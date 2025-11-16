@@ -10,6 +10,8 @@ import PlaceOrder from "./pages/PlaceOrder";
 import OrderHistory from "./pages/OrderHistory";
 import TrackOrder from "./pages/TrackOrder";
 import Contact from "./pages/Contact";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
           <Route path="/orders" element={<OrderHistory />} />
           <Route path="/track" element={<TrackOrder />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/orders/:orderId" element={<AdminOrderDetails />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
