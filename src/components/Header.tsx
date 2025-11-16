@@ -1,12 +1,36 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Package, LogOut } from "lucide-react";
+import { Package, LogOut, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      checkAdminRole();
+    } else {
+      setIsAdmin(false);
+    }
+  }, [isAuthenticated]);
+
+  const checkAdminRole = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      
+      setIsAdmin(!!roles);
+    }
+  };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -55,6 +79,12 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
               <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
                 Contact
               </Link>
+              {isAdmin && (
+                <Link to="/admin" className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1">
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Link>
+              )}
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
