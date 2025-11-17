@@ -4,10 +4,12 @@ import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OrdersTable } from "@/components/admin/OrdersTable";
+import { UserManagement } from "@/components/admin/UserManagement";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Search, Package } from "lucide-react";
+import { Search, Package, Users } from "lucide-react";
 
 interface Order {
   id: string;
@@ -104,45 +106,64 @@ const AdminDashboard = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage all orders and deliveries</p>
+          <p className="text-muted-foreground">Manage orders, deliveries, and users</p>
         </div>
 
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by order ID, customer, phone, or address..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Order Received">Order Received</SelectItem>
-              <SelectItem value="Shopper Assigned">Shopper Assigned</SelectItem>
-              <SelectItem value="Purchasing">Purchasing</SelectItem>
-              <SelectItem value="In Delivery">In Delivery</SelectItem>
-              <SelectItem value="Delivered">Delivered</SelectItem>
-              <SelectItem value="Cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Tabs defaultValue="orders" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="orders" className="gap-2">
+              <Package className="h-4 w-4" />
+              Orders
+            </TabsTrigger>
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="h-4 w-4" />
+              User Management
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="bg-card rounded-lg border border-border p-4 mb-4">
-          <p className="text-sm text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{filteredOrders.length}</span> of{" "}
-            <span className="font-semibold text-foreground">{orders.length}</span> orders
-          </p>
-        </div>
+          <TabsContent value="orders" className="space-y-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by order ID, customer, phone, or address..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="Order Received">Order Received</SelectItem>
+                  <SelectItem value="Shopper Assigned">Shopper Assigned</SelectItem>
+                  <SelectItem value="Purchasing">Purchasing</SelectItem>
+                  <SelectItem value="In Delivery">In Delivery</SelectItem>
+                  <SelectItem value="Delivered">Delivered</SelectItem>
+                  <SelectItem value="Cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        <OrdersTable orders={filteredOrders} />
+            <div className="bg-card rounded-lg border border-border p-4">
+              <p className="text-sm text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{filteredOrders.length}</span> of{" "}
+                <span className="font-semibold text-foreground">{orders.length}</span> orders
+              </p>
+            </div>
+
+            <OrdersTable orders={filteredOrders} />
+          </TabsContent>
+
+          <TabsContent value="users">
+            <UserManagement />
+          </TabsContent>
+        </Tabs>
       </main>
 
       <Footer />
