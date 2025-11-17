@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Package, LogOut, Shield, Truck } from "lucide-react";
+import { LogOut, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
+import logo from "@/assets/desi-drop-logo.jpeg";
 
 export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const navigate = useNavigate();
@@ -52,14 +53,8 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="rounded-lg bg-gradient-to-br from-primary to-accent p-2 relative">
-            <Package className="h-6 w-6 text-primary-foreground" />
-            <Truck className="h-3 w-3 text-primary-foreground absolute -top-1 -right-1" />
-          </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Desi Drop
-          </span>
+        <Link to="/" className="flex items-center">
+          <img src={logo} alt="Desi Drop Logo" className="h-12 w-auto" />
         </Link>
 
         <nav className="flex items-center space-x-6">
