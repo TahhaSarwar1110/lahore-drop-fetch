@@ -157,7 +157,7 @@ const AdminDashboard = () => {
               </p>
             </div>
 
-            <OrdersTable orders={filteredOrders} />
+            <OrdersTable orders={filteredOrders} onOrderUpdated={fetchOrders} />
           </TabsContent>
 
           <TabsContent value="users">

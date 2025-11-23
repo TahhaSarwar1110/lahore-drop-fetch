@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AssignOrderDialog } from "./AssignOrderDialog";
 
 interface Order {
   id: string;
@@ -17,6 +18,7 @@ interface Order {
 
 interface OrdersTableProps {
   orders: Order[];
+  onOrderUpdated?: () => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -26,16 +28,18 @@ const getStatusColor = (status: string) => {
     case "Cancelled":
       return "bg-destructive/10 text-destructive border-destructive/20";
     case "In Delivery":
+    case "Picked":
       return "bg-blue-500/10 text-blue-500 border-blue-500/20";
     case "Purchasing":
     case "Shopper Assigned":
+    case "In Progress":
       return "bg-primary/10 text-primary border-primary/20";
     default:
       return "bg-muted text-muted-foreground border-border";
   }
 };
 
-export const OrdersTable = ({ orders }: OrdersTableProps) => {
+export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
   const navigate = useNavigate();
 
   return (
@@ -79,14 +83,20 @@ export const OrdersTable = ({ orders }: OrdersTableProps) => {
                   {new Date(order.created_at).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => navigate(`/admin/orders/${order.id}`)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate(`/admin/orders/${order.id}`)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
+                    <AssignOrderDialog
+                      orderId={order.id}
+                      onAssigned={() => onOrderUpdated?.()}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))

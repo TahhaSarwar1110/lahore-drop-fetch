@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Shield, ShieldOff, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { CreateUserDialog } from "./CreateUserDialog";
+import { EditUserRoleDialog } from "./EditUserRoleDialog";
 
 interface UserWithRole {
   id: string;
   full_name: string;
   phone: string;
   created_at: string;
-  isAdmin: boolean;
+  roles: string[];
 }
 
 export const UserManagement = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processingUserId, setProcessingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -35,19 +35,23 @@ export const UserManagement = () => {
 
       if (profilesError) throw profilesError;
 
-      // Fetch all admin roles
-      const { data: adminRoles, error: rolesError } = await supabase
+      // Fetch all user roles
+      const { data: allRoles, error: rolesError } = await supabase
         .from("user_roles")
-        .select("user_id")
-        .eq("role", "admin");
+        .select("user_id, role");
 
       if (rolesError) throw rolesError;
 
-      const adminUserIds = new Set(adminRoles?.map(r => r.user_id) || []);
+      // Group roles by user_id
+      const rolesByUser = new Map<string, string[]>();
+      allRoles?.forEach(r => {
+        const existing = rolesByUser.get(r.user_id) || [];
+        rolesByUser.set(r.user_id, [...existing, r.role]);
+      });
 
       const usersWithRoles = profiles?.map(profile => ({
         ...profile,
-        isAdmin: adminUserIds.has(profile.id)
+        roles: rolesByUser.get(profile.id) || []
       })) || [];
 
       setUsers(usersWithRoles);
@@ -59,39 +63,6 @@ export const UserManagement = () => {
     }
   };
 
-  const handleToggleAdmin = async (userId: string, isCurrentlyAdmin: boolean) => {
-    setProcessingUserId(userId);
-    
-    try {
-      if (isCurrentlyAdmin) {
-        // Remove admin role
-        const { error } = await supabase
-          .from("user_roles")
-          .delete()
-          .eq("user_id", userId)
-          .eq("role", "admin");
-
-        if (error) throw error;
-        toast.success("Admin role removed successfully");
-      } else {
-        // Add admin role
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: userId, role: "admin" });
-
-        if (error) throw error;
-        toast.success("Admin role granted successfully");
-      }
-
-      // Refresh the list
-      await fetchUsers();
-    } catch (error: any) {
-      console.error("Error toggling admin role:", error);
-      toast.error(error.message || "Failed to update admin role");
-    } finally {
-      setProcessingUserId(null);
-    }
-  };
 
   if (loading) {
     return (
@@ -103,12 +74,17 @@ export const UserManagement = () => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-card rounded-lg border border-border p-4">
-        <p className="text-sm text-muted-foreground">
-          Total Users: <span className="font-semibold text-foreground">{users.length}</span>
-          {" | "}
-          Admins: <span className="font-semibold text-foreground">{users.filter(u => u.isAdmin).length}</span>
-        </p>
+      <div className="flex justify-between items-center">
+        <div className="bg-card rounded-lg border border-border p-4">
+          <p className="text-sm text-muted-foreground">
+            Total Users: <span className="font-semibold text-foreground">{users.length}</span>
+            {" | "}
+            Admins: <span className="font-semibold text-foreground">{users.filter(u => u.roles.includes('admin')).length}</span>
+            {" | "}
+            Riders: <span className="font-semibold text-foreground">{users.filter(u => u.roles.includes('rider')).length}</span>
+          </p>
+        </div>
+        <CreateUserDialog onUserCreated={fetchUsers} />
       </div>
 
       <div className="bg-card rounded-lg border border-border overflow-hidden">
@@ -118,7 +94,7 @@ export const UserManagement = () => {
               <TableHead>Name</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Joined</TableHead>
-              <TableHead>Role</TableHead>
+              <TableHead>Roles</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -129,36 +105,28 @@ export const UserManagement = () => {
                 <TableCell>{user.phone}</TableCell>
                 <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                 <TableCell>
-                  {user.isAdmin ? (
-                    <Badge variant="default" className="gap-1">
-                      <Shield className="h-3 w-3" />
-                      Admin
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">User</Badge>
-                  )}
+                  <div className="flex gap-1 flex-wrap">
+                    {user.roles.length > 0 ? (
+                      user.roles.map(role => (
+                        <Badge 
+                          key={role} 
+                          variant={role === 'admin' ? 'default' : 'secondary'}
+                        >
+                          {role}
+                        </Badge>
+                      ))
+                    ) : (
+                      <Badge variant="outline">No role</Badge>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    size="sm"
-                    variant={user.isAdmin ? "destructive" : "default"}
-                    onClick={() => handleToggleAdmin(user.id, user.isAdmin)}
-                    disabled={processingUserId === user.id}
-                  >
-                    {processingUserId === user.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : user.isAdmin ? (
-                      <>
-                        <ShieldOff className="h-4 w-4 mr-1" />
-                        Remove Admin
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="h-4 w-4 mr-1" />
-                        Make Admin
-                      </>
-                    )}
-                  </Button>
+                  <EditUserRoleDialog
+                    userId={user.id}
+                    currentRoles={user.roles}
+                    userName={user.full_name}
+                    onRoleUpdated={fetchUsers}
+                  />
                 </TableCell>
               </TableRow>
             ))}
