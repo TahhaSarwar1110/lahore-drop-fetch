@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Package, MapPin, Phone, User } from "lucide-react";
-import { usePermissions } from "@/hooks/usePermissions";
 import { AttachmentUpload } from "@/components/rider/AttachmentUpload";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface OrderAssignment {
   id: string;
@@ -31,32 +31,24 @@ const RiderDashboard = () => {
   const [assignments, setAssignments] = useState<OrderAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
-  const { hasPermission, loading: permissionsLoading } = usePermissions();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error("Please log in to access rider dashboard");
-        navigate("/login");
-        return;
-      }
+    const checkAuthAndRole = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          toast.error("Please log in to access rider dashboard");
+          navigate("/login");
+          return;
+        }
 
-      setIsAuthenticated(true);
-    };
-
-    checkAuth();
-  }, [navigate]);
-
-  useEffect(() => {
-    if (!permissionsLoading && isAuthenticated) {
-      // Check if user has rider role
-      const checkRiderRole = async () => {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) {
+          navigate("/login");
+          return;
+        }
 
         const { data: roles } = await supabase
           .from("user_roles")
@@ -71,12 +63,15 @@ const RiderDashboard = () => {
           return;
         }
 
-        fetchAssignments();
-      };
+        await fetchAssignments();
+      } catch (error) {
+        console.error("Auth check error:", error);
+        navigate("/login");
+      }
+    };
 
-      checkRiderRole();
-    }
-  }, [permissionsLoading, isAuthenticated, navigate]);
+    checkAuthAndRole();
+  }, [navigate]);
 
   const fetchAssignments = async () => {
     try {
@@ -147,7 +142,7 @@ const RiderDashboard = () => {
     return colors[status] || 'bg-gray-500';
   };
 
-  if (loading || permissionsLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -155,111 +150,152 @@ const RiderDashboard = () => {
     );
   }
 
+  const activeAssignments = assignments.filter(
+    a => a.orders.status !== 'Delivered' && a.orders.status !== 'Cancelled'
+  );
+  
+  const completedAssignments = assignments.filter(
+    a => a.orders.status === 'Delivered' || a.orders.status === 'Cancelled'
+  );
+
+  const renderOrderCard = (assignment: OrderAssignment) => {
+    const order = assignment.orders;
+    return (
+      <Card key={assignment.id} className="overflow-hidden">
+        <CardHeader className="pb-3 bg-muted/50">
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Assigned {new Date(assignment.assigned_at).toLocaleString()}
+              </p>
+            </div>
+            <Badge className={getStatusColor(order.status)}>
+              {order.status}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-4 space-y-4">
+          <div className="flex items-start gap-3">
+            <User className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-medium">{order.profiles.full_name}</p>
+              <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                <Phone className="h-3 w-3" />
+                {order.profiles.phone}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Delivery Address</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {order.delivery_address}
+              </p>
+            </div>
+          </div>
+
+          {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
+            <>
+              <AttachmentUpload 
+                orderId={order.id} 
+                onUploadComplete={fetchAssignments}
+              />
+
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                {order.status === 'Pending' || order.status === 'In Progress' ? (
+                  <Button
+                    onClick={() => updateOrderStatus(order.id, 'Picked')}
+                    disabled={updating === order.id}
+                    className="flex-1"
+                  >
+                    {updating === order.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Mark as Picked'
+                    )}
+                  </Button>
+                ) : null}
+                
+                {order.status === 'Picked' ? (
+                  <Button
+                    onClick={() => updateOrderStatus(order.id, 'Delivered')}
+                    disabled={updating === order.id}
+                    variant="default"
+                    className="flex-1"
+                  >
+                    {updating === order.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Mark as Delivered'
+                    )}
+                  </Button>
+                ) : null}
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={isAuthenticated} />
+      <Header isAuthenticated={true} />
       
       <main className="flex-1 py-4 md:py-8 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="mb-6">
             <h1 className="text-2xl md:text-3xl font-bold text-foreground">My Deliveries</h1>
             <p className="text-muted-foreground mt-1">
-              {assignments.length} active assignment{assignments.length !== 1 ? 's' : ''}
+              {activeAssignments.length} active assignment{activeAssignments.length !== 1 ? 's' : ''}
             </p>
           </div>
 
-          {assignments.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No assignments yet</h3>
-                <p className="text-muted-foreground">
-                  You'll see your delivery assignments here once they're assigned to you.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {assignments.map((assignment) => {
-                const order = assignment.orders;
-                return (
-                  <Card key={assignment.id} className="overflow-hidden">
-                    <CardHeader className="pb-3 bg-muted/50">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Assigned {new Date(assignment.assigned_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <Badge className={getStatusColor(order.status)}>
-                          {order.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-4 space-y-4">
-                      <div className="flex items-start gap-3">
-                        <User className="h-5 w-5 text-muted-foreground mt-0.5" />
-                        <div>
-                          <p className="font-medium">{order.profiles.full_name}</p>
-                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                            <Phone className="h-3 w-3" />
-                            {order.profiles.phone}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-3">
-                        <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium">Delivery Address</p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {order.delivery_address}
-                          </p>
-                        </div>
-                      </div>
-
-                      <AttachmentUpload 
-                        orderId={order.id} 
-                        onUploadComplete={fetchAssignments}
-                      />
-
-                      <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                        {order.status === 'Pending' || order.status === 'In Progress' ? (
-                          <Button
-                            onClick={() => updateOrderStatus(order.id, 'Picked')}
-                            disabled={updating === order.id}
-                            className="flex-1"
-                          >
-                            {updating === order.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              'Mark as Picked'
-                            )}
-                          </Button>
-                        ) : null}
-                        
-                        {order.status === 'Picked' ? (
-                          <Button
-                            onClick={() => updateOrderStatus(order.id, 'Delivered')}
-                            disabled={updating === order.id}
-                            variant="default"
-                            className="flex-1"
-                          >
-                            {updating === order.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              'Mark as Delivered'
-                            )}
-                          </Button>
-                        ) : null}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+          <Tabs defaultValue="active" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="active">Active Orders</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="active" className="space-y-4">
+              {activeAssignments.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No active orders</h3>
+                    <p className="text-muted-foreground">
+                      You'll see your delivery assignments here once they're assigned to you.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {activeAssignments.map(renderOrderCard)}
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="history" className="space-y-4">
+              {completedAssignments.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No order history</h3>
+                    <p className="text-muted-foreground">
+                      Completed and cancelled orders will appear here.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {completedAssignments.map(renderOrderCard)}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
       
