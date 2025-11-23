@@ -207,12 +207,23 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
             </div>
           </div>
 
-          {isFormValid() && (
-            <Button onClick={handleAddItem} className="w-full">
+          <div className="space-y-2">
+            {!isFormValid() && (
+              <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                  ⚠️ Please fill all required fields above to add this item
+                </p>
+              </div>
+            )}
+            <Button 
+              onClick={handleAddItem} 
+              className="w-full"
+              disabled={!isFormValid()}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Item to Order
             </Button>
-          )}
+          </div>
         </>
       )}
     </div>
