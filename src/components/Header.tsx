@@ -98,9 +98,14 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                 </Link>
               )}
               {isManager && (
-                <Link to="/manager" className="text-sm font-medium transition-colors hover:text-primary">
-                  Manager
-                </Link>
+                <>
+                  <Link to="/manager" className="text-sm font-medium transition-colors hover:text-primary">
+                    Manager
+                  </Link>
+                  <Link to="/manager/pricing" className="text-sm font-medium transition-colors hover:text-primary">
+                    Pricing
+                  </Link>
+                </>
               )}
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
@@ -191,13 +196,22 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                     </Link>
                   )}
                   {isManager && (
-                    <Link 
-                      to="/manager" 
-                      className="text-base font-medium transition-colors hover:text-primary py-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Manager Dashboard
-                    </Link>
+                    <>
+                      <Link 
+                        to="/manager" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Manager Dashboard
+                      </Link>
+                      <Link 
+                        to="/manager/pricing" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Pricing Management
+                      </Link>
+                    </>
                   )}
                   <Button 
                     variant="outline" 

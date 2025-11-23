@@ -6,10 +6,23 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Package, CheckCircle, XCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
+import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
+
+interface OrderItem {
+  id: string;
+  item_type: string;
+  item_data: any;
+  approval_status: string;
+  manager_feedback: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+}
 
 interface Order {
   id: string;
@@ -19,6 +32,8 @@ interface Order {
   user_id: string;
   manager_feedback: string | null;
   confirmed_at: string | null;
+  additional_charges: number;
+  charges_description: string | null;
   profiles: {
     full_name: string;
     phone: string;
@@ -31,6 +46,9 @@ const ManagerDashboard = () => {
   const [updating, setUpdating] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Record<string, string>>({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,6 +103,33 @@ const ManagerDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchOrderItems = async (orderId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("order_items")
+        .select("*")
+        .eq("order_id", orderId);
+
+      if (error) throw error;
+      setOrderItems(data || []);
+    } catch (error) {
+      console.error("Error fetching order items:", error);
+      toast.error("Failed to fetch order items");
+    }
+  };
+
+  const handleViewDetails = async (orderId: string) => {
+    setSelectedOrder(orderId);
+    await fetchOrderItems(orderId);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setSelectedOrder(null);
+    setOrderItems([]);
   };
 
   const confirmOrder = async (orderId: string) => {
@@ -206,6 +251,16 @@ const ManagerDashboard = () => {
                       <p className="text-sm text-muted-foreground">{order.delivery_address}</p>
                     </div>
 
+                    {order.additional_charges > 0 && (
+                      <div className="bg-primary/10 p-3 rounded-md">
+                        <p className="text-sm font-medium mb-1">Additional Charges</p>
+                        <p className="text-lg font-bold text-primary">${order.additional_charges.toFixed(2)}</p>
+                        {order.charges_description && (
+                          <p className="text-sm text-muted-foreground mt-1">{order.charges_description}</p>
+                        )}
+                      </div>
+                    )}
+
                     {order.manager_feedback && (
                       <div className="bg-muted p-3 rounded-md">
                         <p className="text-sm font-medium mb-1">Previous Feedback</p>
@@ -213,50 +268,61 @@ const ManagerDashboard = () => {
                       </div>
                     )}
 
-                    {order.status === "Pending" && (
-                      <div className="space-y-4 pt-4 border-t">
-                        <div className="space-y-2">
-                          <Label htmlFor={`feedback-${order.id}`}>Feedback (Optional)</Label>
-                          <Textarea
-                            id={`feedback-${order.id}`}
-                            placeholder="Add feedback for the customer..."
-                            value={feedback[order.id] || ""}
-                            onChange={(e) => setFeedback({ ...feedback, [order.id]: e.target.value })}
-                            rows={3}
-                          />
-                        </div>
+                    <div className="pt-4 border-t space-y-3">
+                      <Button
+                        onClick={() => handleViewDetails(order.id)}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details & Approve Items
+                      </Button>
 
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => confirmOrder(order.id)}
-                            disabled={updating === order.id}
-                            className="flex-1"
-                          >
-                            {updating === order.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            ) : (
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                            )}
-                            Confirm Order
-                          </Button>
+                      {order.status === "Pending" && (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor={`feedback-${order.id}`}>Order Feedback (Optional)</Label>
+                            <Textarea
+                              id={`feedback-${order.id}`}
+                              placeholder="Add feedback for the customer..."
+                              value={feedback[order.id] || ""}
+                              onChange={(e) => setFeedback({ ...feedback, [order.id]: e.target.value })}
+                              rows={3}
+                            />
+                          </div>
 
-                          {feedback[order.id] && (
+                          <div className="flex gap-2">
                             <Button
-                              variant="outline"
-                              onClick={() => sendFeedback(order.id)}
+                              onClick={() => confirmOrder(order.id)}
                               disabled={updating === order.id}
+                              className="flex-1"
                             >
                               {updating === order.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                               ) : (
-                                <XCircle className="h-4 w-4 mr-2" />
+                                <CheckCircle className="h-4 w-4 mr-2" />
                               )}
-                              Send Feedback
+                              Confirm Order
                             </Button>
-                          )}
-                        </div>
-                      </div>
-                    )}
+
+                            {feedback[order.id] && (
+                              <Button
+                                variant="outline"
+                                onClick={() => sendFeedback(order.id)}
+                                disabled={updating === order.id}
+                              >
+                                {updating === order.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                )}
+                                Send Feedback
+                              </Button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
 
                     {order.confirmed_at && (
                       <div className="text-sm text-muted-foreground pt-4 border-t">
@@ -269,6 +335,36 @@ const ManagerDashboard = () => {
             </div>
           )}
         </div>
+
+        <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Order Details & Management</DialogTitle>
+              <DialogDescription>
+                Review items, approve/reject, and manage additional charges
+              </DialogDescription>
+            </DialogHeader>
+            {selectedOrder && (
+              <div className="space-y-6">
+                <OrderItemApproval 
+                  items={orderItems} 
+                  onUpdate={() => {
+                    fetchOrderItems(selectedOrder);
+                    fetchOrders();
+                  }} 
+                />
+                <AdditionalCharges
+                  orderId={selectedOrder}
+                  currentCharges={orders.find(o => o.id === selectedOrder)?.additional_charges || 0}
+                  currentDescription={orders.find(o => o.id === selectedOrder)?.charges_description || null}
+                  onUpdate={() => {
+                    fetchOrders();
+                  }}
+                />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
 
       <Footer />

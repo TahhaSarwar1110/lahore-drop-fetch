@@ -5,6 +5,7 @@ import { Package, ShoppingBag, Gift, Clock } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
+import { PricingBundles } from "@/components/PricingBundles";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -181,6 +182,9 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        {/* Pricing Section */}
+        <PricingBundles />
 
         {/* CTA Section */}
         <section className="py-16 bg-gradient-to-br from-primary to-accent text-primary-foreground">
