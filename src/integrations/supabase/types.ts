@@ -14,6 +14,52 @@ export type Database = {
   }
   public: {
     Tables: {
+      order_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string
+          id: string
+          order_id: string
+          rider_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by: string
+          id?: string
+          order_id: string
+          rider_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string
+          id?: string
+          order_id?: string
+          rider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_assignments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_assignments_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string | null
@@ -110,6 +156,27 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -130,6 +197,35 @@ export type Database = {
           phone?: string
         }
         Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission_id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
