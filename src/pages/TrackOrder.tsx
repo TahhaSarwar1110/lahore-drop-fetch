@@ -8,7 +8,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, Circle, Package } from "lucide-react";
+import { CheckCircle2, Circle, Package, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -17,12 +17,20 @@ interface StatusHistory {
   timestamp: string;
 }
 
+interface Attachment {
+  id: string;
+  file_url: string;
+  file_name: string;
+  created_at: string;
+}
+
 const TrackOrder = () => {
   const [searchParams] = useSearchParams();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [orderId, setOrderId] = useState(searchParams.get("orderId") || "");
   const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const [statusHistory, setStatusHistory] = useState<StatusHistory[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -94,6 +102,19 @@ const TrackOrder = () => {
       console.error("Error fetching history:", historyError);
     } else {
       setStatusHistory(historyData);
+    }
+
+    // Fetch attachments
+    const { data: attachmentData, error: attachmentError } = await supabase
+      .from("order_attachments")
+      .select("*")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: false });
+
+    if (attachmentError) {
+      console.error("Error fetching attachments:", attachmentError);
+    } else {
+      setAttachments(attachmentData || []);
     }
 
     setLoading(false);
@@ -205,6 +226,34 @@ const TrackOrder = () => {
                     <strong>Note:</strong> Status updates every 10 seconds automatically
                   </p>
                 </div>
+
+                {attachments.length > 0 && (
+                  <div className="mt-6 space-y-3">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Paperclip className="h-5 w-5" />
+                      Delivery Proof
+                    </h3>
+                    <div className="space-y-2">
+                      {attachments.map((attachment) => (
+                        <a
+                          key={attachment.id}
+                          href={attachment.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                        >
+                          <Paperclip className="h-4 w-4 text-muted-foreground" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{attachment.file_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(attachment.created_at), "PPp")}
+                            </p>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

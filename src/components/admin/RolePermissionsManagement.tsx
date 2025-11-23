@@ -30,7 +30,7 @@ interface RolePermission {
   permissions: Permission;
 }
 
-const ROLES = ['admin', 'rider', 'user'] as const;
+const ROLES = ['admin', 'manager', 'rider', 'user'] as const;
 
 export const RolePermissionsManagement = () => {
   const [rolePermissions, setRolePermissions] = useState<RolePermission[]>([]);
