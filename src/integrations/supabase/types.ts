@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      item_pickups: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_item_id: string
+          picked_at: string | null
+          pickup_proof_name: string | null
+          pickup_proof_url: string | null
+          rider_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_item_id: string
+          picked_at?: string | null
+          pickup_proof_name?: string | null
+          pickup_proof_url?: string | null
+          rider_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_item_id?: string
+          picked_at?: string | null
+          pickup_proof_name?: string | null
+          pickup_proof_url?: string | null
+          rider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_pickups_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_assignments: {
         Row: {
           assigned_at: string | null
