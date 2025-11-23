@@ -261,7 +261,30 @@ const RiderDashboard = () => {
                 </Button>
               </div>
 
-              {order.status === 'Pending' || order.status === 'In Progress' ? (
+              {order.status === 'Picked' && (
+                <div className="pt-3 border-t space-y-3 bg-primary/5 -mx-6 px-6 py-4 mt-4 rounded-lg">
+                  <p className="text-sm font-medium text-primary">All items picked! Ready for delivery</p>
+                  <AttachmentUpload 
+                    orderId={order.id} 
+                    onUploadComplete={fetchAssignments}
+                  />
+                  <Button
+                    onClick={() => updateOrderStatus(order.id, 'Delivered')}
+                    disabled={updating === order.id}
+                    variant="default"
+                    className="w-full"
+                    size="lg"
+                  >
+                    {updating === order.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <><Package className="h-4 w-4 mr-2" />Mark as Delivered</>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {(order.status === 'Pending' || order.status === 'In Progress') && (
                 <div className="pt-3 border-t">
                   <Button
                     onClick={() => updateOrderStatus(order.id, 'Picked')}
@@ -271,37 +294,14 @@ const RiderDashboard = () => {
                     {updating === order.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      'Mark All Items as Picked'
+                      'Confirm All Items Picked'
                     )}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2 text-center">
                     All items must be picked individually first
                   </p>
                 </div>
-              ) : null}
-              
-              {order.status === 'Picked' ? (
-                <>
-                  <AttachmentUpload 
-                    orderId={order.id} 
-                    onUploadComplete={fetchAssignments}
-                  />
-                  <div className="pt-3 border-t">
-                    <Button
-                      onClick={() => updateOrderStatus(order.id, 'Delivered')}
-                      disabled={updating === order.id}
-                      variant="default"
-                      className="w-full"
-                    >
-                      {updating === order.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        'Mark as Delivered'
-                      )}
-                    </Button>
-                  </div>
-                </>
-              ) : null}
+              )}
             </>
           )}
         </CardContent>

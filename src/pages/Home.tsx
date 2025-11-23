@@ -10,14 +10,40 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Home = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isRider, setIsRider] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
-    });
+      
+      if (session?.user) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .eq("role", "rider");
+        
+        setIsRider(roles && roles.length > 0);
+      }
+    };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setIsAuthenticated(!!session);
+      
+      if (session?.user) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .eq("role", "rider");
+        
+        setIsRider(roles && roles.length > 0);
+      } else {
+        setIsRider(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -43,11 +69,13 @@ const Home = () => {
                 Fast delivery, trusted service.
               </p>
               <div className="flex gap-4">
-                <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-                  <Button size="lg" className="text-lg px-8">
-                    {isAuthenticated ? "Place Order Now" : "Get Started"}
-                  </Button>
-                </Link>
+                {!isRider && (
+                  <Link to={isAuthenticated ? "/place-order" : "/signup"}>
+                    <Button size="lg" className="text-lg px-8">
+                      {isAuthenticated ? "Place Order Now" : "Get Started"}
+                    </Button>
+                  </Link>
+                )}
                 {!isAuthenticated && (
                   <Link to="/login">
                     <Button size="lg" variant="outline" className="text-lg px-8">
@@ -163,11 +191,13 @@ const Home = () => {
               <p className="text-lg max-w-2xl opacity-90">
                 Join thousands of satisfied customers who trust Desi Drop for their delivery needs
               </p>
-              <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-                <Button size="lg" variant="secondary" className="text-lg px-8">
-                  {isAuthenticated ? "Place Order Now" : "Sign Up Today"}
-                </Button>
-              </Link>
+              {!isRider && (
+                <Link to={isAuthenticated ? "/place-order" : "/signup"}>
+                  <Button size="lg" variant="secondary" className="text-lg px-8">
+                    {isAuthenticated ? "Place Order Now" : "Sign Up Today"}
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </section>
