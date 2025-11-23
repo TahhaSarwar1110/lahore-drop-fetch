@@ -26,39 +26,41 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const { toast } = useToast();
 
-  const itemTypeFields: Record<string, { label: string; type: string; placeholder: string }[]> = {
+  const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean }[]> = {
     Cloth: [
-      { label: "Dress Code", type: "text", placeholder: "e.g., Casual, Formal" },
-      { label: "Brand", type: "text", placeholder: "Brand name" },
-      { label: "Quantity", type: "number", placeholder: "1" },
-      { label: "Expected Price (PKR)", type: "number", placeholder: "0" },
-      { label: "Special Instructions", type: "textarea", placeholder: "Any specific requirements..." },
+      { label: "Shop/Store Name", type: "text", placeholder: "Name of store", required: true },
+      { label: "Item Description", type: "text", placeholder: "What you want to buy", required: true },
+      { label: "Brand", type: "text", placeholder: "Brand name (optional)" },
+      { label: "Quantity", type: "number", placeholder: "1 (optional)" },
+      { label: "Expected Price (PKR)", type: "number", placeholder: "0 (optional)" },
+      { label: "Special Instructions", type: "textarea", placeholder: "Any specific requirements (optional)" },
     ],
     Food: [
-      { label: "Restaurant/Shop Name", type: "text", placeholder: "Name of restaurant" },
-      { label: "Item Name", type: "text", placeholder: "What to order" },
-      { label: "Quantity", type: "number", placeholder: "1" },
-      { label: "Price (PKR)", type: "number", placeholder: "0" },
-      { label: "Special Instructions", type: "textarea", placeholder: "Extra spicy, no onions, etc." },
+      { label: "Restaurant/Shop Name", type: "text", placeholder: "Name of restaurant", required: true },
+      { label: "Item Name", type: "text", placeholder: "What to order", required: true },
+      { label: "Quantity", type: "number", placeholder: "1 (optional)" },
+      { label: "Price (PKR)", type: "number", placeholder: "0 (optional)" },
+      { label: "Special Instructions", type: "textarea", placeholder: "Extra spicy, no onions, etc. (optional)" },
     ],
     Commodities: [
-      { label: "Shop Name", type: "text", placeholder: "Store name" },
-      { label: "Commodity", type: "text", placeholder: "Item name" },
-      { label: "Quantity", type: "number", placeholder: "1" },
-      { label: "Price (PKR)", type: "number", placeholder: "0" },
-      { label: "Instructions", type: "textarea", placeholder: "Any specific requirements..." },
+      { label: "Shop Name", type: "text", placeholder: "Store name", required: true },
+      { label: "Item Description", type: "text", placeholder: "What you need", required: true },
+      { label: "Quantity", type: "number", placeholder: "1 (optional)" },
+      { label: "Price (PKR)", type: "number", placeholder: "0 (optional)" },
+      { label: "Instructions", type: "textarea", placeholder: "Any specific requirements (optional)" },
     ],
     Gifts: [
-      { label: "Shop Name", type: "text", placeholder: "Gift shop name" },
-      { label: "Gift Type", type: "text", placeholder: "Flowers, Cake, etc." },
-      { label: "Quantity", type: "number", placeholder: "1" },
-      { label: "Price (PKR)", type: "number", placeholder: "0" },
-      { label: "Instructions", type: "textarea", placeholder: "Message on card, etc." },
+      { label: "Shop Name", type: "text", placeholder: "Gift shop name", required: true },
+      { label: "Gift Description", type: "text", placeholder: "Flowers, Cake, etc.", required: true },
+      { label: "Quantity", type: "number", placeholder: "1 (optional)" },
+      { label: "Price (PKR)", type: "number", placeholder: "0 (optional)" },
+      { label: "Instructions", type: "textarea", placeholder: "Message on card, etc. (optional)" },
     ],
     Others: [
-      { label: "Description", type: "textarea", placeholder: "Describe what you need..." },
-      { label: "Price (PKR)", type: "number", placeholder: "0" },
-      { label: "Instructions", type: "textarea", placeholder: "Any specific requirements..." },
+      { label: "Shop/Location Name", type: "text", placeholder: "Where to get it from", required: true },
+      { label: "Description", type: "textarea", placeholder: "Describe what you need", required: true },
+      { label: "Price (PKR)", type: "number", placeholder: "0 (optional)" },
+      { label: "Instructions", type: "textarea", placeholder: "Any specific requirements (optional)" },
     ],
   };
 
@@ -86,9 +88,12 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
     const fields = itemTypeFields[itemType];
     if (!fields) return false;
     
+    // Only check required fields
     for (const field of fields) {
-      const value = formData[field.label];
-      if (!value || value.trim() === "") return false;
+      if (field.required) {
+        const value = formData[field.label];
+        if (!value || value.trim() === "") return false;
+      }
     }
     return true;
   };
@@ -170,7 +175,10 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
         <>
           {itemTypeFields[itemType].map((field) => (
             <div key={field.label} className="space-y-2">
-              <Label>{field.label}</Label>
+              <Label>
+                {field.label}
+                {field.required && <span className="text-red-500 ml-1">*</span>}
+              </Label>
               {field.type === "textarea" ? (
                 <Textarea
                   placeholder={field.placeholder}
@@ -211,7 +219,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
             {!isFormValid() && (
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                 <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                  ⚠️ Please fill all required fields above to add this item
+                  ⚠️ Please fill all required fields (marked with *)
                 </p>
               </div>
             )}
