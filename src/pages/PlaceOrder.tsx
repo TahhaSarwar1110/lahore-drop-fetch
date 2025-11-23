@@ -241,17 +241,34 @@ const PlaceOrder = () => {
                           PKR {calculateTotalPrice().toLocaleString()}
                         </span>
                       </div>
-
-                      <Button
-                        onClick={handleSubmitOrder}
-                        className="w-full"
-                        size="lg"
-                        disabled={loading}
-                      >
-                        {loading ? "Placing Order..." : "Submit Order"}
-                      </Button>
                     </div>
                   )}
+
+                  {/* Always show Place Order button with validation */}
+                  <div className="border-t pt-6 space-y-3">
+                    {orderItems.length === 0 && (
+                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                          ⚠️ Please add at least one item to your order
+                        </p>
+                      </div>
+                    )}
+                    {(!fullName || !phone || !deliveryAddress) && (
+                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                          ⚠️ Please complete all required fields above
+                        </p>
+                      </div>
+                    )}
+                    <Button
+                      onClick={handleSubmitOrder}
+                      className="w-full"
+                      size="lg"
+                      disabled={loading}
+                    >
+                      {loading ? "Placing Order..." : "Submit Order"}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
