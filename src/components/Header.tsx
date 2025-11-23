@@ -6,22 +6,18 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import logo from "@/assets/desi-drop-logo.jpeg";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { usePermissions } from "@/hooks/usePermissions";
 
 export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isRiderOnly, setIsRiderOnly] = useState(false);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { hasPermission, loading: permissionsLoading } = usePermissions();
 
   useEffect(() => {
     if (isAuthenticated) {
       checkUserRole();
     } else {
-      setIsAdmin(false);
-      setIsRiderOnly(false);
+      setUserRoles([]);
     }
   }, [isAuthenticated]);
 
@@ -34,17 +30,14 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
         .eq("user_id", user.id);
       
       if (roles && roles.length > 0) {
-        const userRoles = roles.map(r => r.role);
-        setIsAdmin(userRoles.includes("admin"));
-        // User is rider-only if they have rider role but not admin or manager
-        setIsRiderOnly(
-          userRoles.includes("rider") && 
-          !userRoles.includes("admin") && 
-          !userRoles.includes("manager")
-        );
+        setUserRoles(roles.map(r => r.role));
       }
     }
   };
+
+  const isAdmin = userRoles.includes('admin');
+  const isManager = userRoles.includes('manager');
+  const isRider = userRoles.includes('rider');
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -72,25 +65,28 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          {!isRiderOnly && (
-            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
-              Home
-            </Link>
-          )}
+          <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
+            Home
+          </Link>
           {isAuthenticated ? (
             <>
-              {!isRiderOnly && (
+              {(!isRider || isAdmin || isManager) && (
                 <>
                   <Link to="/place-order" className="text-sm font-medium transition-colors hover:text-primary">
                     Place Order
                   </Link>
-                  <Link to="/orders" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/order-history" className="text-sm font-medium transition-colors hover:text-primary">
                     My Orders
                   </Link>
                   <Link to="/track" className="text-sm font-medium transition-colors hover:text-primary">
                     Track
                   </Link>
                 </>
+              )}
+              {isRider && (
+                <Link to="/orders" className="text-sm font-medium transition-colors hover:text-primary">
+                  Orders
+                </Link>
               )}
               <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
                 Contact
@@ -99,6 +95,11 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                 <Link to="/admin" className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1">
                   <Shield className="h-4 w-4" />
                   Admin
+                </Link>
+              )}
+              {isManager && (
+                <Link to="/manager" className="text-sm font-medium transition-colors hover:text-primary">
+                  Manager
                 </Link>
               )}
               <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -129,18 +130,16 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
           </SheetTrigger>
           <SheetContent side="right" className="w-64">
             <nav className="flex flex-col space-y-4 mt-8">
-              {!isRiderOnly && (
-                <Link 
-                  to="/" 
-                  className="text-base font-medium transition-colors hover:text-primary py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Home
-                </Link>
-              )}
+              <Link 
+                to="/" 
+                className="text-base font-medium transition-colors hover:text-primary py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
               {isAuthenticated ? (
                 <>
-                  {!isRiderOnly && (
+                  {(!isRider || isAdmin || isManager) && (
                     <>
                       <Link 
                         to="/place-order" 
@@ -150,7 +149,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                         Place Order
                       </Link>
                       <Link 
-                        to="/orders" 
+                        to="/order-history" 
                         className="text-base font-medium transition-colors hover:text-primary py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -164,6 +163,15 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                         Track
                       </Link>
                     </>
+                  )}
+                  {isRider && (
+                    <Link 
+                      to="/orders" 
+                      className="text-base font-medium transition-colors hover:text-primary py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Orders
+                    </Link>
                   )}
                   <Link 
                     to="/contact" 
@@ -180,6 +188,15 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                     >
                       <Shield className="h-4 w-4" />
                       Admin Dashboard
+                    </Link>
+                  )}
+                  {isManager && (
+                    <Link 
+                      to="/manager" 
+                      className="text-base font-medium transition-colors hover:text-primary py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Manager Dashboard
                     </Link>
                   )}
                   <Button 
