@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { X } from "lucide-react";
 import { z } from "zod";
+import { useBundlePricing } from "@/hooks/useBundlePricing";
 
 const orderSchema = z.object({
   fullName: z.string().trim().min(2, "Name required"),
@@ -29,6 +30,7 @@ const PlaceOrder = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { calculateBundlePrice } = useBundlePricing();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -93,13 +95,20 @@ const PlaceOrder = () => {
       orderSchema.parse({ fullName, phone, deliveryAddress });
       setLoading(true);
 
-      // Create order
+      // Calculate bundle pricing based on item count
+      const { bundle, price: bundlePrice } = calculateBundlePrice(orderItems.length);
+      
+      // Create order with bundle pricing
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: userId,
           delivery_address: deliveryAddress,
           status: "Pending",
+          additional_charges: bundlePrice,
+          charges_description: bundle 
+            ? `Delivery charges (${bundle.name} - ${orderItems.length} items)` 
+            : "No delivery bundle applied",
         })
         .select()
         .single();
@@ -235,10 +244,34 @@ const PlaceOrder = () => {
                         <span>{orderItems.length}</span>
                       </div>
                       
-                      <div className="flex justify-between items-center p-4 bg-primary/10 rounded-lg">
-                        <span className="font-semibold">Expected Total:</span>
-                        <span className="text-xl font-bold text-primary">
+                      <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+                        <span className="font-semibold">Items Total:</span>
+                        <span className="text-lg font-bold">
                           PKR {calculateTotalPrice().toLocaleString()}
+                        </span>
+                      </div>
+                      
+                      {(() => {
+                        const { bundle, price } = calculateBundlePrice(orderItems.length);
+                        return bundle ? (
+                          <div className="flex justify-between items-center p-4 bg-accent/10 rounded-lg">
+                            <div>
+                              <span className="font-semibold block">Delivery Charges</span>
+                              <span className="text-xs text-muted-foreground">
+                                {bundle.name} ({orderItems.length} of {bundle.items_allowed} items)
+                              </span>
+                            </div>
+                            <span className="text-lg font-bold">
+                              PKR {price.toLocaleString()}
+                            </span>
+                          </div>
+                        ) : null;
+                      })()}
+                      
+                      <div className="flex justify-between items-center p-4 bg-primary/10 rounded-lg">
+                        <span className="font-semibold">Grand Total:</span>
+                        <span className="text-xl font-bold text-primary">
+                          PKR {(calculateTotalPrice() + calculateBundlePrice(orderItems.length).price).toLocaleString()}
                         </span>
                       </div>
                     </div>
