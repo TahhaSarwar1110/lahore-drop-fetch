@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { OrdersTable } from "@/components/admin/OrdersTable";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { RolePermissionsManagement } from "@/components/admin/RolePermissionsManagement";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -119,6 +120,9 @@ const AdminDashboard = () => {
               <Users className="h-4 w-4" />
               User Management
             </TabsTrigger>
+            <TabsTrigger value="permissions" className="gap-2">
+              Role Permissions
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="orders" className="space-y-6">
@@ -162,6 +166,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="users">
             <UserManagement />
+          </TabsContent>
+
+          <TabsContent value="permissions">
+            <RolePermissionsManagement />
           </TabsContent>
         </Tabs>
       </main>
