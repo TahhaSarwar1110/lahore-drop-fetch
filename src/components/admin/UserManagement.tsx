@@ -73,9 +73,9 @@ export const UserManagement = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="bg-card rounded-lg border border-border p-4">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="bg-card rounded-lg border border-border p-4 flex-1">
           <p className="text-sm text-muted-foreground">
             Total Users: <span className="font-semibold text-foreground">{users.length}</span>
             {" | "}
