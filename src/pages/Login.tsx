@@ -33,15 +33,13 @@ const Login = () => {
           const userRole = roles[0].role;
           if (userRole === "admin") {
             navigate("/admin");
-          } else if (userRole === "rider") {
-            navigate("/rider");
           } else if (userRole === "manager") {
             navigate("/manager");
           } else {
-            navigate("/place-order");
+            navigate("/");
           }
         } else {
-          navigate("/place-order");
+          navigate("/");
         }
       }
     });
@@ -83,19 +81,17 @@ const Login = () => {
           
           if (userRole === "admin") {
             navigate("/admin");
-          } else if (userRole === "rider") {
-            navigate("/rider");
           } else if (userRole === "manager") {
             navigate("/manager");
           } else {
-            navigate("/place-order");
+            navigate("/");
           }
         } else {
           toast({
             title: "Welcome back!",
             description: "Login successful",
           });
-          navigate("/place-order");
+          navigate("/");
         }
       }
     } catch (error) {
