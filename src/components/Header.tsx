@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Menu, Bike } from "lucide-react";
+import { LogOut, Shield, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
@@ -12,28 +12,37 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isRiderOnly, setIsRiderOnly] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { hasPermission, loading: permissionsLoading } = usePermissions();
 
   useEffect(() => {
     if (isAuthenticated) {
-      checkAdminRole();
+      checkUserRole();
     } else {
       setIsAdmin(false);
+      setIsRiderOnly(false);
     }
   }, [isAuthenticated]);
 
-  const checkAdminRole = async () => {
+  const checkUserRole = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+        .eq("user_id", user.id);
       
-      setIsAdmin(!!roles);
+      if (roles && roles.length > 0) {
+        const userRoles = roles.map(r => r.role);
+        setIsAdmin(userRoles.includes("admin"));
+        // User is rider-only if they have rider role but not admin or manager
+        setIsRiderOnly(
+          userRoles.includes("rider") && 
+          !userRoles.includes("admin") && 
+          !userRoles.includes("manager")
+        );
+      }
     }
   };
 
@@ -68,24 +77,22 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
           </Link>
           {isAuthenticated ? (
             <>
-              <Link to="/place-order" className="text-sm font-medium transition-colors hover:text-primary">
-                Place Order
-              </Link>
-              <Link to="/orders" className="text-sm font-medium transition-colors hover:text-primary">
-                My Orders
-              </Link>
-              <Link to="/track" className="text-sm font-medium transition-colors hover:text-primary">
-                Track
-              </Link>
+              {!isRiderOnly && (
+                <>
+                  <Link to="/place-order" className="text-sm font-medium transition-colors hover:text-primary">
+                    Place Order
+                  </Link>
+                  <Link to="/orders" className="text-sm font-medium transition-colors hover:text-primary">
+                    My Orders
+                  </Link>
+                  <Link to="/track" className="text-sm font-medium transition-colors hover:text-primary">
+                    Track
+                  </Link>
+                </>
+              )}
               <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
                 Contact
               </Link>
-              {!permissionsLoading && hasPermission('rider_module') && (
-                <Link to="/rider" className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1">
-                  <Bike className="h-4 w-4" />
-                  Rider
-                </Link>
-              )}
               {isAdmin && (
                 <Link to="/admin" className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1">
                   <Shield className="h-4 w-4" />
@@ -129,27 +136,31 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
               </Link>
               {isAuthenticated ? (
                 <>
-                  <Link 
-                    to="/place-order" 
-                    className="text-base font-medium transition-colors hover:text-primary py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Place Order
-                  </Link>
-                  <Link 
-                    to="/orders" 
-                    className="text-base font-medium transition-colors hover:text-primary py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    My Orders
-                  </Link>
-                  <Link 
-                    to="/track" 
-                    className="text-base font-medium transition-colors hover:text-primary py-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Track
-                  </Link>
+                  {!isRiderOnly && (
+                    <>
+                      <Link 
+                        to="/place-order" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Place Order
+                      </Link>
+                      <Link 
+                        to="/orders" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        My Orders
+                      </Link>
+                      <Link 
+                        to="/track" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Track
+                      </Link>
+                    </>
+                  )}
                   <Link 
                     to="/contact" 
                     className="text-base font-medium transition-colors hover:text-primary py-2"
@@ -157,16 +168,6 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                   >
                     Contact
                   </Link>
-                  {!permissionsLoading && hasPermission('rider_module') && (
-                    <Link 
-                      to="/rider" 
-                      className="text-base font-medium transition-colors hover:text-primary py-2 flex items-center gap-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Bike className="h-4 w-4" />
-                      Rider Dashboard
-                    </Link>
-                  )}
                   {isAdmin && (
                     <Link 
                       to="/admin" 
