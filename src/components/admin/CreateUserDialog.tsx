@@ -20,7 +20,7 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
     password: "",
     full_name: "",
     phone: "",
-    role: "user" as "admin" | "rider" | "customer" | "user",
+    role: "user" as "admin" | "rider" | "customer" | "user" | "manager",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,6 +126,7 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
                   <SelectItem value="user">User</SelectItem>
                   <SelectItem value="customer">Customer</SelectItem>
                   <SelectItem value="rider">Rider</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
