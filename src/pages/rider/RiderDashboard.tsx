@@ -53,14 +53,30 @@ const RiderDashboard = () => {
 
   useEffect(() => {
     if (!permissionsLoading && isAuthenticated) {
-      if (!hasPermission('rider_module')) {
-        toast.error("You don't have access to the rider module");
-        navigate("/");
-        return;
-      }
-      fetchAssignments();
+      // Check if user has rider role
+      const checkRiderRole = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "rider")
+          .maybeSingle();
+
+        if (!roles) {
+          toast.error("You don't have access to the rider dashboard");
+          navigate("/");
+          return;
+        }
+
+        fetchAssignments();
+      };
+
+      checkRiderRole();
     }
-  }, [permissionsLoading, hasPermission, isAuthenticated, navigate]);
+  }, [permissionsLoading, isAuthenticated, navigate]);
 
   const fetchAssignments = async () => {
     try {

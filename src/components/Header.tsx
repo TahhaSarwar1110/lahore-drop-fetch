@@ -72,9 +72,11 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
-            Home
-          </Link>
+          {!isRiderOnly && (
+            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
+              Home
+            </Link>
+          )}
           {isAuthenticated ? (
             <>
               {!isRiderOnly && (
@@ -127,13 +129,15 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
           </SheetTrigger>
           <SheetContent side="right" className="w-64">
             <nav className="flex flex-col space-y-4 mt-8">
-              <Link 
-                to="/" 
-                className="text-base font-medium transition-colors hover:text-primary py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
+              {!isRiderOnly && (
+                <Link 
+                  to="/" 
+                  className="text-base font-medium transition-colors hover:text-primary py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+              )}
               {isAuthenticated ? (
                 <>
                   {!isRiderOnly && (
