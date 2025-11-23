@@ -7,8 +7,9 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Phone, User } from "lucide-react";
+import { Loader2, Package, MapPin, Phone, User, Eye } from "lucide-react";
 import { AttachmentUpload } from "@/components/rider/AttachmentUpload";
+import { OrderDetailsDialog } from "@/components/rider/OrderDetailsDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface OrderAssignment {
@@ -24,6 +25,10 @@ interface OrderAssignment {
       full_name: string;
       phone: string;
     };
+    order_items: {
+      id: string;
+      item_type: string;
+    }[];
   };
 }
 
@@ -31,6 +36,7 @@ const RiderDashboard = () => {
   const [assignments, setAssignments] = useState<OrderAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<{ id: string; number: string } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -94,6 +100,10 @@ const RiderDashboard = () => {
             profiles (
               full_name,
               phone
+            ),
+            order_items (
+              id,
+              item_type
             )
           )
         `)
@@ -111,9 +121,46 @@ const RiderDashboard = () => {
     }
   };
 
+  const checkAllItemsPicked = async (orderId: string): Promise<boolean> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      // Get all items for this order
+      const { data: items } = await supabase
+        .from("order_items")
+        .select("id")
+        .eq("order_id", orderId);
+
+      if (!items || items.length === 0) return false;
+
+      // Get all pickups for these items
+      const { data: pickups } = await supabase
+        .from("item_pickups")
+        .select("order_item_id")
+        .eq("rider_id", user.id)
+        .in("order_item_id", items.map(i => i.id));
+
+      return pickups?.length === items.length;
+    } catch (error) {
+      console.error("Error checking items:", error);
+      return false;
+    }
+  };
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     setUpdating(orderId);
     try {
+      // For "Picked" status, check if all items are picked
+      if (newStatus === 'Picked') {
+        const allPicked = await checkAllItemsPicked(orderId);
+        if (!allPicked) {
+          toast.error("Please mark all items as picked first");
+          setUpdating(null);
+          return;
+        }
+      }
+
       const { error } = await supabase.rpc('update_order_status', {
         p_order_id: orderId,
         p_new_status: newStatus
@@ -199,41 +246,62 @@ const RiderDashboard = () => {
 
           {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
             <>
-              <AttachmentUpload 
-                orderId={order.id} 
-                onUploadComplete={fetchAssignments}
-              />
+              <div className="pt-3 border-t">
+                <p className="text-sm font-medium mb-2">
+                  Order Items: {order.order_items?.length || 0} items
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedOrder({ id: order.id, number: order.id.slice(0, 8) })}
+                  className="w-full"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Items & Mark as Picked
+                </Button>
+              </div>
 
-              <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                {order.status === 'Pending' || order.status === 'In Progress' ? (
+              {order.status === 'Pending' || order.status === 'In Progress' ? (
+                <div className="pt-3 border-t">
                   <Button
                     onClick={() => updateOrderStatus(order.id, 'Picked')}
                     disabled={updating === order.id}
-                    className="flex-1"
+                    className="w-full"
                   >
                     {updating === order.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      'Mark as Picked'
+                      'Mark All Items as Picked'
                     )}
                   </Button>
-                ) : null}
-                
-                {order.status === 'Picked' ? (
-                  <Button
-                    onClick={() => updateOrderStatus(order.id, 'Delivered')}
-                    disabled={updating === order.id}
-                    variant="default"
-                    className="flex-1"
-                  >
-                    {updating === order.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      'Mark as Delivered'
-                    )}
-                  </Button>
-                ) : null}
-              </div>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    All items must be picked individually first
+                  </p>
+                </div>
+              ) : null}
+              
+              {order.status === 'Picked' ? (
+                <>
+                  <AttachmentUpload 
+                    orderId={order.id} 
+                    onUploadComplete={fetchAssignments}
+                  />
+                  <div className="pt-3 border-t">
+                    <Button
+                      onClick={() => updateOrderStatus(order.id, 'Delivered')}
+                      disabled={updating === order.id}
+                      variant="default"
+                      className="w-full"
+                    >
+                      {updating === order.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        'Mark as Delivered'
+                      )}
+                    </Button>
+                  </div>
+                </>
+              ) : null}
             </>
           )}
         </CardContent>
@@ -300,6 +368,16 @@ const RiderDashboard = () => {
       </main>
       
       <Footer />
+
+      {selectedOrder && (
+        <OrderDetailsDialog
+          open={!!selectedOrder}
+          onOpenChange={(open) => !open && setSelectedOrder(null)}
+          orderId={selectedOrder.id}
+          orderNumber={selectedOrder.number}
+          onPickupComplete={fetchAssignments}
+        />
+      )}
     </div>
   );
 };
