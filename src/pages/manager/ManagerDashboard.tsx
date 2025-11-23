@@ -56,52 +56,92 @@ const ManagerDashboard = () => {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      navigate("/login");
-      return;
-    }
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      console.log("Manager Dashboard - Session:", session ? "Authenticated" : "Not authenticated");
+      
+      if (!session) {
+        console.log("Manager Dashboard - No session, redirecting to login");
+        navigate("/login");
+        return;
+      }
 
-    setIsAuthenticated(true);
+      setIsAuthenticated(true);
 
-    // Check if user has manager role
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .eq("role", "manager");
+      // Check if user has manager role
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "manager");
 
-    if (!roles || roles.length === 0) {
-      toast.error("Access denied. Manager role required.");
+      console.log("Manager Dashboard - Roles check:", { roles, rolesError, userId: session.user.id });
+
+      if (rolesError) {
+        console.error("Manager Dashboard - Error checking roles:", rolesError);
+        toast.error("Failed to verify manager role");
+        navigate("/");
+        return;
+      }
+
+      if (!roles || roles.length === 0) {
+        console.log("Manager Dashboard - User does not have manager role");
+        toast.error("Access denied. Manager role required.");
+        navigate("/");
+        return;
+      }
+
+      console.log("Manager Dashboard - Access granted, fetching orders");
+      fetchOrders();
+    } catch (error) {
+      console.error("Manager Dashboard - Auth check error:", error);
+      toast.error("Authentication error");
       navigate("/");
-      return;
     }
-
-    fetchOrders();
   };
 
   const fetchOrders = async () => {
     try {
+      console.log("Manager Dashboard - Fetching orders...");
       setLoading(true);
+      
       const { data, error } = await supabase
         .from("orders")
         .select(`
           *,
-          profiles:user_id (
+          profiles!orders_user_id_fkey (
             full_name,
             phone
           )
         `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setOrders(data || []);
+      console.log("Manager Dashboard - Orders fetch result:", { 
+        dataCount: data?.length, 
+        error,
+        sampleData: data?.[0] 
+      });
+
+      if (error) {
+        console.error("Manager Dashboard - Error fetching orders:", error);
+        throw error;
+      }
+      
+      // Transform the data to ensure profiles is an object, not an array
+      const transformedData = (data || []).map(order => ({
+        ...order,
+        profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
+      }));
+      
+      console.log("Manager Dashboard - Transformed orders:", transformedData.length);
+      setOrders(transformedData);
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("Manager Dashboard - Catch block error:", error);
       toast.error("Failed to load orders");
     } finally {
       setLoading(false);
+      console.log("Manager Dashboard - Fetch orders completed");
     }
   };
 
