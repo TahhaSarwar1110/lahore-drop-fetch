@@ -135,27 +135,39 @@ export type Database = {
       }
       order_items: {
         Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           created_at: string | null
           id: string
           image_url: string | null
           item_data: Json
           item_type: string
+          manager_feedback: string | null
           order_id: string
         }
         Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string | null
           id?: string
           image_url?: string | null
           item_data: Json
           item_type: string
+          manager_feedback?: string | null
           order_id: string
         }
         Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string | null
           id?: string
           image_url?: string | null
           item_data?: Json
           item_type?: string
+          manager_feedback?: string | null
           order_id?: string
         }
         Relationships: [
@@ -199,6 +211,8 @@ export type Database = {
       }
       orders: {
         Row: {
+          additional_charges: number | null
+          charges_description: string | null
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string | null
@@ -209,6 +223,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          additional_charges?: number | null
+          charges_description?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
@@ -219,6 +235,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          additional_charges?: number | null
+          charges_description?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
@@ -256,6 +274,39 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      pricing_bundles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          items_allowed: number
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          items_allowed: number
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          items_allowed?: number
+          name?: string
+          price?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
