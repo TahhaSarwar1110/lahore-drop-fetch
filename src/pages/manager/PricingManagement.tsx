@@ -48,7 +48,10 @@ export const PricingManagement = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching bundles:", error);
+        throw error;
+      }
       setBundles(data || []);
     } catch (error) {
       console.error("Error fetching bundles:", error);
