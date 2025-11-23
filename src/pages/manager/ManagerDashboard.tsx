@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
 import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
+import { AssignOrderDialog } from "@/components/admin/AssignOrderDialog";
 
 interface OrderItem {
   id: string;
@@ -309,14 +310,20 @@ const ManagerDashboard = () => {
                     )}
 
                     <div className="pt-4 border-t space-y-3">
-                      <Button
-                        onClick={() => handleViewDetails(order.id)}
-                        variant="outline"
-                        className="w-full"
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Details & Approve Items
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleViewDetails(order.id)}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details & Approve Items
+                        </Button>
+                        <AssignOrderDialog 
+                          orderId={order.id} 
+                          onAssigned={() => fetchOrders()} 
+                        />
+                      </div>
 
                       {order.status === "Pending" && (
                         <>
