@@ -21,9 +21,28 @@ const Login = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        navigate("/place-order");
+        // Check user role and redirect accordingly
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id);
+
+        if (roles && roles.length > 0) {
+          const userRole = roles[0].role;
+          if (userRole === "admin") {
+            navigate("/admin");
+          } else if (userRole === "rider") {
+            navigate("/rider");
+          } else if (userRole === "manager") {
+            navigate("/manager");
+          } else {
+            navigate("/place-order");
+          }
+        } else {
+          navigate("/place-order");
+        }
       }
     });
   }, [navigate]);
@@ -49,11 +68,35 @@ const Login = () => {
           variant: "destructive",
         });
       } else if (data.session) {
-        toast({
-          title: "Welcome back!",
-          description: "Login successful",
-        });
-        navigate("/place-order");
+        // Check user role and redirect accordingly
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.session.user.id);
+
+        if (roles && roles.length > 0) {
+          const userRole = roles[0].role;
+          toast({
+            title: "Welcome back!",
+            description: "Login successful",
+          });
+          
+          if (userRole === "admin") {
+            navigate("/admin");
+          } else if (userRole === "rider") {
+            navigate("/rider");
+          } else if (userRole === "manager") {
+            navigate("/manager");
+          } else {
+            navigate("/place-order");
+          }
+        } else {
+          toast({
+            title: "Welcome back!",
+            description: "Login successful",
+          });
+          navigate("/place-order");
+        }
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

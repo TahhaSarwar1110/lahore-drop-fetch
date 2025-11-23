@@ -60,6 +60,41 @@ export type Database = {
           },
         ]
       }
+      order_attachments: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_url: string
+          id: string
+          order_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_url: string
+          id?: string
+          order_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          order_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_attachments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string | null
@@ -126,23 +161,32 @@ export type Database = {
       }
       orders: {
         Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string | null
           delivery_address: string
           id: string
+          manager_feedback: string | null
           status: string
           user_id: string
         }
         Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string | null
           delivery_address: string
           id?: string
+          manager_feedback?: string | null
           status?: string
           user_id: string
         }
         Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string | null
           delivery_address?: string
           id?: string
+          manager_feedback?: string | null
           status?: string
           user_id?: string
         }

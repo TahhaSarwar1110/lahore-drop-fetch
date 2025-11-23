@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Package, MapPin, Phone, User } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
+import { AttachmentUpload } from "@/components/rider/AttachmentUpload";
 
 interface OrderAssignment {
   id: string;
@@ -201,6 +202,11 @@ const RiderDashboard = () => {
                           </p>
                         </div>
                       </div>
+
+                      <AttachmentUpload 
+                        orderId={order.id} 
+                        onUploadComplete={fetchAssignments}
+                      />
 
                       <div className="flex flex-col sm:flex-row gap-2 pt-2">
                         {order.status === 'Pending' || order.status === 'In Progress' ? (
