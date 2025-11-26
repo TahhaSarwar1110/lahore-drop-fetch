@@ -70,12 +70,12 @@ const ManagerDashboard = () => {
 
       setIsAuthenticated(true);
 
-      // Check if user has manager role
+      // Check if user has manager or admin role
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", session.user.id)
-        .eq("role", "manager");
+        .in("role", ["manager", "admin"]);
 
       console.log("Manager Dashboard - Roles check:", { roles, rolesError, userId: session.user.id });
 
@@ -111,7 +111,7 @@ const ManagerDashboard = () => {
         .from("orders")
         .select(`
           *,
-          profiles!orders_user_id_fkey (
+          profiles!fk_user (
             full_name,
             phone
           )
