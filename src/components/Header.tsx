@@ -70,7 +70,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
           </Link>
           {isAuthenticated ? (
             <>
-              {(!isRider || isAdmin || isManager) && (
+              {(!isRider && !isManager) || isAdmin ? (
                 <>
                   <Link to="/place-order" className="text-sm font-medium transition-colors hover:text-primary">
                     Place Order
@@ -82,7 +82,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                     Track
                   </Link>
                 </>
-              )}
+              ) : null}
               {isRider && (
                 <Link to="/orders" className="text-sm font-medium transition-colors hover:text-primary">
                   Orders
@@ -144,7 +144,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
               </Link>
               {isAuthenticated ? (
                 <>
-                  {(!isRider || isAdmin || isManager) && (
+                  {(!isRider && !isManager) || isAdmin ? (
                     <>
                       <Link 
                         to="/place-order" 
@@ -168,7 +168,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                         Track
                       </Link>
                     </>
-                  )}
+                  ) : null}
                   {isRider && (
                     <Link 
                       to="/orders" 
