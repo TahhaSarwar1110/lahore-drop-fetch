@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { useManagerCheck } from "@/hooks/useManagerCheck";
 
 interface PricingBundle {
   id: string;
@@ -25,6 +26,7 @@ interface PricingBundle {
 }
 
 export const PricingManagement = () => {
+  const { isManager, loading: roleLoading } = useManagerCheck();
   const [bundles, setBundles] = useState<PricingBundle[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -38,8 +40,10 @@ export const PricingManagement = () => {
   });
 
   useEffect(() => {
-    fetchBundles();
-  }, []);
+    if (isManager) {
+      fetchBundles();
+    }
+  }, [isManager]);
 
   const fetchBundles = async () => {
     try {
@@ -152,7 +156,7 @@ export const PricingManagement = () => {
     }
   };
 
-  if (loading) {
+  if (roleLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-lg">Loading...</div>
