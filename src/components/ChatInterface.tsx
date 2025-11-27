@@ -2,24 +2,33 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Loader2, Package, DollarSign, MapPin, HelpCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
+const quickActions = [
+  { icon: Package, label: "Track my order", query: "What's the status of my recent orders?" },
+  { icon: DollarSign, label: "View pricing", query: "What are your pricing bundles?" },
+  { icon: MapPin, label: "Delivery areas", query: "Which areas in Lahore do you deliver to?" },
+  { icon: HelpCircle, label: "How it works", query: "How does Desi Drop work?" },
+];
+
 export const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm the Desi Drop AI Assistant. I can help you with orders, pricing, tracking, and any questions about our service. How can I help you today?"
+      content: "Assalam-o-Alaikum! 👋 I'm your Desi Drop AI Assistant.\n\nI can help you with:\n• Tracking your orders 📦\n• Pricing and bundles 💰\n• How our service works 🚀\n• Delivery information 🏍️\n• General questions ❓\n\nWhat would you like to know?"
     }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -27,16 +36,17 @@ export const ChatInterface = () => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  const sendMessage = async (messageText?: string) => {
+    const textToSend = messageText || input;
+    if (!textToSend.trim() || isLoading) return;
 
-    const userMessage: Message = { role: "user", content: input };
+    const userMessage: Message = { role: "user", content: textToSend };
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setShowQuickActions(false);
 
     try {
-      // Get current user ID if authenticated
       const { data: { user } } = await supabase.auth.getUser();
       
       const response = await fetch(
@@ -76,7 +86,6 @@ export const ChatInterface = () => {
       let assistantMessage = "";
       let buffer = "";
 
-      // Add empty assistant message
       setMessages(prev => [...prev, { role: "assistant", content: "" }]);
 
       while (true) {
@@ -110,7 +119,7 @@ export const ChatInterface = () => {
               });
             }
           } catch (e) {
-            // Ignore parse errors for incomplete JSON
+            // Ignore parse errors
           }
         }
       }
@@ -121,7 +130,6 @@ export const ChatInterface = () => {
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
-      // Remove the empty assistant message on error
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
@@ -135,63 +143,109 @@ export const ChatInterface = () => {
     }
   };
 
+  const handleQuickAction = (query: string) => {
+    sendMessage(query);
+  };
+
   return (
-    <div className="flex flex-col h-[600px] max-w-2xl mx-auto">
+    <div className="flex flex-col h-[600px]">
       <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
+        <div className="space-y-4 max-w-3xl mx-auto">
           {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex items-start gap-3 ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              {message.role === "assistant" && (
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-5 h-5 text-primary" />
-                </div>
-              )}
+            <div key={index}>
               <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                className={`flex items-start gap-3 ${
+                  message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                {message.role === "assistant" && (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                )}
+                <div
+                  className={`rounded-2xl px-4 py-3 max-w-[85%] shadow-sm ${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card border border-border"
+                  }`}
+                >
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                </div>
+                {message.role === "user" && (
+                  <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
+                    <User className="w-5 h-5 text-secondary" />
+                  </div>
+                )}
               </div>
-              {message.role === "user" && (
-                <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                  <User className="w-5 h-5 text-secondary" />
+              
+              {/* Quick actions after first assistant message */}
+              {index === 0 && message.role === "assistant" && showQuickActions && (
+                <div className="mt-4 flex flex-wrap gap-2 justify-start ml-13">
+                  {quickActions.map((action, idx) => (
+                    <Button
+                      key={idx}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleQuickAction(action.query)}
+                      className="rounded-full text-xs gap-1.5 hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      <action.icon className="w-3.5 h-3.5" />
+                      {action.label}
+                    </Button>
+                  ))}
                 </div>
               )}
             </div>
           ))}
+          
+          {isLoading && (
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div className="rounded-2xl px-4 py-3 bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">Thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
       
-      <div className="border-t p-4">
-        <div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask me anything about Desi Drop..."
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            size="icon"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+      <div className="border-t bg-background p-4">
+        <div className="max-w-3xl mx-auto space-y-2">
+          <div className="flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me anything about Desi Drop..."
+              disabled={isLoading}
+              className="flex-1 rounded-full"
+            />
+            <Button
+              onClick={() => sendMessage()}
+              disabled={isLoading || !input.trim()}
+              size="icon"
+              className="rounded-full h-10 w-10 shadow-md"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+            <span>Powered by Lovable AI</span>
+            <span>{isLoading ? "AI is typing..." : "Press Enter to send"}</span>
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          {isLoading ? "Thinking..." : "Press Enter to send"}
-        </p>
       </div>
     </div>
   );
