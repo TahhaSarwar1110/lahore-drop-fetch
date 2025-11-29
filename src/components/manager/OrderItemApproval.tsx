@@ -115,11 +115,11 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
   const getStatusColor = (status: string) => {
     switch (status) {
       case "approved":
-        return "bg-green-100 text-green-800";
+        return "bg-green-500 text-white";
       case "rejected":
-        return "bg-red-100 text-red-800";
+        return "bg-red-500 text-white";
       default:
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-500 text-white";
     }
   };
 
@@ -155,28 +155,40 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
               )}
 
               {/* Item Details Grid */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
+                {item.item_data.shopName && (
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Shop Name</p>
+                    <p className="text-sm text-muted-foreground">{item.item_data.shopName}</p>
+                  </div>
+                )}
+                {item.item_data.address && (
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Address</p>
+                    <p className="text-sm text-muted-foreground">{item.item_data.address}</p>
+                  </div>
+                )}
                 {item.item_data.brandName && (
                   <div>
-                    <p className="text-sm font-medium">Brand Name</p>
+                    <p className="text-sm font-semibold text-foreground">Brand Name</p>
                     <p className="text-sm text-muted-foreground">{item.item_data.brandName}</p>
                   </div>
                 )}
                 {item.item_data.quantity && (
                   <div>
-                    <p className="text-sm font-medium">Quantity</p>
+                    <p className="text-sm font-semibold text-foreground">Quantity</p>
                     <p className="text-sm text-muted-foreground">{item.item_data.quantity}</p>
                   </div>
                 )}
                 {item.item_data.expectedPrice && (
                   <div>
-                    <p className="text-sm font-medium">Expected Price</p>
-                    <p className="text-sm text-muted-foreground">PKR {item.item_data.expectedPrice}</p>
+                    <p className="text-sm font-semibold text-foreground">Expected Price</p>
+                    <p className="text-lg font-bold text-primary">PKR {item.item_data.expectedPrice}</p>
                   </div>
                 )}
                 {item.item_data.description && (
-                  <div className="col-span-2">
-                    <p className="text-sm font-medium">Description</p>
+                  <div className="md:col-span-2">
+                    <p className="text-sm font-semibold text-foreground">Description / Instructions</p>
                     <p className="text-sm text-muted-foreground">{item.item_data.description}</p>
                   </div>
                 )}
@@ -194,7 +206,7 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
                     onChange={(e) => setFeedbackMap(prev => ({ ...prev, [item.id]: e.target.value }))}
                     placeholder="Add feedback for this item..."
                     className="mt-1"
-                    disabled={item.approval_status !== "pending" && loadingMap[item.id]}
+                    disabled={loadingMap[item.id]}
                   />
                 </div>
 
