@@ -26,79 +26,82 @@ interface OrderItemApprovalProps {
 
 export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) => {
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
-  const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
+  const [statusMap, setStatusMap] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize feedbackMap with existing feedback from items
+  // Initialize feedback and status maps with existing data from items
   useEffect(() => {
     const initialFeedback: Record<string, string> = {};
+    const initialStatus: Record<string, string> = {};
     items.forEach(item => {
       if (item.manager_feedback) {
         initialFeedback[item.id] = item.manager_feedback;
       }
+      initialStatus[item.id] = item.approval_status;
     });
     setFeedbackMap(initialFeedback);
+    setStatusMap(initialStatus);
   }, [items]);
 
-  const handleApprove = async (itemId: string) => {
-    try {
-      setLoadingMap(prev => ({ ...prev, [itemId]: true }));
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { error } = await supabase
-        .from("order_items")
-        .update({
-          approval_status: "approved",
-          approved_by: user.id,
-          approved_at: new Date().toISOString(),
-          manager_feedback: feedbackMap[itemId] || null,
-        })
-        .eq("id", itemId);
-
-      if (error) throw error;
-
-      toast.success("Item approved successfully");
-      onUpdate();
-    } catch (error) {
-      console.error("Error approving item:", error);
-      toast.error("Failed to approve item");
-    } finally {
-      setLoadingMap(prev => ({ ...prev, [itemId]: false }));
-    }
+  const handleApprove = (itemId: string) => {
+    setStatusMap(prev => ({ ...prev, [itemId]: "approved" }));
+    toast.success("Item marked as approved. Click 'Save Changes' to confirm.");
   };
 
-  const handleReject = async (itemId: string) => {
+  const handleReject = (itemId: string) => {
     if (!feedbackMap[itemId]) {
       toast.error("Please provide feedback for rejection");
       return;
     }
+    setStatusMap(prev => ({ ...prev, [itemId]: "rejected" }));
+    toast.success("Item marked as rejected. Click 'Save Changes' to confirm.");
+  };
 
+  const handleSaveChanges = async () => {
     try {
-      setLoadingMap(prev => ({ ...prev, [itemId]: true }));
+      setIsSaving(true);
 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { error } = await supabase
-        .from("order_items")
-        .update({
-          approval_status: "rejected",
-          approved_by: user.id,
-          approved_at: new Date().toISOString(),
-          manager_feedback: feedbackMap[itemId],
-        })
-        .eq("id", itemId);
+      // Save all items with changed status or feedback
+      const updates = items.map(async (item) => {
+        const newStatus = statusMap[item.id];
+        const newFeedback = feedbackMap[item.id] || null;
+        
+        // Check if anything changed
+        const statusChanged = newStatus !== item.approval_status;
+        const feedbackChanged = newFeedback !== item.manager_feedback;
+        
+        if (statusChanged || feedbackChanged) {
+          // Validate rejection has feedback
+          if (newStatus === "rejected" && !newFeedback) {
+            throw new Error("Feedback is required for rejected items");
+          }
 
-      if (error) throw error;
+          const { error } = await supabase
+            .from("order_items")
+            .update({
+              approval_status: newStatus,
+              approved_by: user.id,
+              approved_at: new Date().toISOString(),
+              manager_feedback: newFeedback,
+            })
+            .eq("id", item.id);
 
-      toast.success("Item rejected with feedback");
+          if (error) throw error;
+        }
+      });
+
+      await Promise.all(updates);
+
+      toast.success("All changes saved successfully");
       onUpdate();
     } catch (error) {
-      console.error("Error rejecting item:", error);
-      toast.error("Failed to reject item");
+      console.error("Error saving changes:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to save changes");
     } finally {
-      setLoadingMap(prev => ({ ...prev, [itemId]: false }));
+      setIsSaving(false);
     }
   };
 
@@ -113,11 +116,31 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
     }
   };
 
+  const hasChanges = items.some((item) => {
+    const statusChanged = statusMap[item.id] !== item.approval_status;
+    const feedbackChanged = (feedbackMap[item.id] || null) !== item.manager_feedback;
+    return statusChanged || feedbackChanged;
+  });
+
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Item Approval</h3>
-      {items.map((item) => (
-        <Card key={item.id}>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Item Approval</h3>
+        {hasChanges && (
+          <Button
+            onClick={handleSaveChanges}
+            disabled={isSaving}
+            size="lg"
+            className="bg-primary hover:bg-primary/90"
+          >
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        )}
+      </div>
+      {items.map((item) => {
+        const currentStatus = statusMap[item.id] || item.approval_status;
+        return (
+        <Card key={item.id} className={currentStatus !== item.approval_status ? "border-primary" : ""}>
           <CardHeader>
             <div className="flex justify-between items-start">
               <div className="flex-1">
@@ -126,8 +149,8 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
                   {item.item_data.shopName || item.item_data.address}
                 </CardDescription>
               </div>
-              <Badge className={getStatusColor(item.approval_status)}>
-                {item.approval_status}
+              <Badge className={getStatusColor(currentStatus)}>
+                {currentStatus}
               </Badge>
             </div>
           </CardHeader>
@@ -219,36 +242,38 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
                     onChange={(e) => setFeedbackMap(prev => ({ ...prev, [item.id]: e.target.value }))}
                     placeholder="Add feedback for this item..."
                     className="mt-1"
-                    disabled={loadingMap[item.id]}
+                    disabled={isSaving}
                   />
                 </div>
 
                 <div className="flex gap-2">
                   <Button
                     onClick={() => handleApprove(item.id)}
-                    disabled={loadingMap[item.id]}
+                    disabled={isSaving}
                     size="sm"
                     className="flex-1"
+                    variant={currentStatus === "approved" ? "default" : "outline"}
                   >
                     <Check className="h-4 w-4 mr-2" />
-                    {item.approval_status === "approved" ? "Update & Keep Approved" : "Approve"}
+                    {currentStatus === "approved" ? "Approved" : "Approve"}
                   </Button>
                   <Button
                     onClick={() => handleReject(item.id)}
-                    disabled={loadingMap[item.id]}
-                    variant="destructive"
+                    disabled={isSaving}
+                    variant={currentStatus === "rejected" ? "destructive" : "outline"}
                     size="sm"
                     className="flex-1"
                   >
                     <X className="h-4 w-4 mr-2" />
-                    {item.approval_status === "rejected" ? "Update & Keep Rejected" : "Reject"}
+                    {currentStatus === "rejected" ? "Rejected" : "Reject"}
                   </Button>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
-      ))}
+      );
+      })}
     </div>
   );
 };
