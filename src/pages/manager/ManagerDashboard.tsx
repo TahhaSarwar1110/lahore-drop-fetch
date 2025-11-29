@@ -24,6 +24,7 @@ interface OrderItem {
   manager_feedback: string | null;
   approved_by: string | null;
   approved_at: string | null;
+  image_url: string | null;
 }
 
 interface Order {
@@ -341,7 +342,7 @@ const ManagerDashboard = () => {
                     {order.additional_charges > 0 && (
                       <div className="bg-primary/10 p-3 rounded-md">
                         <p className="text-sm font-medium mb-1">Additional Charges</p>
-                        <p className="text-lg font-bold text-primary">${order.additional_charges.toFixed(2)}</p>
+                        <p className="text-lg font-bold text-primary">PKR {order.additional_charges.toFixed(2)}</p>
                         {order.charges_description && (
                           <p className="text-sm text-muted-foreground mt-1">{order.charges_description}</p>
                         )}
