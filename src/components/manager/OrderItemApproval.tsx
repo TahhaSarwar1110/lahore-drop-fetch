@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, MessageSquare } from "lucide-react";
+import { Check, X } from "lucide-react";
 
 interface OrderItem {
   id: string;
@@ -16,6 +16,7 @@ interface OrderItem {
   manager_feedback: string | null;
   approved_by: string | null;
   approved_at: string | null;
+  image_url: string | null;
 }
 
 interface OrderItemApprovalProps {
@@ -118,7 +119,7 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
         <Card key={item.id}>
           <CardHeader>
             <div className="flex justify-between items-start">
-              <div>
+              <div className="flex-1">
                 <CardTitle className="text-base">{item.item_type}</CardTitle>
                 <CardDescription>
                   {item.item_data.shopName || item.item_data.address}
@@ -131,36 +132,62 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">
-                  <strong>Description:</strong> {item.item_data.description}
-                </p>
-              </div>
-
-              {item.manager_feedback && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <MessageSquare className="h-4 w-4 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium">Manager Feedback</p>
-                      <p className="text-sm text-muted-foreground">{item.manager_feedback}</p>
-                    </div>
-                  </div>
+              {/* Item Image */}
+              {item.image_url && (
+                <div className="flex justify-center">
+                  <img 
+                    src={item.image_url} 
+                    alt={`${item.item_type} item`}
+                    className="max-w-full h-48 object-cover rounded-lg border"
+                  />
                 </div>
               )}
 
-              {item.approval_status === "pending" && (
-                <div className="space-y-3">
+              {/* Item Details Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {item.item_data.brandName && (
                   <div>
-                    <Label htmlFor={`feedback-${item.id}`}>Feedback (Optional for approval, Required for rejection)</Label>
-                    <Textarea
-                      id={`feedback-${item.id}`}
-                      value={feedbackMap[item.id] || ""}
-                      onChange={(e) => setFeedbackMap(prev => ({ ...prev, [item.id]: e.target.value }))}
-                      placeholder="Add feedback for this item..."
-                      className="mt-1"
-                    />
+                    <p className="text-sm font-medium">Brand Name</p>
+                    <p className="text-sm text-muted-foreground">{item.item_data.brandName}</p>
                   </div>
+                )}
+                {item.item_data.quantity && (
+                  <div>
+                    <p className="text-sm font-medium">Quantity</p>
+                    <p className="text-sm text-muted-foreground">{item.item_data.quantity}</p>
+                  </div>
+                )}
+                {item.item_data.expectedPrice && (
+                  <div>
+                    <p className="text-sm font-medium">Expected Price</p>
+                    <p className="text-sm text-muted-foreground">PKR {item.item_data.expectedPrice}</p>
+                  </div>
+                )}
+                {item.item_data.description && (
+                  <div className="col-span-2">
+                    <p className="text-sm font-medium">Description</p>
+                    <p className="text-sm text-muted-foreground">{item.item_data.description}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Feedback Section */}
+              <div className="space-y-3 pt-4 border-t">
+                <div>
+                  <Label htmlFor={`feedback-${item.id}`}>
+                    Manager Feedback {item.approval_status === "pending" && "(Optional for approval, Required for rejection)"}
+                  </Label>
+                  <Textarea
+                    id={`feedback-${item.id}`}
+                    value={feedbackMap[item.id] !== undefined ? feedbackMap[item.id] : (item.manager_feedback || "")}
+                    onChange={(e) => setFeedbackMap(prev => ({ ...prev, [item.id]: e.target.value }))}
+                    placeholder="Add feedback for this item..."
+                    className="mt-1"
+                    disabled={item.approval_status !== "pending" && loadingMap[item.id]}
+                  />
+                </div>
+
+                {item.approval_status === "pending" ? (
                   <div className="flex gap-2">
                     <Button
                       onClick={() => handleApprove(item.id)}
@@ -182,8 +209,32 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
                       Reject
                     </Button>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <Button
+                    onClick={() => {
+                      const newFeedback = feedbackMap[item.id] !== undefined 
+                        ? feedbackMap[item.id] 
+                        : item.manager_feedback || "";
+                      
+                      if (item.approval_status === "approved") {
+                        handleApprove(item.id);
+                      } else {
+                        if (!newFeedback) {
+                          toast.error("Please provide feedback for rejection");
+                          return;
+                        }
+                        handleReject(item.id);
+                      }
+                    }}
+                    disabled={loadingMap[item.id]}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Update Feedback
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
