@@ -156,40 +156,63 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
 
               {/* Item Details Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg">
-                {item.item_data.shopName && (
+                {/* Shop/Store/Restaurant Name */}
+                {(item.item_data["Shop/Store Name"] || item.item_data["Restaurant/Shop Name"] || 
+                  item.item_data["Shop Name"] || item.item_data["Shop/Location Name"]) && (
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Shop Name</p>
-                    <p className="text-sm text-muted-foreground">{item.item_data.shopName}</p>
+                    <p className="text-sm font-semibold text-foreground">Shop/Store Name</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.item_data["Shop/Store Name"] || item.item_data["Restaurant/Shop Name"] || 
+                       item.item_data["Shop Name"] || item.item_data["Shop/Location Name"]}
+                    </p>
                   </div>
                 )}
-                {item.item_data.address && (
+
+                {/* Item Description */}
+                {(item.item_data["Item Description"] || item.item_data["Item Name"] || 
+                  item.item_data["Gift Description"] || item.item_data["Description"]) && (
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Address</p>
-                    <p className="text-sm text-muted-foreground">{item.item_data.address}</p>
+                    <p className="text-sm font-semibold text-foreground">Item Description</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.item_data["Item Description"] || item.item_data["Item Name"] || 
+                       item.item_data["Gift Description"] || item.item_data["Description"]}
+                    </p>
                   </div>
                 )}
-                {item.item_data.brandName && (
+
+                {/* Brand */}
+                {item.item_data["Brand"] && (
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Brand Name</p>
-                    <p className="text-sm text-muted-foreground">{item.item_data.brandName}</p>
+                    <p className="text-sm font-semibold text-foreground">Brand</p>
+                    <p className="text-sm text-muted-foreground">{item.item_data["Brand"]}</p>
                   </div>
                 )}
-                {item.item_data.quantity && (
+
+                {/* Quantity */}
+                {item.item_data["Quantity"] && (
                   <div>
                     <p className="text-sm font-semibold text-foreground">Quantity</p>
-                    <p className="text-sm text-muted-foreground">{item.item_data.quantity}</p>
+                    <p className="text-sm text-muted-foreground">{item.item_data["Quantity"]}</p>
                   </div>
                 )}
-                {item.item_data.expectedPrice && (
+
+                {/* Price */}
+                {(item.item_data["Expected Price (PKR)"] || item.item_data["Price (PKR)"]) && (
                   <div>
                     <p className="text-sm font-semibold text-foreground">Expected Price</p>
-                    <p className="text-lg font-bold text-primary">PKR {item.item_data.expectedPrice}</p>
+                    <p className="text-lg font-bold text-primary">
+                      PKR {item.item_data["Expected Price (PKR)"] || item.item_data["Price (PKR)"]}
+                    </p>
                   </div>
                 )}
-                {item.item_data.description && (
+
+                {/* Special Instructions */}
+                {(item.item_data["Special Instructions"] || item.item_data["Instructions"]) && (
                   <div className="md:col-span-2">
-                    <p className="text-sm font-semibold text-foreground">Description / Instructions</p>
-                    <p className="text-sm text-muted-foreground">{item.item_data.description}</p>
+                    <p className="text-sm font-semibold text-foreground">Special Instructions</p>
+                    <p className="text-sm text-muted-foreground">
+                      {item.item_data["Special Instructions"] || item.item_data["Instructions"]}
+                    </p>
                   </div>
                 )}
               </div>

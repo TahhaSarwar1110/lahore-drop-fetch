@@ -65,7 +65,7 @@ export const AdditionalCharges = ({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="charges">Amount ($)</Label>
+            <Label htmlFor="charges">Amount (PKR)</Label>
             <Input
               id="charges"
               type="number"
