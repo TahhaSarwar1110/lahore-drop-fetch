@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,17 @@ interface OrderItemApprovalProps {
 export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) => {
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
+
+  // Initialize feedbackMap with existing feedback from items
+  useEffect(() => {
+    const initialFeedback: Record<string, string> = {};
+    items.forEach(item => {
+      if (item.manager_feedback) {
+        initialFeedback[item.id] = item.manager_feedback;
+      }
+    });
+    setFeedbackMap(initialFeedback);
+  }, [items]);
 
   const handleApprove = async (itemId: string) => {
     try {
@@ -179,7 +190,7 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
                   </Label>
                   <Textarea
                     id={`feedback-${item.id}`}
-                    value={feedbackMap[item.id] !== undefined ? feedbackMap[item.id] : (item.manager_feedback || "")}
+                    value={feedbackMap[item.id] || ""}
                     onChange={(e) => setFeedbackMap(prev => ({ ...prev, [item.id]: e.target.value }))}
                     placeholder="Add feedback for this item..."
                     className="mt-1"
