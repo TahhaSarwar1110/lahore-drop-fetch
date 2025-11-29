@@ -36,7 +36,7 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
         initialFeedback[item.id] = item.manager_feedback;
       }
     });
-    setFeedbackMap(initialFeedback);
+    setFeedbackMap(prev => ({ ...prev, ...initialFeedback }));
   }, [items]);
 
   const handleApprove = async (itemId: string) => {
@@ -59,11 +59,6 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
       if (error) throw error;
 
       toast.success("Item approved successfully");
-      setFeedbackMap(prev => {
-        const newMap = { ...prev };
-        delete newMap[itemId];
-        return newMap;
-      });
       onUpdate();
     } catch (error) {
       console.error("Error approving item:", error);
@@ -98,11 +93,6 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
       if (error) throw error;
 
       toast.success("Item rejected with feedback");
-      setFeedbackMap(prev => {
-        const newMap = { ...prev };
-        delete newMap[itemId];
-        return newMap;
-      });
       onUpdate();
     } catch (error) {
       console.error("Error rejecting item:", error);
@@ -233,53 +223,27 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
                   />
                 </div>
 
-                {item.approval_status === "pending" ? (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleApprove(item.id)}
-                      disabled={loadingMap[item.id]}
-                      size="sm"
-                      className="flex-1"
-                    >
-                      <Check className="h-4 w-4 mr-2" />
-                      Approve
-                    </Button>
-                    <Button
-                      onClick={() => handleReject(item.id)}
-                      disabled={loadingMap[item.id]}
-                      variant="destructive"
-                      size="sm"
-                      className="flex-1"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Reject
-                    </Button>
-                  </div>
-                ) : (
+                <div className="flex gap-2">
                   <Button
-                    onClick={() => {
-                      const newFeedback = feedbackMap[item.id] !== undefined 
-                        ? feedbackMap[item.id] 
-                        : item.manager_feedback || "";
-                      
-                      if (item.approval_status === "approved") {
-                        handleApprove(item.id);
-                      } else {
-                        if (!newFeedback) {
-                          toast.error("Please provide feedback for rejection");
-                          return;
-                        }
-                        handleReject(item.id);
-                      }
-                    }}
+                    onClick={() => handleApprove(item.id)}
                     disabled={loadingMap[item.id]}
                     size="sm"
-                    variant="outline"
+                    className="flex-1"
                   >
                     <Check className="h-4 w-4 mr-2" />
-                    Update Feedback
+                    {item.approval_status === "approved" ? "Update & Keep Approved" : "Approve"}
                   </Button>
-                )}
+                  <Button
+                    onClick={() => handleReject(item.id)}
+                    disabled={loadingMap[item.id]}
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    {item.approval_status === "rejected" ? "Update & Keep Rejected" : "Reject"}
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
