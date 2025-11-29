@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, CheckCircle, XCircle, Eye } from "lucide-react";
+import { Loader2, Package, CheckCircle, XCircle, Eye, User } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
 import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
 import { AssignOrderDialog } from "@/components/admin/AssignOrderDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface OrderItem {
   id: string;
@@ -39,6 +40,13 @@ interface Order {
     full_name: string;
     phone: string;
   };
+  order_assignments?: {
+    rider_id: string;
+    profiles: {
+      full_name: string;
+      phone: string;
+    };
+  } | null;
 }
 
 const ManagerDashboard = () => {
@@ -50,6 +58,7 @@ const ManagerDashboard = () => {
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -114,6 +123,13 @@ const ManagerDashboard = () => {
           profiles!fk_user (
             full_name,
             phone
+          ),
+          order_assignments (
+            rider_id,
+            profiles!order_assignments_rider_id_fkey (
+              full_name,
+              phone
+            )
           )
         `)
         .order("created_at", { ascending: false });
@@ -253,9 +269,25 @@ const ManagerDashboard = () => {
 
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-6">Manager Dashboard</h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Manager Dashboard</h1>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Orders</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Order Received">Order Received</SelectItem>
+                <SelectItem value="Shopper Assigned">Shopper Assigned</SelectItem>
+                <SelectItem value="Purchasing">Purchasing</SelectItem>
+                <SelectItem value="In Delivery">In Delivery</SelectItem>
+                <SelectItem value="Delivered">Delivered</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          {orders.length === 0 ? (
+          {orders.filter(order => statusFilter === "all" || order.status === statusFilter).length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -264,7 +296,9 @@ const ManagerDashboard = () => {
             </Card>
           ) : (
             <div className="grid gap-4">
-              {orders.map((order) => (
+              {orders.filter(order => statusFilter === "all" || order.status === statusFilter).map((order) => {
+                const assignedRider = order.order_assignments;
+                return (
                 <Card key={order.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -291,6 +325,18 @@ const ManagerDashboard = () => {
                       <p className="text-sm font-medium">Delivery Address</p>
                       <p className="text-sm text-muted-foreground">{order.delivery_address}</p>
                     </div>
+
+                    {assignedRider && (
+                      <div className="bg-primary/5 p-3 rounded-md border border-primary/20">
+                        <div className="flex items-center gap-2 mb-1">
+                          <User className="h-4 w-4 text-primary" />
+                          <p className="text-sm font-medium">Assigned Rider</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {assignedRider.profiles.full_name} - {assignedRider.profiles.phone}
+                        </p>
+                      </div>
+                    )}
 
                     {order.additional_charges > 0 && (
                       <div className="bg-primary/10 p-3 rounded-md">
@@ -320,7 +366,8 @@ const ManagerDashboard = () => {
                           View Details & Approve Items
                         </Button>
                         <AssignOrderDialog 
-                          orderId={order.id} 
+                          orderId={order.id}
+                          currentRiderId={assignedRider?.rider_id}
                           onAssigned={() => fetchOrders()} 
                         />
                       </div>
@@ -378,7 +425,7 @@ const ManagerDashboard = () => {
                     )}
                   </CardContent>
                 </Card>
-              ))}
+              )})}
             </div>
           )}
         </div>
@@ -391,25 +438,77 @@ const ManagerDashboard = () => {
                 Review items, approve/reject, and manage additional charges
               </DialogDescription>
             </DialogHeader>
-            {selectedOrder && (
-              <div className="space-y-6">
-                <OrderItemApproval 
-                  items={orderItems} 
-                  onUpdate={() => {
-                    fetchOrderItems(selectedOrder);
-                    fetchOrders();
-                  }} 
-                />
-                <AdditionalCharges
-                  orderId={selectedOrder}
-                  currentCharges={orders.find(o => o.id === selectedOrder)?.additional_charges || 0}
-                  currentDescription={orders.find(o => o.id === selectedOrder)?.charges_description || null}
-                  onUpdate={() => {
-                    fetchOrders();
-                  }}
-                />
-              </div>
-            )}
+            {selectedOrder && (() => {
+              const currentOrder = orders.find(o => o.id === selectedOrder);
+              const assignedRider = currentOrder?.order_assignments;
+              const approvedItems = orderItems.filter(item => item.approval_status === "approved");
+              
+              return (
+                <div className="space-y-6">
+                  {assignedRider && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Assigned Rider</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-primary" />
+                          <div>
+                            <p className="font-medium">{assignedRider.profiles.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{assignedRider.profiles.phone}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {approvedItems.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Approved Items ({approvedItems.length})</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {approvedItems.map((item) => (
+                          <div key={item.id} className="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <p className="font-medium text-sm">{item.item_type}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {item.item_data.shopName || item.item_data.address}
+                                </p>
+                              </div>
+                              <Badge className="bg-green-100 text-green-800">Approved</Badge>
+                            </div>
+                            {item.manager_feedback && (
+                              <div className="mt-2 text-xs">
+                                <p className="font-medium">Manager Notes:</p>
+                                <p className="text-muted-foreground">{item.manager_feedback}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <OrderItemApproval 
+                    items={orderItems} 
+                    onUpdate={() => {
+                      fetchOrderItems(selectedOrder);
+                      fetchOrders();
+                    }} 
+                  />
+                  <AdditionalCharges
+                    orderId={selectedOrder}
+                    currentCharges={currentOrder?.additional_charges || 0}
+                    currentDescription={currentOrder?.charges_description || null}
+                    onUpdate={() => {
+                      fetchOrders();
+                    }}
+                  />
+                </div>
+              );
+            })()}
           </DialogContent>
         </Dialog>
       </main>
