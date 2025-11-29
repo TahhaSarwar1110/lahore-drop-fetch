@@ -36,7 +36,7 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
         initialFeedback[item.id] = item.manager_feedback;
       }
     });
-    setFeedbackMap(prev => ({ ...prev, ...initialFeedback }));
+    setFeedbackMap(initialFeedback);
   }, [items]);
 
   const handleApprove = async (itemId: string) => {
