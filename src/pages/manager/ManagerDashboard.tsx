@@ -468,22 +468,62 @@ const ManagerDashboard = () => {
                       <CardHeader>
                         <CardTitle className="text-base">Approved Items ({approvedItems.length})</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
+                      <CardContent className="space-y-4">
                         {approvedItems.map((item) => (
-                          <div key={item.id} className="p-3 bg-green-50 border border-green-200 rounded-md">
-                            <div className="flex justify-between items-start mb-2">
+                          <div key={item.id} className="p-4 bg-green-50 border border-green-200 rounded-md space-y-3">
+                            <div className="flex justify-between items-start">
                               <div>
-                                <p className="font-medium text-sm">{item.item_type}</p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="font-medium">{item.item_type}</p>
+                                <p className="text-sm text-muted-foreground">
                                   {item.item_data.shopName || item.item_data.address}
                                 </p>
                               </div>
                               <Badge className="bg-green-100 text-green-800">Approved</Badge>
                             </div>
+
+                            {/* Item Image */}
+                            {item.image_url && (
+                              <div className="flex justify-center">
+                                <img 
+                                  src={item.image_url} 
+                                  alt={`${item.item_type} item`}
+                                  className="max-w-full h-40 object-cover rounded-lg border"
+                                />
+                              </div>
+                            )}
+
+                            {/* Item Details Grid */}
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              {item.item_data.brandName && (
+                                <div>
+                                  <p className="font-medium">Brand Name</p>
+                                  <p className="text-muted-foreground">{item.item_data.brandName}</p>
+                                </div>
+                              )}
+                              {item.item_data.quantity && (
+                                <div>
+                                  <p className="font-medium">Quantity</p>
+                                  <p className="text-muted-foreground">{item.item_data.quantity}</p>
+                                </div>
+                              )}
+                              {item.item_data.expectedPrice && (
+                                <div>
+                                  <p className="font-medium">Expected Price</p>
+                                  <p className="text-muted-foreground">PKR {item.item_data.expectedPrice}</p>
+                                </div>
+                              )}
+                              {item.item_data.description && (
+                                <div className="col-span-2">
+                                  <p className="font-medium">Description</p>
+                                  <p className="text-muted-foreground">{item.item_data.description}</p>
+                                </div>
+                              )}
+                            </div>
+
                             {item.manager_feedback && (
-                              <div className="mt-2 text-xs">
-                                <p className="font-medium">Manager Notes:</p>
-                                <p className="text-muted-foreground">{item.manager_feedback}</p>
+                              <div className="pt-2 border-t border-green-300">
+                                <p className="font-medium text-sm">Manager Notes:</p>
+                                <p className="text-sm text-muted-foreground">{item.manager_feedback}</p>
                               </div>
                             )}
                           </div>
