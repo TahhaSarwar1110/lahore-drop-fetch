@@ -33,17 +33,17 @@ serve(async (req) => {
       });
     }
 
-    // Check if user is admin
-    const { data: adminRole } = await supabaseClient
+    // Check if user is admin or manager
+    const { data: userRole } = await supabaseClient
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .eq('role', 'admin')
+      .in('role', ['admin', 'manager'])
       .maybeSingle();
 
-    if (!adminRole) {
-      console.error('User is not admin');
-      return new Response(JSON.stringify({ error: 'Forbidden - Admin only' }), {
+    if (!userRole) {
+      console.error('User is not admin or manager');
+      return new Response(JSON.stringify({ error: 'Forbidden - Admin or Manager only' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
