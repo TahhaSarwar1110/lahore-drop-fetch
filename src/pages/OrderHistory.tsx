@@ -11,12 +11,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, Eye, MapPin } from "lucide-react";
+import { Package, Eye, MapPin, Trash2, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface Order {
   id: string;
@@ -87,6 +99,28 @@ const OrderHistory = () => {
       setOrders(data as Order[]);
     }
     setLoading(false);
+  };
+
+  const handleRemoveItem = async (orderId: string, itemId: string) => {
+    try {
+      const { error } = await supabase
+        .from("order_items")
+        .delete()
+        .eq("id", itemId);
+
+      if (error) throw error;
+
+      toast.success("Item removed successfully");
+      
+      // Reload orders
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        loadOrders(user.id);
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+      toast.error("Failed to remove item");
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -230,7 +264,7 @@ const OrderHistory = () => {
                                         className="mt-3 rounded-lg max-h-48 object-cover"
                                       />
                                     )}
-                                    {item.manager_feedback && (
+                                     {item.manager_feedback && (
                                       <div className="mt-3 p-3 bg-muted rounded-lg">
                                         <p className="text-sm font-medium mb-1">Manager Feedback:</p>
                                         <p className="text-sm text-muted-foreground">{item.manager_feedback}</p>
@@ -239,6 +273,42 @@ const OrderHistory = () => {
                                             {format(new Date(item.approved_at), "PPp")}
                                           </p>
                                         )}
+                                      </div>
+                                    )}
+                                    
+                                    {item.approval_status === "rejected" && order.status === "Pending" && (
+                                      <div className="mt-3 flex gap-2">
+                                        <AlertDialog>
+                                          <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" size="sm">
+                                              <Trash2 className="h-4 w-4 mr-1" />
+                                              Remove Item
+                                            </Button>
+                                          </AlertDialogTrigger>
+                                          <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                              <AlertDialogTitle>Remove Item?</AlertDialogTitle>
+                                              <AlertDialogDescription>
+                                                This will permanently remove this rejected item from your order. This action cannot be undone.
+                                              </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                              <AlertDialogAction onClick={() => handleRemoveItem(order.id, item.id)}>
+                                                Remove
+                                              </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                          </AlertDialogContent>
+                                        </AlertDialog>
+                                        
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm"
+                                          onClick={() => navigate("/place-order")}
+                                        >
+                                          <RefreshCw className="h-4 w-4 mr-1" />
+                                          Add New Item
+                                        </Button>
                                       </div>
                                     )}
                                   </CardContent>
