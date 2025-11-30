@@ -3,30 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { supabase } from "@/integrations/supabase/client";
-import { Package, Eye, MapPin, Trash2, RefreshCw } from "lucide-react";
+import { Package, Eye, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -99,28 +80,6 @@ const OrderHistory = () => {
       setOrders(data as Order[]);
     }
     setLoading(false);
-  };
-
-  const handleRemoveItem = async (orderId: string, itemId: string) => {
-    try {
-      const { error } = await supabase
-        .from("order_items")
-        .delete()
-        .eq("id", itemId);
-
-      if (error) throw error;
-
-      toast.success("Item removed successfully");
-      
-      // Reload orders
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        loadOrders(user.id);
-      }
-    } catch (error) {
-      console.error("Error removing item:", error);
-      toast.error("Failed to remove item");
-    }
   };
 
   const getStatusColor = (status: string) => {
@@ -213,110 +172,14 @@ const OrderHistory = () => {
                       </div>
 
                       <div className="flex gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Order Details</DialogTitle>
-                              <DialogDescription>
-                                Order #{order.id.slice(0, 8)} - {format(new Date(order.created_at), "PPP")}
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 mt-4">
-                              {order.order_items.map((item) => (
-                                <Card key={item.id}>
-                                  <CardContent className="p-4">
-                                    <div className="flex items-start justify-between mb-2">
-                                      <p className="font-semibold text-primary">
-                                        {item.item_type}
-                                      </p>
-                                      {item.approval_status && (
-                                        <Badge
-                                          variant={
-                                            item.approval_status === "approved"
-                                              ? "default"
-                                              : item.approval_status === "rejected"
-                                              ? "destructive"
-                                              : "secondary"
-                                          }
-                                        >
-                                          {item.approval_status}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div className="space-y-1 text-sm">
-                                      {Object.entries(item.item_data).map(([key, value]) => (
-                                        <p key={key} className="text-muted-foreground">
-                                          <span className="font-medium text-foreground">{key}:</span>{" "}
-                                          {value}
-                                        </p>
-                                      ))}
-                                    </div>
-                                    {item.image_url && (
-                                      <img
-                                        src={item.image_url}
-                                        alt="Item"
-                                        className="mt-3 rounded-lg max-h-48 object-cover"
-                                      />
-                                    )}
-                                     {item.manager_feedback && (
-                                      <div className="mt-3 p-3 bg-muted rounded-lg">
-                                        <p className="text-sm font-medium mb-1">Manager Feedback:</p>
-                                        <p className="text-sm text-muted-foreground">{item.manager_feedback}</p>
-                                        {item.approved_at && (
-                                          <p className="text-xs text-muted-foreground mt-1">
-                                            {format(new Date(item.approved_at), "PPp")}
-                                          </p>
-                                        )}
-                                      </div>
-                                    )}
-                                    
-                                    {item.approval_status === "rejected" && order.status === "Pending" && (
-                                      <div className="mt-3 flex gap-2">
-                                        <AlertDialog>
-                                          <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" size="sm">
-                                              <Trash2 className="h-4 w-4 mr-1" />
-                                              Remove Item
-                                            </Button>
-                                          </AlertDialogTrigger>
-                                          <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                              <AlertDialogTitle>Remove Item?</AlertDialogTitle>
-                                              <AlertDialogDescription>
-                                                This will permanently remove this rejected item from your order. This action cannot be undone.
-                                              </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                              <AlertDialogAction onClick={() => handleRemoveItem(order.id, item.id)}>
-                                                Remove
-                                              </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                          </AlertDialogContent>
-                                        </AlertDialog>
-                                        
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm"
-                                          onClick={() => navigate("/place-order")}
-                                        >
-                                          <RefreshCw className="h-4 w-4 mr-1" />
-                                          Add New Item
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/order-details?orderId=${order.id}`)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
 
                         <Button
                           variant="default"
