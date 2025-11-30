@@ -28,6 +28,9 @@ interface Order {
     item_type: string;
     item_data: Record<string, string>;
     image_url: string | null;
+    approval_status: string | null;
+    manager_feedback: string | null;
+    approved_at: string | null;
   }[];
 }
 
@@ -69,7 +72,10 @@ const OrderHistory = () => {
           id,
           item_type,
           item_data,
-          image_url
+          image_url,
+          approval_status,
+          manager_feedback,
+          approved_at
         )
       `)
       .eq("user_id", userId)
@@ -191,9 +197,24 @@ const OrderHistory = () => {
                               {order.order_items.map((item) => (
                                 <Card key={item.id}>
                                   <CardContent className="p-4">
-                                    <p className="font-semibold text-primary mb-2">
-                                      {item.item_type}
-                                    </p>
+                                    <div className="flex items-start justify-between mb-2">
+                                      <p className="font-semibold text-primary">
+                                        {item.item_type}
+                                      </p>
+                                      {item.approval_status && (
+                                        <Badge
+                                          variant={
+                                            item.approval_status === "approved"
+                                              ? "default"
+                                              : item.approval_status === "rejected"
+                                              ? "destructive"
+                                              : "secondary"
+                                          }
+                                        >
+                                          {item.approval_status}
+                                        </Badge>
+                                      )}
+                                    </div>
                                     <div className="space-y-1 text-sm">
                                       {Object.entries(item.item_data).map(([key, value]) => (
                                         <p key={key} className="text-muted-foreground">
@@ -208,6 +229,17 @@ const OrderHistory = () => {
                                         alt="Item"
                                         className="mt-3 rounded-lg max-h-48 object-cover"
                                       />
+                                    )}
+                                    {item.manager_feedback && (
+                                      <div className="mt-3 p-3 bg-muted rounded-lg">
+                                        <p className="text-sm font-medium mb-1">Manager Feedback:</p>
+                                        <p className="text-sm text-muted-foreground">{item.manager_feedback}</p>
+                                        {item.approved_at && (
+                                          <p className="text-xs text-muted-foreground mt-1">
+                                            {format(new Date(item.approved_at), "PPp")}
+                                          </p>
+                                        )}
+                                      </div>
                                     )}
                                   </CardContent>
                                 </Card>
