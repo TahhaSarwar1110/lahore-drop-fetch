@@ -65,60 +65,60 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
+          <Link to="/" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
             Home
           </Link>
           {isAuthenticated ? (
             <>
               {(!isRider && !isManager) || isAdmin ? (
                 <>
-                  <Link to="/place-order" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/place-order" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                     Place Order
                   </Link>
-                  <Link to="/order-history" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/order-history" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                     My Orders
                   </Link>
-                  <Link to="/track" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/track" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                     Track
                   </Link>
                 </>
               ) : null}
               {isRider && (
-                <Link to="/orders" className="text-sm font-medium transition-colors hover:text-primary">
+                <Link to="/orders" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                   Orders
                 </Link>
               )}
-              <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/contact" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                 Contact
               </Link>
               {isAdmin && (
-                <Link to="/admin" className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1">
+                <Link to="/admin" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110 flex items-center gap-1">
                   <Shield className="h-4 w-4" />
                   Admin
                 </Link>
               )}
               {isManager && (
                 <>
-                  <Link to="/manager" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/manager" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                     Manager
                   </Link>
-                  <Link to="/manager/pricing" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/manager/pricing" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                     Pricing
                   </Link>
                 </>
               )}
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="transition-all duration-300 hover:scale-105">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
             </>
           ) : (
             <>
-              <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/contact" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                 Contact
               </Link>
               <Link to="/login">
-                <Button variant="default" size="sm">
+                <Button variant="default" size="sm" className="transition-all duration-300 hover:scale-105">
                   Login
                 </Button>
               </Link>
@@ -129,7 +129,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
         {/* Mobile Navigation */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="transition-all duration-300 hover:scale-110">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
@@ -215,7 +215,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                   )}
                   <Button 
                     variant="outline" 
-                    className="justify-start" 
+                    className="justify-start transition-all duration-300 hover:scale-105" 
                     onClick={() => {
                       handleLogout();
                       setMobileMenuOpen(false);
@@ -235,7 +235,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                     Contact
                   </Link>
                   <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="default" className="w-full">
+                    <Button variant="default" className="w-full transition-all duration-300 hover:scale-105">
                       Login
                     </Button>
                   </Link>
