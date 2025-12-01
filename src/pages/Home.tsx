@@ -184,39 +184,39 @@ const Home = () => {
                     1
                   </div>
                 </div>
-                {/* Particle Arrow connecting to next icon */}
+                {/* Arrow from center to center */}
                 <svg 
-                  className="hidden md:block absolute top-[35px] left-[calc(50%+40px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
-                  viewBox="0 0 240 100"
+                  className="hidden md:block absolute top-[50%] -translate-y-1/2 left-[50%] w-[calc(100%+24px)] h-[120px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 300 120"
                   preserveAspectRatio="none"
                   style={{ overflow: 'visible' }}
                 >
                   <defs>
                     <linearGradient id="arrow1" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0 }} />
-                      <stop offset="30%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
-                      <stop offset="70%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0 }} />
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.2 }} />
+                      <stop offset="20%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
+                      <stop offset="80%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0.2 }} />
                     </linearGradient>
                   </defs>
                   
-                  {/* Scattered particles at the start */}
-                  {[...Array(20)].map((_, i) => (
+                  {/* Particles originating from icon center */}
+                  {[...Array(25)].map((_, i) => (
                     <circle
-                      key={`particle-${i}`}
-                      cx={10 + i * 5}
-                      cy={50 + (Math.sin(i) * 15)}
-                      r={2 + Math.random() * 2}
+                      key={`p1-${i}`}
+                      cx={20 + i * 8}
+                      cy={60 + (Math.sin(i * 0.5) * 20)}
+                      r={2.5}
                       fill="hsl(var(--primary))"
-                      opacity={0.3 + Math.random() * 0.5}
+                      opacity={0.4 + Math.random() * 0.4}
                       className="animate-[slide-in-right_2s_ease-out_infinite]"
-                      style={{ animationDelay: `${i * 0.05}s` }}
+                      style={{ animationDelay: `${i * 0.04}s` }}
                     />
                   ))}
                   
-                  {/* Main arrow body */}
+                  {/* Main arrow */}
                   <path
-                    d="M 100 50 L 220 50 L 220 40 L 240 50 L 220 60 L 220 50 Z"
+                    d="M 80 60 L 270 60 L 270 50 L 295 60 L 270 70 L 270 60 Z"
                     fill="url(#arrow1)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
@@ -241,37 +241,37 @@ const Home = () => {
                     2
                   </div>
                 </div>
-                {/* Particle Arrow connecting to next icon */}
+                {/* Arrow from center to center */}
                 <svg 
-                  className="hidden md:block absolute top-[35px] left-[calc(50%+40px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
-                  viewBox="0 0 240 100"
+                  className="hidden md:block absolute top-[50%] -translate-y-1/2 left-[50%] w-[calc(100%+24px)] h-[120px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 300 120"
                   preserveAspectRatio="none"
                   style={{ overflow: 'visible' }}
                 >
                   <defs>
                     <linearGradient id="arrow2" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0 }} />
-                      <stop offset="30%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
-                      <stop offset="70%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0 }} />
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.2 }} />
+                      <stop offset="20%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
+                      <stop offset="80%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0.2 }} />
                     </linearGradient>
                   </defs>
                   
-                  {[...Array(20)].map((_, i) => (
+                  {[...Array(25)].map((_, i) => (
                     <circle
-                      key={`particle-${i}`}
-                      cx={10 + i * 5}
-                      cy={50 + (Math.sin(i) * 15)}
-                      r={2 + Math.random() * 2}
+                      key={`p2-${i}`}
+                      cx={20 + i * 8}
+                      cy={60 + (Math.sin(i * 0.5) * 20)}
+                      r={2.5}
                       fill="hsl(var(--primary))"
-                      opacity={0.3 + Math.random() * 0.5}
+                      opacity={0.4 + Math.random() * 0.4}
                       className="animate-[slide-in-right_2s_ease-out_infinite]"
-                      style={{ animationDelay: `${i * 0.05}s` }}
+                      style={{ animationDelay: `${i * 0.04}s` }}
                     />
                   ))}
                   
                   <path
-                    d="M 100 50 L 220 50 L 220 40 L 240 50 L 220 60 L 220 50 Z"
+                    d="M 80 60 L 270 60 L 270 50 L 295 60 L 270 70 L 270 60 Z"
                     fill="url(#arrow2)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
@@ -296,37 +296,37 @@ const Home = () => {
                     3
                   </div>
                 </div>
-                {/* Particle Arrow connecting to next icon */}
+                {/* Arrow from center to center */}
                 <svg 
-                  className="hidden md:block absolute top-[35px] left-[calc(50%+40px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
-                  viewBox="0 0 240 100"
+                  className="hidden md:block absolute top-[50%] -translate-y-1/2 left-[50%] w-[calc(100%+24px)] h-[120px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 300 120"
                   preserveAspectRatio="none"
                   style={{ overflow: 'visible' }}
                 >
                   <defs>
                     <linearGradient id="arrow3" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0 }} />
-                      <stop offset="30%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
-                      <stop offset="70%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0 }} />
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.2 }} />
+                      <stop offset="20%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
+                      <stop offset="80%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0.2 }} />
                     </linearGradient>
                   </defs>
                   
-                  {[...Array(20)].map((_, i) => (
+                  {[...Array(25)].map((_, i) => (
                     <circle
-                      key={`particle-${i}`}
-                      cx={10 + i * 5}
-                      cy={50 + (Math.sin(i) * 15)}
-                      r={2 + Math.random() * 2}
+                      key={`p3-${i}`}
+                      cx={20 + i * 8}
+                      cy={60 + (Math.sin(i * 0.5) * 20)}
+                      r={2.5}
                       fill="hsl(var(--primary))"
-                      opacity={0.3 + Math.random() * 0.5}
+                      opacity={0.4 + Math.random() * 0.4}
                       className="animate-[slide-in-right_2s_ease-out_infinite]"
-                      style={{ animationDelay: `${i * 0.05}s` }}
+                      style={{ animationDelay: `${i * 0.04}s` }}
                     />
                   ))}
                   
                   <path
-                    d="M 100 50 L 220 50 L 220 40 L 240 50 L 220 60 L 220 50 Z"
+                    d="M 80 60 L 270 60 L 270 50 L 295 60 L 270 70 L 270 60 Z"
                     fill="url(#arrow3)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
@@ -351,37 +351,37 @@ const Home = () => {
                     4
                   </div>
                 </div>
-                {/* Particle Arrow connecting to next icon */}
+                {/* Arrow from center to center */}
                 <svg 
-                  className="hidden md:block absolute top-[35px] left-[calc(50%+40px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
-                  viewBox="0 0 240 100"
+                  className="hidden md:block absolute top-[50%] -translate-y-1/2 left-[50%] w-[calc(100%+24px)] h-[120px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 300 120"
                   preserveAspectRatio="none"
                   style={{ overflow: 'visible' }}
                 >
                   <defs>
                     <linearGradient id="arrow4" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0 }} />
-                      <stop offset="30%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
-                      <stop offset="70%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0 }} />
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.2 }} />
+                      <stop offset="20%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
+                      <stop offset="80%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0.2 }} />
                     </linearGradient>
                   </defs>
                   
-                  {[...Array(20)].map((_, i) => (
+                  {[...Array(25)].map((_, i) => (
                     <circle
-                      key={`particle-${i}`}
-                      cx={10 + i * 5}
-                      cy={50 + (Math.sin(i) * 15)}
-                      r={2 + Math.random() * 2}
+                      key={`p4-${i}`}
+                      cx={20 + i * 8}
+                      cy={60 + (Math.sin(i * 0.5) * 20)}
+                      r={2.5}
                       fill="hsl(var(--primary))"
-                      opacity={0.3 + Math.random() * 0.5}
+                      opacity={0.4 + Math.random() * 0.4}
                       className="animate-[slide-in-right_2s_ease-out_infinite]"
-                      style={{ animationDelay: `${i * 0.05}s` }}
+                      style={{ animationDelay: `${i * 0.04}s` }}
                     />
                   ))}
                   
                   <path
-                    d="M 100 50 L 220 50 L 220 40 L 240 50 L 220 60 L 220 50 Z"
+                    d="M 80 60 L 270 60 L 270 50 L 295 60 L 270 70 L 270 60 Z"
                     fill="url(#arrow4)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
