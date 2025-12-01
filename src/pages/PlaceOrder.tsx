@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { X } from "lucide-react";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
+import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 
 const orderSchema = z.object({
   fullName: z.string().trim().min(2, "Name required"),
@@ -26,6 +27,7 @@ const PlaceOrder = () => {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryLocation, setDeliveryLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -98,12 +100,14 @@ const PlaceOrder = () => {
       // Calculate bundle pricing based on item count
       const { bundle, price: bundlePrice } = calculateBundlePrice(orderItems.length);
       
-      // Create order with bundle pricing
+      // Create order with bundle pricing and delivery location
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: userId,
           delivery_address: deliveryAddress,
+          delivery_latitude: deliveryLocation?.lat,
+          delivery_longitude: deliveryLocation?.lng,
           status: "Pending",
           additional_charges: bundlePrice,
           charges_description: bundle 
@@ -115,12 +119,14 @@ const PlaceOrder = () => {
 
       if (orderError) throw orderError;
 
-      // Insert order items
+      // Insert order items with pickup locations
       const itemsToInsert = orderItems.map((item) => ({
         order_id: orderData.id,
         item_type: item.itemType,
         item_data: item.itemData,
         image_url: item.imageUrl || null,
+        pickup_latitude: item.pickupLat,
+        pickup_longitude: item.pickupLng,
       }));
 
       const { error: itemsError } = await supabase
@@ -205,6 +211,20 @@ const PlaceOrder = () => {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <Label>
+                      Delivery Location
+                      <span className="text-red-500 ml-1">*</span>
+                    </Label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Click on the map to mark your delivery location
+                    </p>
+                    <LocationPickerMap
+                      onLocationSelect={(lat, lng) => setDeliveryLocation({ lat, lng })}
+                      label="Delivery Location"
+                    />
+                  </div>
+
                   <div className="border-t pt-6">
                     <h3 className="text-xl font-semibold mb-4">Add Items</h3>
                     <OrderItemForm onAddItem={handleAddItem} />
@@ -286,10 +306,10 @@ const PlaceOrder = () => {
                         </p>
                       </div>
                     )}
-                    {(!fullName || !phone || !deliveryAddress) && (
+                    {(!fullName || !phone || !deliveryAddress || !deliveryLocation) && (
                       <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                         <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                          ⚠️ Please complete all required fields above
+                          ⚠️ Please complete all required fields and select delivery location
                         </p>
                       </div>
                     )}
