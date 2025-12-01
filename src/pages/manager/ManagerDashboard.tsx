@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, CheckCircle, XCircle, Eye, User, MapPin } from "lucide-react";
+import { Loader2, Package, XCircle, Eye, User, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -151,31 +151,6 @@ const ManagerDashboard = () => {
     navigate(`/manager/orders/${orderId}`);
   };
 
-  const confirmOrder = async (orderId: string) => {
-    try {
-      setUpdating(orderId);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const { error } = await supabase
-        .from("orders")
-        .update({
-          status: "Order Received",
-          confirmed_by: user?.id,
-          confirmed_at: new Date().toISOString(),
-        })
-        .eq("id", orderId);
-
-      if (error) throw error;
-
-      toast.success("Order confirmed successfully");
-      fetchOrders();
-    } catch (error) {
-      console.error("Error confirming order:", error);
-      toast.error("Failed to confirm order");
-    } finally {
-      setUpdating(null);
-    }
-  };
 
   const sendFeedback = async (orderId: string) => {
     try {
@@ -339,49 +314,30 @@ const ManagerDashboard = () => {
                         />
                       </div>
 
-                      {order.status === "Pending" && (
-                        <>
-                          <div className="space-y-2">
-                            <Label htmlFor={`feedback-${order.id}`}>Order Feedback (Optional)</Label>
-                            <Textarea
-                              id={`feedback-${order.id}`}
-                              placeholder="Add feedback for the customer..."
-                              value={feedback[order.id] || ""}
-                              onChange={(e) => setFeedback({ ...feedback, [order.id]: e.target.value })}
-                              rows={3}
-                            />
-                          </div>
-
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={() => confirmOrder(order.id)}
-                              disabled={updating === order.id}
-                              className="flex-1"
-                            >
-                              {updating === order.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              ) : (
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                              )}
-                              Confirm Order
-                            </Button>
-
-                            {feedback[order.id] && (
-                              <Button
-                                variant="outline"
-                                onClick={() => sendFeedback(order.id)}
-                                disabled={updating === order.id}
-                              >
-                                {updating === order.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                ) : (
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                )}
-                                Send Feedback
-                              </Button>
+                      {order.status === "Pending" && feedback[order.id] && (
+                        <div className="space-y-2">
+                          <Label htmlFor={`feedback-${order.id}`}>Order Feedback (Optional)</Label>
+                          <Textarea
+                            id={`feedback-${order.id}`}
+                            placeholder="Add feedback for the customer..."
+                            value={feedback[order.id] || ""}
+                            onChange={(e) => setFeedback({ ...feedback, [order.id]: e.target.value })}
+                            rows={3}
+                          />
+                          <Button
+                            variant="outline"
+                            onClick={() => sendFeedback(order.id)}
+                            disabled={updating === order.id}
+                            className="w-full"
+                          >
+                            {updating === order.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                              <XCircle className="h-4 w-4 mr-2" />
                             )}
-                          </div>
-                        </>
+                            Send Feedback
+                          </Button>
+                        </div>
                       )}
                     </div>
 
