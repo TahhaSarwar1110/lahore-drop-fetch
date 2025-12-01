@@ -166,19 +166,28 @@ const Home = () => {
         </section>
 
         {/* How It Works */}
-        <section className="py-16">
+        <section className="py-16 overflow-hidden">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-              <div className="flex flex-col items-center text-center space-y-4">
+            <h2 className="text-3xl font-bold text-center mb-12 animate-fade-in">How It Works</h2>
+            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6">
+              {/* Animated connecting lines for desktop */}
+              <div className="hidden md:block absolute top-[60px] left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-20">
+                <div className="h-full bg-gradient-to-r from-primary to-accent animate-[slide-in-right_2s_ease-out]" style={{ width: '100%' }}></div>
+              </div>
+
+              {/* Step 1 */}
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 <div 
-                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
                     e.currentTarget.classList.add('animate-bounce');
                     setTimeout(() => e.currentTarget.classList.remove('animate-bounce'), 1000);
                   }}
                 >
                   <ShoppingCart className="h-10 w-10" />
+                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                    1
+                  </div>
                 </div>
                 <h3 className="font-semibold text-lg">Place Your Order</h3>
                 <p className="text-sm text-muted-foreground">
@@ -186,15 +195,19 @@ const Home = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col items-center text-center space-y-4">
+              {/* Step 2 */}
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
                 <div 
-                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
                     e.currentTarget.classList.add('animate-pulse');
                     setTimeout(() => e.currentTarget.classList.remove('animate-pulse'), 1000);
                   }}
                 >
                   <CheckCircle className="h-10 w-10" />
+                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                    2
+                  </div>
                 </div>
                 <h3 className="font-semibold text-lg">We Verify & Confirm</h3>
                 <p className="text-sm text-muted-foreground">
@@ -202,15 +215,19 @@ const Home = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col items-center text-center space-y-4">
+              {/* Step 3 */}
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
                 <div 
-                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
                     e.currentTarget.classList.add('animate-spin');
                     setTimeout(() => e.currentTarget.classList.remove('animate-spin'), 1000);
                   }}
                 >
                   <CreditCard className="h-10 w-10" />
+                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                    3
+                  </div>
                 </div>
                 <h3 className="font-semibold text-lg">Payment</h3>
                 <p className="text-sm text-muted-foreground">
@@ -218,15 +235,19 @@ const Home = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col items-center text-center space-y-4">
+              {/* Step 4 */}
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
                 <div 
-                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
                     e.currentTarget.classList.add('animate-bounce');
                     setTimeout(() => e.currentTarget.classList.remove('animate-bounce'), 1000);
                   }}
                 >
                   <ShoppingBagIcon className="h-10 w-10" />
+                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                    4
+                  </div>
                 </div>
                 <h3 className="font-semibold text-lg">We Shop For You</h3>
                 <p className="text-sm text-muted-foreground">
@@ -234,15 +255,19 @@ const Home = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col items-center text-center space-y-4">
+              {/* Step 5 */}
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
                 <div 
-                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
                     e.currentTarget.classList.add('animate-pulse');
                     setTimeout(() => e.currentTarget.classList.remove('animate-pulse'), 1000);
                   }}
                 >
                   <TruckIcon className="h-10 w-10" />
+                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                    5
+                  </div>
                 </div>
                 <h3 className="font-semibold text-lg">Fast Delivery</h3>
                 <p className="text-sm text-muted-foreground">
