@@ -184,36 +184,41 @@ const Home = () => {
                     1
                   </div>
                 </div>
-                {/* Particle Arrow - originates from icon */}
+                {/* Particle Arrow connecting to next icon */}
                 <svg 
-                  className="hidden md:block absolute top-[50px] left-[calc(100%+0px)] w-[100%] h-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-5 pointer-events-none"
-                  viewBox="0 0 200 80"
+                  className="hidden md:block absolute top-[35px] left-[calc(50%+40px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 240 100"
+                  preserveAspectRatio="none"
                   style={{ overflow: 'visible' }}
                 >
                   <defs>
-                    <linearGradient id="arrowGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.3 }} />
-                      <stop offset="50%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.7 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                    <linearGradient id="arrow1" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0 }} />
+                      <stop offset="30%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
+                      <stop offset="70%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0 }} />
                     </linearGradient>
                   </defs>
-                  {/* Particles on left */}
-                  {[...Array(15)].map((_, i) => (
-                    <polygon
-                      key={i}
-                      points="0,0 4,2 2,4"
-                      fill="url(#arrowGradient1)"
-                      opacity={0.4 + Math.random() * 0.4}
-                      transform={`translate(${i * 3 + Math.random() * 10}, ${30 + Math.random() * 20}) rotate(${Math.random() * 360})`}
-                      className="animate-[slide-in-right_1.5s_ease-out_infinite]"
-                      style={{ animationDelay: `${i * 0.1}s` }}
+                  
+                  {/* Scattered particles at the start */}
+                  {[...Array(20)].map((_, i) => (
+                    <circle
+                      key={`particle-${i}`}
+                      cx={10 + i * 5}
+                      cy={50 + (Math.sin(i) * 15)}
+                      r={2 + Math.random() * 2}
+                      fill="hsl(var(--primary))"
+                      opacity={0.3 + Math.random() * 0.5}
+                      className="animate-[slide-in-right_2s_ease-out_infinite]"
+                      style={{ animationDelay: `${i * 0.05}s` }}
                     />
                   ))}
+                  
                   {/* Main arrow body */}
                   <path
-                    d="M 50 40 L 160 40 L 160 30 L 180 40 L 160 50 L 160 40"
-                    fill="url(#arrowGradient1)"
-                    className="animate-[slide-in-right_1s_ease-out_infinite]"
+                    d="M 100 50 L 220 50 L 220 40 L 240 50 L 220 60 L 220 50 Z"
+                    fill="url(#arrow1)"
+                    className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Place Your Order</h3>
@@ -236,34 +241,39 @@ const Home = () => {
                     2
                   </div>
                 </div>
-                {/* Particle Arrow */}
+                {/* Particle Arrow connecting to next icon */}
                 <svg 
-                  className="hidden md:block absolute top-[50px] left-[calc(100%+0px)] w-[100%] h-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-5 pointer-events-none"
-                  viewBox="0 0 200 80"
+                  className="hidden md:block absolute top-[35px] left-[calc(50%+40px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 240 100"
+                  preserveAspectRatio="none"
                   style={{ overflow: 'visible' }}
                 >
                   <defs>
-                    <linearGradient id="arrowGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.3 }} />
-                      <stop offset="50%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.7 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                    <linearGradient id="arrow2" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0 }} />
+                      <stop offset="30%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
+                      <stop offset="70%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0 }} />
                     </linearGradient>
                   </defs>
-                  {[...Array(15)].map((_, i) => (
-                    <polygon
-                      key={i}
-                      points="0,0 4,2 2,4"
-                      fill="url(#arrowGradient2)"
-                      opacity={0.4 + Math.random() * 0.4}
-                      transform={`translate(${i * 3 + Math.random() * 10}, ${30 + Math.random() * 20}) rotate(${Math.random() * 360})`}
-                      className="animate-[slide-in-right_1.5s_ease-out_infinite]"
-                      style={{ animationDelay: `${i * 0.1}s` }}
+                  
+                  {[...Array(20)].map((_, i) => (
+                    <circle
+                      key={`particle-${i}`}
+                      cx={10 + i * 5}
+                      cy={50 + (Math.sin(i) * 15)}
+                      r={2 + Math.random() * 2}
+                      fill="hsl(var(--primary))"
+                      opacity={0.3 + Math.random() * 0.5}
+                      className="animate-[slide-in-right_2s_ease-out_infinite]"
+                      style={{ animationDelay: `${i * 0.05}s` }}
                     />
                   ))}
+                  
                   <path
-                    d="M 50 40 L 160 40 L 160 30 L 180 40 L 160 50 L 160 40"
-                    fill="url(#arrowGradient2)"
-                    className="animate-[slide-in-right_1s_ease-out_infinite]"
+                    d="M 100 50 L 220 50 L 220 40 L 240 50 L 220 60 L 220 50 Z"
+                    fill="url(#arrow2)"
+                    className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Verify & Confirm</h3>
@@ -286,34 +296,39 @@ const Home = () => {
                     3
                   </div>
                 </div>
-                {/* Particle Arrow */}
+                {/* Particle Arrow connecting to next icon */}
                 <svg 
-                  className="hidden md:block absolute top-[50px] left-[calc(100%+0px)] w-[100%] h-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-5 pointer-events-none"
-                  viewBox="0 0 200 80"
+                  className="hidden md:block absolute top-[35px] left-[calc(50%+40px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 240 100"
+                  preserveAspectRatio="none"
                   style={{ overflow: 'visible' }}
                 >
                   <defs>
-                    <linearGradient id="arrowGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.3 }} />
-                      <stop offset="50%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.7 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                    <linearGradient id="arrow3" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0 }} />
+                      <stop offset="30%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
+                      <stop offset="70%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0 }} />
                     </linearGradient>
                   </defs>
-                  {[...Array(15)].map((_, i) => (
-                    <polygon
-                      key={i}
-                      points="0,0 4,2 2,4"
-                      fill="url(#arrowGradient3)"
-                      opacity={0.4 + Math.random() * 0.4}
-                      transform={`translate(${i * 3 + Math.random() * 10}, ${30 + Math.random() * 20}) rotate(${Math.random() * 360})`}
-                      className="animate-[slide-in-right_1.5s_ease-out_infinite]"
-                      style={{ animationDelay: `${i * 0.1}s` }}
+                  
+                  {[...Array(20)].map((_, i) => (
+                    <circle
+                      key={`particle-${i}`}
+                      cx={10 + i * 5}
+                      cy={50 + (Math.sin(i) * 15)}
+                      r={2 + Math.random() * 2}
+                      fill="hsl(var(--primary))"
+                      opacity={0.3 + Math.random() * 0.5}
+                      className="animate-[slide-in-right_2s_ease-out_infinite]"
+                      style={{ animationDelay: `${i * 0.05}s` }}
                     />
                   ))}
+                  
                   <path
-                    d="M 50 40 L 160 40 L 160 30 L 180 40 L 160 50 L 160 40"
-                    fill="url(#arrowGradient3)"
-                    className="animate-[slide-in-right_1s_ease-out_infinite]"
+                    d="M 100 50 L 220 50 L 220 40 L 240 50 L 220 60 L 220 50 Z"
+                    fill="url(#arrow3)"
+                    className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Payment</h3>
@@ -336,34 +351,39 @@ const Home = () => {
                     4
                   </div>
                 </div>
-                {/* Particle Arrow */}
+                {/* Particle Arrow connecting to next icon */}
                 <svg 
-                  className="hidden md:block absolute top-[50px] left-[calc(100%+0px)] w-[100%] h-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-5 pointer-events-none"
-                  viewBox="0 0 200 80"
+                  className="hidden md:block absolute top-[35px] left-[calc(50%+40px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 240 100"
+                  preserveAspectRatio="none"
                   style={{ overflow: 'visible' }}
                 >
                   <defs>
-                    <linearGradient id="arrowGradient4" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.3 }} />
-                      <stop offset="50%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.7 }} />
-                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                    <linearGradient id="arrow4" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0 }} />
+                      <stop offset="30%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.8 }} />
+                      <stop offset="70%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: 'hsl(var(--accent))', stopOpacity: 0 }} />
                     </linearGradient>
                   </defs>
-                  {[...Array(15)].map((_, i) => (
-                    <polygon
-                      key={i}
-                      points="0,0 4,2 2,4"
-                      fill="url(#arrowGradient4)"
-                      opacity={0.4 + Math.random() * 0.4}
-                      transform={`translate(${i * 3 + Math.random() * 10}, ${30 + Math.random() * 20}) rotate(${Math.random() * 360})`}
-                      className="animate-[slide-in-right_1.5s_ease-out_infinite]"
-                      style={{ animationDelay: `${i * 0.1}s` }}
+                  
+                  {[...Array(20)].map((_, i) => (
+                    <circle
+                      key={`particle-${i}`}
+                      cx={10 + i * 5}
+                      cy={50 + (Math.sin(i) * 15)}
+                      r={2 + Math.random() * 2}
+                      fill="hsl(var(--primary))"
+                      opacity={0.3 + Math.random() * 0.5}
+                      className="animate-[slide-in-right_2s_ease-out_infinite]"
+                      style={{ animationDelay: `${i * 0.05}s` }}
                     />
                   ))}
+                  
                   <path
-                    d="M 50 40 L 160 40 L 160 30 L 180 40 L 160 50 L 160 40"
-                    fill="url(#arrowGradient4)"
-                    className="animate-[slide-in-right_1s_ease-out_infinite]"
+                    d="M 100 50 L 220 50 L 220 40 L 240 50 L 220 60 L 220 50 Z"
+                    fill="url(#arrow4)"
+                    className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Shop For You</h3>
