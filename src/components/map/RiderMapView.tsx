@@ -3,14 +3,6 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { MapPin } from "lucide-react";
 
-// Fix for default marker icon
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-});
-
 interface Location {
   lat: number;
   lng: number;
@@ -25,19 +17,20 @@ interface RiderMapViewProps {
 
 export const RiderMapView = ({ locations, height = "400px" }: RiderMapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<L.Map | null>(null);
+  const mapInstance = useRef<L.Map | null>(null);
 
   useEffect(() => {
     if (!mapContainer.current || locations.length === 0) return;
 
     // Clean up existing map
-    if (map.current) {
-      map.current.remove();
+    if (mapInstance.current) {
+      mapInstance.current.remove();
+      mapInstance.current = null;
     }
 
-    // Create custom icons
+    // Create custom icons using divIcon
     const pickupIcon = L.divIcon({
-      className: 'custom-marker',
+      className: 'custom-marker-pickup',
       html: `<div style="background-color: #f59e0b; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
       </div>`,
@@ -46,7 +39,7 @@ export const RiderMapView = ({ locations, height = "400px" }: RiderMapViewProps)
     });
 
     const deliveryIcon = L.divIcon({
-      className: 'custom-marker',
+      className: 'custom-marker-delivery',
       html: `<div style="background-color: #10b981; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
       </div>`,
@@ -56,19 +49,19 @@ export const RiderMapView = ({ locations, height = "400px" }: RiderMapViewProps)
 
     // Initialize map
     const center: [number, number] = [locations[0].lat, locations[0].lng];
-    map.current = L.map(mapContainer.current).setView(center, 13);
+    const map = L.map(mapContainer.current).setView(center, 13);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map.current);
+    }).addTo(map);
 
     // Add markers
-    const bounds: L.LatLngBoundsExpression = [];
+    const bounds: [number, number][] = [];
     locations.forEach((location) => {
       const marker = L.marker(
         [location.lat, location.lng],
         { icon: location.type === "pickup" ? pickupIcon : deliveryIcon }
-      ).addTo(map.current!);
+      ).addTo(map);
       
       marker.bindPopup(`
         <div style="font-family: system-ui, sans-serif;">
@@ -82,12 +75,16 @@ export const RiderMapView = ({ locations, height = "400px" }: RiderMapViewProps)
 
     // Fit map to show all markers
     if (bounds.length > 1) {
-      map.current.fitBounds(bounds, { padding: [50, 50] });
+      map.fitBounds(bounds, { padding: [50, 50] });
     }
 
+    mapInstance.current = map;
+
     return () => {
-      map.current?.remove();
-      map.current = null;
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
     };
   }, [locations]);
 
