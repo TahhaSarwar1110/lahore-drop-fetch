@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -21,10 +22,11 @@ interface OrderItem {
 
 interface OrderItemApprovalProps {
   items: OrderItem[];
+  orderId: string;
   onUpdate: () => void;
 }
 
-export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) => {
+export const OrderItemApproval = ({ items, orderId, onUpdate }: OrderItemApprovalProps) => {
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
   const [statusMap, setStatusMap] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -64,6 +66,9 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Track which items were modified
+      const modifiedItemsList: OrderItem[] = [];
+
       // Save all items with changed status or feedback
       const updates = items.map(async (item) => {
         const newStatus = statusMap[item.id];
@@ -90,10 +95,74 @@ export const OrderItemApproval = ({ items, onUpdate }: OrderItemApprovalProps) =
             .eq("id", item.id);
 
           if (error) throw error;
+          
+          modifiedItemsList.push({
+            ...item,
+            approval_status: newStatus,
+            manager_feedback: newFeedback,
+          });
         }
       });
 
       await Promise.all(updates);
+
+      // Send notifications for each modified item
+      for (const item of modifiedItemsList) {
+        const { data: orderData } = await supabase
+          .from("order_items")
+          .select("order_id")
+          .eq("id", item.id)
+          .single();
+
+        if (!orderData) continue;
+
+        const { data: order } = await supabase
+          .from("orders")
+          .select("user_id")
+          .eq("id", orderData.order_id)
+          .single();
+
+        if (!order) continue;
+
+        const itemData = typeof item.item_data === 'string' 
+          ? JSON.parse(item.item_data) 
+          : item.item_data;
+
+        const notificationTitle = item.approval_status === 'approved' 
+          ? "Item Approved" 
+          : "Item Rejected";
+        
+        const notificationMessage = item.approval_status === 'approved'
+          ? `Your item "${itemData.description || itemData["Item Description"] || item.item_type}" has been approved.`
+          : `Your item "${itemData.description || itemData["Item Description"] || item.item_type}" has been rejected. ${item.manager_feedback ? `Reason: ${item.manager_feedback}` : 'Please contact support for more details.'}`;
+
+        await createNotification({
+          userId: order.user_id,
+          title: notificationTitle,
+          message: notificationMessage,
+          type: item.approval_status === 'approved' ? 'item_approved' : 'item_rejected',
+          orderId: orderData.order_id,
+        });
+
+        // Send email notification
+        const { data: customerProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", order.user_id)
+          .single();
+
+        const { data: { user: customerUser } } = await supabase.auth.admin.getUserById(order.user_id);
+        
+        if (customerUser?.email && customerProfile) {
+          await sendNotificationEmail(
+            customerUser.email,
+            customerProfile.full_name,
+            notificationTitle,
+            notificationMessage,
+            `${window.location.origin}/order-details?orderId=${orderData.order_id}`
+          );
+        }
+      }
 
       toast.success("All changes saved successfully");
       onUpdate();

@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import logo from "@/assets/desi-drop-logo.jpeg";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { NotificationBell } from "./NotificationBell";
 
 export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const navigate = useNavigate();
@@ -107,6 +108,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                   </Link>
                 </>
               )}
+              <NotificationBell />
               <Button variant="ghost" size="sm" onClick={handleLogout} className="transition-all duration-300 hover:scale-105">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
