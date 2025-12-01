@@ -63,27 +63,27 @@ const Home = () => {
         <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20">
           <div className="container mx-auto px-4">
             <div className="flex flex-col items-center text-center space-y-8">
-              <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+              <h1 className="text-5xl md:text-6xl font-bold tracking-tight animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 Welcome to{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Desi Drop
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl">
+              <p className="text-xl text-muted-foreground max-w-2xl animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
                 Order anything from Lahore - clothes, food, groceries, gifts, and more.
                 Fast delivery, trusted service.
               </p>
-              <div className="flex gap-4">
+              <div className="flex gap-4 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
                 {!isRider && (
                   <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-                    <Button size="lg" className="text-lg px-8">
+                    <Button size="lg" className="text-lg px-8 transition-all duration-300 hover:scale-105 hover:shadow-lg">
                       {isAuthenticated ? "Place Order Now" : "Get Started"}
                     </Button>
                   </Link>
                 )}
                 {!isAuthenticated && (
                   <Link to="/login">
-                    <Button size="lg" variant="outline" className="text-lg px-8">
+                    <Button size="lg" variant="outline" className="text-lg px-8 transition-all duration-300 hover:scale-105 hover:shadow-lg">
                       Login
                     </Button>
                   </Link>
