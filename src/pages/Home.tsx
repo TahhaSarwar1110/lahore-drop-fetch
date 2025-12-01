@@ -175,16 +175,14 @@ const Home = () => {
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
-                    e.currentTarget.classList.add('animate-bounce');
-                    setTimeout(() => e.currentTarget.classList.remove('animate-bounce'), 1000);
+                    const target = e.currentTarget;
+                    target.classList.add('animate-bounce');
+                    setTimeout(() => target.classList.remove('animate-bounce'), 1000);
                   }}
                 >
                   <ShoppingCart className="h-10 w-10" />
-                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
-                    1
-                  </div>
                 </div>
-                {/* Arrow 1 - appears first in cascade */}
+                {/* Arrow 1 */}
                 <svg 
                   className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover/cascade:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
                   style={{ transitionDelay: '0s' }}
@@ -202,7 +200,7 @@ const Home = () => {
                   
                   {[...Array(25)].map((_, i) => (
                     <circle
-                      key={`p1-${i}`}
+                      key={i}
                       cx={10 + i * 8}
                       cy={50 + (Math.sin(i * 0.5) * 15)}
                       r={2.5}
@@ -230,16 +228,14 @@ const Home = () => {
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
-                    e.currentTarget.classList.add('animate-pulse');
-                    setTimeout(() => e.currentTarget.classList.remove('animate-pulse'), 1000);
+                    const target = e.currentTarget;
+                    target.classList.add('animate-pulse');
+                    setTimeout(() => target.classList.remove('animate-pulse'), 1000);
                   }}
                 >
                   <CheckCircle className="h-10 w-10" />
-                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
-                    2
-                  </div>
                 </div>
-                {/* Arrow 2 - appears second in cascade */}
+                {/* Arrow 2 */}
                 <svg 
                   className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover/cascade:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
                   style={{ transitionDelay: '0.3s' }}
@@ -257,7 +253,7 @@ const Home = () => {
                   
                   {[...Array(25)].map((_, i) => (
                     <circle
-                      key={`p2-${i}`}
+                      key={i}
                       cx={10 + i * 8}
                       cy={50 + (Math.sin(i * 0.5) * 15)}
                       r={2.5}
@@ -285,16 +281,14 @@ const Home = () => {
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
-                    e.currentTarget.classList.add('animate-spin');
-                    setTimeout(() => e.currentTarget.classList.remove('animate-spin'), 1000);
+                    const target = e.currentTarget;
+                    target.classList.add('animate-spin');
+                    setTimeout(() => target.classList.remove('animate-spin'), 1000);
                   }}
                 >
                   <CreditCard className="h-10 w-10" />
-                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
-                    3
-                  </div>
                 </div>
-                {/* Arrow 3 - appears third in cascade */}
+                {/* Arrow 3 */}
                 <svg 
                   className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover/cascade:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
                   style={{ transitionDelay: '0.6s' }}
@@ -312,7 +306,7 @@ const Home = () => {
                   
                   {[...Array(25)].map((_, i) => (
                     <circle
-                      key={`p3-${i}`}
+                      key={i}
                       cx={10 + i * 8}
                       cy={50 + (Math.sin(i * 0.5) * 15)}
                       r={2.5}
@@ -340,16 +334,14 @@ const Home = () => {
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
-                    e.currentTarget.classList.add('animate-bounce');
-                    setTimeout(() => e.currentTarget.classList.remove('animate-bounce'), 1000);
+                    const target = e.currentTarget;
+                    target.classList.add('animate-bounce');
+                    setTimeout(() => target.classList.remove('animate-bounce'), 1000);
                   }}
                 >
                   <ShoppingBagIcon className="h-10 w-10" />
-                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
-                    4
-                  </div>
                 </div>
-                {/* Arrow 4 - appears fourth in cascade */}
+                {/* Arrow 4 */}
                 <svg 
                   className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover/cascade:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
                   style={{ transitionDelay: '0.9s' }}
@@ -367,7 +359,7 @@ const Home = () => {
                   
                   {[...Array(25)].map((_, i) => (
                     <circle
-                      key={`p4-${i}`}
+                      key={i}
                       cx={10 + i * 8}
                       cy={50 + (Math.sin(i * 0.5) * 15)}
                       r={2.5}
@@ -395,14 +387,12 @@ const Home = () => {
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
-                    e.currentTarget.classList.add('animate-pulse');
-                    setTimeout(() => e.currentTarget.classList.remove('animate-pulse'), 1000);
+                    const target = e.currentTarget;
+                    target.classList.add('animate-pulse');
+                    setTimeout(() => target.classList.remove('animate-pulse'), 1000);
                   }}
                 >
                   <TruckIcon className="h-10 w-10" />
-                  <div className="absolute -top-2 -right-2 bg-primary-foreground text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
-                    5
-                  </div>
                 </div>
                 <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '1.2s' }}>Fast Delivery</h3>
                 <p className="text-sm text-muted-foreground">
