@@ -75,22 +75,6 @@ serve(async (req) => {
       });
     }
 
-    // Check if order is confirmed
-    const { data: orderData } = await supabaseClient
-      .from('orders')
-      .select('confirmed_at')
-      .eq('id', order_id)
-      .single();
-
-    if (!orderData || !orderData.confirmed_at) {
-      return new Response(JSON.stringify({ 
-        error: 'Order must be confirmed before assigning a rider' 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
     // Check if order has any rejected items
     const { data: rejectedItems } = await supabaseClient
       .from('order_items')
@@ -100,7 +84,7 @@ serve(async (req) => {
 
     if (rejectedItems && rejectedItems.length > 0) {
       return new Response(JSON.stringify({ 
-        error: 'Cannot assign rider to order with rejected items. Customer must remove or replace rejected items first.' 
+        error: 'Cannot assign rider: all items must be approved first. This order has rejected items.' 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
