@@ -160,12 +160,16 @@ const ManagerOrderDetails = () => {
     return orderItems.some(item => item.approval_status === 'rejected');
   };
 
+  const allItemsApproved = () => {
+    return orderItems.length > 0 && orderItems.every(item => item.approval_status === 'approved');
+  };
+
   const canAssignRider = () => {
-    return !hasRejectedItems();
+    return allItemsApproved();
   };
 
   const canConfirmOrder = () => {
-    return !hasRejectedItems() && order?.order_assignments?.rider_id;
+    return allItemsApproved() && order?.order_assignments?.rider_id;
   };
 
   const handleConfirmOrder = async () => {
@@ -306,13 +310,15 @@ const ManagerOrderDetails = () => {
                   <span className="text-2xl">⚠️</span>
                   <div>
                     <h3 className="text-destructive font-semibold mb-2">Order Workflow Status</h3>
-                    {hasRejectedItems() ? (
+                    {!allItemsApproved() ? (
                       <div className="space-y-2">
                         <p className="text-sm">
                           <strong>Step 1:</strong> Approve all items first
                         </p>
                         <p className="text-sm text-muted-foreground ml-4">
-                          ❌ This order has rejected items. All items must be approved before proceeding.
+                          {hasRejectedItems() 
+                            ? "❌ This order has rejected items. All items must be approved before proceeding."
+                            : "⏳ Some items are still pending approval. Please review and approve all items."}
                         </p>
                       </div>
                     ) : !order.order_assignments?.rider_id ? (
@@ -396,10 +402,12 @@ const ManagerOrderDetails = () => {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {hasRejectedItems() ? (
+                    {!allItemsApproved() ? (
                       <div className="text-center py-4 px-4 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground">
-                          Please approve all items before assigning a rider
+                          {hasRejectedItems() 
+                            ? "Please approve all items before assigning a rider"
+                            : "Please review and approve all items before assigning a rider"}
                         </p>
                       </div>
                     ) : (
@@ -409,7 +417,7 @@ const ManagerOrderDetails = () => {
                           orderId={order.id}
                           currentRiderId={assignedRider?.rider_id}
                           onAssigned={fetchOrderDetails}
-                          hasRejectedItems={hasRejectedItems()}
+                          hasRejectedItems={!allItemsApproved()}
                         />
                       </>
                     )}
