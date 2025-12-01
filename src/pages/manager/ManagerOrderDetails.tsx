@@ -95,7 +95,7 @@ const ManagerOrderDetails = () => {
     try {
       setLoading(true);
       
-      // Fetch order details
+      // Fetch order details with customer profile
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .select(`
@@ -103,13 +103,6 @@ const ManagerOrderDetails = () => {
           profiles!fk_user (
             full_name,
             phone
-          ),
-          order_assignments (
-            rider_id,
-            profiles!order_assignments_rider_id_fkey (
-              full_name,
-              phone
-            )
           )
         `)
         .eq("id", orderId)
@@ -117,15 +110,27 @@ const ManagerOrderDetails = () => {
 
       if (orderError) throw orderError;
 
+      // Fetch rider assignment separately with rider profile
+      const { data: assignmentData } = await supabase
+        .from("order_assignments")
+        .select(`
+          rider_id,
+          profiles!order_assignments_rider_id_fkey (
+            full_name,
+            phone
+          )
+        `)
+        .eq("order_id", orderId)
+        .maybeSingle();
+
       // Transform the data
       const transformedOrder = {
         ...orderData,
         profiles: Array.isArray(orderData.profiles) ? orderData.profiles[0] : orderData.profiles,
-        order_assignments: Array.isArray(orderData.order_assignments) && orderData.order_assignments.length > 0
-          ? orderData.order_assignments[0]
-          : null
+        order_assignments: assignmentData
       };
 
+      console.log("Transformed order with assignment:", transformedOrder);
       setOrder(transformedOrder);
 
       // Fetch order items
