@@ -75,6 +75,22 @@ serve(async (req) => {
       });
     }
 
+    // Check if order has any rejected items
+    const { data: rejectedItems } = await supabaseClient
+      .from('order_items')
+      .select('id')
+      .eq('order_id', order_id)
+      .eq('approval_status', 'rejected');
+
+    if (rejectedItems && rejectedItems.length > 0) {
+      return new Response(JSON.stringify({ 
+        error: 'Cannot assign rider to order with rejected items. Customer must remove or replace rejected items first.' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Create assignment (will update if already exists due to UNIQUE constraint)
     const { error: assignError } = await supabaseClient
       .from('order_assignments')

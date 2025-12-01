@@ -96,12 +96,14 @@ const OrderHistory = () => {
   };
 
   const calculateTotalPrice = (items: Order["order_items"]) => {
-    return items.reduce((total, item) => {
-      const priceField = Object.entries(item.item_data).find(
-        ([key]) => key.toLowerCase().includes("price")
-      );
-      return total + (priceField ? parseFloat(priceField[1]) || 0 : 0);
-    }, 0);
+    return items
+      .filter(item => item.approval_status === 'approved')
+      .reduce((total, item) => {
+        const priceField = Object.entries(item.item_data).find(
+          ([key]) => key.toLowerCase().includes("price")
+        );
+        return total + (priceField ? parseFloat(priceField[1]) || 0 : 0);
+      }, 0);
   };
 
   return (

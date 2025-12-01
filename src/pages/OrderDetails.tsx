@@ -159,6 +159,22 @@ const OrderDetails = () => {
     return order.order_items.filter(item => !itemsToRemove.includes(item.id));
   };
 
+  const hasRejectedItems = () => {
+    return order?.order_items?.some(
+      (item) => item.approval_status === 'rejected' && !itemsToRemove.includes(item.id)
+    ) || false;
+  };
+
+  const calculateTotal = () => {
+    const approvedItems = getFilteredItems().filter(
+      (item) => item.approval_status === 'approved'
+    );
+    return approvedItems.reduce((sum, item) => {
+      const itemData = item.item_data as any;
+      return sum + (Number(itemData?.expectedPrice) || 0);
+    }, 0);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -200,6 +216,30 @@ const OrderDetails = () => {
             </Button>
           </div>
 
+          {hasRejectedItems() && (
+            <Card className="mb-6 border-destructive bg-destructive/5">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <h3 className="text-destructive font-semibold mb-2">Order Update Required</h3>
+                    <p className="text-sm mb-2">
+                      Your order has some rejected items that need attention. Please:
+                    </p>
+                    <ul className="list-disc list-inside text-sm space-y-1 ml-2 mb-3">
+                      <li>Remove the rejected items from your order, or</li>
+                      <li>Replace them with new items, or</li>
+                      <li>Contact our customer service for assistance</li>
+                    </ul>
+                    <p className="text-sm font-medium text-destructive">
+                      Note: Rejected items are not included in the total bill calculation.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="mb-6">
             <div className="flex items-center justify-between">
               <div>
@@ -212,9 +252,16 @@ const OrderDetails = () => {
                 {order.status}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              Delivery Address: {order.delivery_address}
-            </p>
+            <div className="mt-2 space-y-1">
+              <p className="text-sm text-muted-foreground">
+                Delivery Address: {order.delivery_address}
+              </p>
+              {calculateTotal() > 0 && (
+                <p className="text-sm font-medium">
+                  Total (Approved Items): <span className="text-primary text-lg">PKR {calculateTotal().toLocaleString()}</span>
+                </p>
+              )}
+            </div>
           </div>
 
           {hasChanges && (
