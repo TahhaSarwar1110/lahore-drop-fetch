@@ -170,11 +170,6 @@ const Home = () => {
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12 animate-fade-in">How It Works</h2>
             <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
-              {/* Animated connecting lines for desktop */}
-              <div className="hidden md:block absolute top-[60px] left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-20">
-                <div className="h-full bg-gradient-to-r from-primary to-accent animate-[slide-in-right_2s_ease-out]" style={{ width: '100%' }}></div>
-              </div>
-
               {/* Step 1 */}
               <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 <div 
@@ -189,11 +184,11 @@ const Home = () => {
                     1
                   </div>
                 </div>
-                {/* Arrow flowing to next step */}
-                <div className="hidden md:flex absolute top-[50px] -right-[50%] translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
+                {/* Arrow flowing to next step - centered between columns */}
+                <div className="hidden md:flex absolute top-[60px] left-[calc(100%+10px)] w-[calc(100%-20px)] justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
                 </div>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Place Your Order</h3>
                 <p className="text-sm text-muted-foreground">
@@ -215,11 +210,11 @@ const Home = () => {
                     2
                   </div>
                 </div>
-                {/* Arrow flowing to next step */}
-                <div className="hidden md:flex absolute top-[50px] -right-[50%] translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
+                {/* Arrow flowing to next step - centered between columns */}
+                <div className="hidden md:flex absolute top-[60px] left-[calc(100%+10px)] w-[calc(100%-20px)] justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
                 </div>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Verify & Confirm</h3>
                 <p className="text-sm text-muted-foreground">
@@ -241,11 +236,11 @@ const Home = () => {
                     3
                   </div>
                 </div>
-                {/* Arrow flowing to next step */}
-                <div className="hidden md:flex absolute top-[50px] -right-[50%] translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
+                {/* Arrow flowing to next step - centered between columns */}
+                <div className="hidden md:flex absolute top-[60px] left-[calc(100%+10px)] w-[calc(100%-20px)] justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
                 </div>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Payment</h3>
                 <p className="text-sm text-muted-foreground">
@@ -267,11 +262,11 @@ const Home = () => {
                     4
                   </div>
                 </div>
-                {/* Arrow flowing to next step */}
-                <div className="hidden md:flex absolute top-[50px] -right-[50%] translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
-                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
+                {/* Arrow flowing to next step - centered between columns */}
+                <div className="hidden md:flex absolute top-[60px] left-[calc(100%+10px)] w-[calc(100%-20px)] justify-center items-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
                 </div>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Shop For You</h3>
                 <p className="text-sm text-muted-foreground">
