@@ -356,37 +356,35 @@ const ManagerOrderDetails = () => {
             </Card>
 
             {/* Assigned Rider Card */}
-            {order.confirmed_at && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
-                    Assigned Rider
-                    {assignedRider && (
-                      <Badge variant="outline" className="ml-2">Assigned</Badge>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {assignedRider ? (
-                    <div>
-                      <p className="font-medium">{assignedRider.profiles.full_name}</p>
-                      <p className="text-sm text-muted-foreground">{assignedRider.profiles.phone}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">No rider assigned yet</p>
-                      <AssignOrderDialog
-                        orderId={order.id}
-                        currentRiderId={assignedRider?.rider_id}
-                        onAssigned={fetchOrderDetails}
-                        isOrderConfirmed={!!order.confirmed_at}
-                      />
-                    </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <User className="h-5 w-5 text-primary" />
+                  Assigned Rider
+                  {assignedRider && (
+                    <Badge variant="outline" className="ml-2">Assigned</Badge>
                   )}
-                </CardContent>
-              </Card>
-            )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {assignedRider ? (
+                  <div>
+                    <p className="font-medium">{assignedRider.profiles.full_name}</p>
+                    <p className="text-sm text-muted-foreground">{assignedRider.profiles.phone}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">No rider assigned yet</p>
+                    <AssignOrderDialog
+                      orderId={order.id}
+                      currentRiderId={assignedRider?.rider_id}
+                      onAssigned={fetchOrderDetails}
+                      isOrderConfirmed={!!order.confirmed_at}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Additional Charges Card */}
             <AdditionalCharges
