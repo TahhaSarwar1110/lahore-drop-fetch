@@ -61,7 +61,28 @@ const Home = () => {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20">
-          <div className="container mx-auto px-4">
+          {/* Parallax Background Elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Large gradient orb - slow movement */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary/30 to-accent/30 rounded-full blur-3xl animate-[pulse_8s_ease-in-out_infinite] opacity-50" 
+                 style={{ transform: 'translate(30%, -30%)' }} />
+            
+            {/* Medium gradient orb - medium speed */}
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-accent/40 to-primary/40 rounded-full blur-3xl animate-[pulse_6s_ease-in-out_infinite] opacity-40" 
+                 style={{ transform: 'translate(-30%, 30%)', animationDelay: '2s' }} />
+            
+            {/* Small gradient orb - faster movement */}
+            <div className="absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-2xl animate-[pulse_4s_ease-in-out_infinite] opacity-60" 
+                 style={{ transform: 'translate(-50%, -50%)', animationDelay: '1s' }} />
+            
+            {/* Floating shapes */}
+            <div className="absolute top-20 left-10 w-4 h-4 bg-primary/30 rounded-full animate-[float_3s_ease-in-out_infinite]" />
+            <div className="absolute top-40 right-20 w-3 h-3 bg-accent/30 rounded-full animate-[float_4s_ease-in-out_infinite]" style={{ animationDelay: '1s' }} />
+            <div className="absolute bottom-32 left-1/4 w-2 h-2 bg-primary/40 rounded-full animate-[float_5s_ease-in-out_infinite]" style={{ animationDelay: '2s' }} />
+            <div className="absolute bottom-20 right-1/3 w-3 h-3 bg-accent/40 rounded-full animate-[float_3.5s_ease-in-out_infinite]" style={{ animationDelay: '0.5s' }} />
+          </div>
+          
+          <div className="container mx-auto px-4 relative z-10">
             <div className="flex flex-col items-center text-center space-y-8">
               <h1 className="text-5xl md:text-6xl font-bold tracking-tight animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 Welcome to{" "}
