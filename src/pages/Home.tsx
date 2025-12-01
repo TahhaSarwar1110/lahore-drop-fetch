@@ -1,13 +1,17 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Package, ShoppingBag, Gift, Clock } from "lucide-react";
+import { ShoppingCart, CheckCircle, CreditCard, ShoppingBag as ShoppingBagIcon, TruckIcon } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { PricingBundles } from "@/components/PricingBundles";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import clothingImg from "@/assets/clothing-delivery.jpg";
+import foodImg from "@/assets/food-delivery.jpg";
+import groceriesImg from "@/assets/groceries-delivery.jpg";
+import giftsImg from "@/assets/gifts-delivery.jpg";
 
 const Home = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -94,11 +98,15 @@ const Home = () => {
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">What We Deliver</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="border-2 hover:border-primary/50 transition-colors">
+              <Card className="border-2 hover:border-primary/50 transition-all duration-300 overflow-hidden group cursor-pointer hover:scale-105">
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={clothingImg} 
+                    alt="Clothing delivery" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
                 <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                  <div className="rounded-full bg-primary/10 p-4">
-                    <ShoppingBag className="h-8 w-8 text-primary" />
-                  </div>
                   <h3 className="font-semibold text-lg">Clothing</h3>
                   <p className="text-sm text-muted-foreground">
                     Designer wear, traditional outfits, and more from your favorite brands
@@ -106,11 +114,15 @@ const Home = () => {
                 </CardContent>
               </Card>
 
-              <Card className="border-2 hover:border-primary/50 transition-colors">
+              <Card className="border-2 hover:border-primary/50 transition-all duration-300 overflow-hidden group cursor-pointer hover:scale-105">
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={foodImg} 
+                    alt="Food delivery" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
                 <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                  <div className="rounded-full bg-primary/10 p-4">
-                    <Package className="h-8 w-8 text-primary" />
-                  </div>
                   <h3 className="font-semibold text-lg">Food</h3>
                   <p className="text-sm text-muted-foreground">
                     Delicious meals from top restaurants and local eateries
@@ -118,11 +130,15 @@ const Home = () => {
                 </CardContent>
               </Card>
 
-              <Card className="border-2 hover:border-primary/50 transition-colors">
+              <Card className="border-2 hover:border-primary/50 transition-all duration-300 overflow-hidden group cursor-pointer hover:scale-105">
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={groceriesImg} 
+                    alt="Groceries delivery" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
                 <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                  <div className="rounded-full bg-primary/10 p-4">
-                    <ShoppingBag className="h-8 w-8 text-primary" />
-                  </div>
                   <h3 className="font-semibold text-lg">Groceries</h3>
                   <p className="text-sm text-muted-foreground">
                     Fresh produce, daily essentials, and household items
@@ -130,11 +146,15 @@ const Home = () => {
                 </CardContent>
               </Card>
 
-              <Card className="border-2 hover:border-primary/50 transition-colors">
+              <Card className="border-2 hover:border-primary/50 transition-all duration-300 overflow-hidden group cursor-pointer hover:scale-105">
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={giftsImg} 
+                    alt="Gifts delivery" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
                 <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                  <div className="rounded-full bg-primary/10 p-4">
-                    <Gift className="h-8 w-8 text-primary" />
-                  </div>
                   <h3 className="font-semibold text-lg">Gifts & More</h3>
                   <p className="text-sm text-muted-foreground">
                     Special gifts, custom items, and anything else you need
@@ -149,34 +169,84 @@ const Home = () => {
         <section className="py-16">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground">
-                  <span className="text-3xl font-bold">1</span>
+                <div 
+                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  onClick={(e) => {
+                    e.currentTarget.classList.add('animate-bounce');
+                    setTimeout(() => e.currentTarget.classList.remove('animate-bounce'), 1000);
+                  }}
+                >
+                  <ShoppingCart className="h-10 w-10" />
                 </div>
-                <h3 className="font-semibold text-xl">Place Your Order</h3>
-                <p className="text-muted-foreground">
-                  Tell us what you need - clothes, food, groceries, or custom items
+                <h3 className="font-semibold text-lg">Place Your Order</h3>
+                <p className="text-sm text-muted-foreground">
+                  Tell us what you need
                 </p>
               </div>
 
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground">
-                  <span className="text-3xl font-bold">2</span>
+                <div 
+                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  onClick={(e) => {
+                    e.currentTarget.classList.add('animate-pulse');
+                    setTimeout(() => e.currentTarget.classList.remove('animate-pulse'), 1000);
+                  }}
+                >
+                  <CheckCircle className="h-10 w-10" />
                 </div>
-                <h3 className="font-semibold text-xl">We Shop For You</h3>
-                <p className="text-muted-foreground">
-                  Our trusted shoppers pick up your items with care
+                <h3 className="font-semibold text-lg">We Verify & Confirm</h3>
+                <p className="text-sm text-muted-foreground">
+                  We review and confirm details
                 </p>
               </div>
 
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground">
-                  <span className="text-3xl font-bold">3</span>
+                <div 
+                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  onClick={(e) => {
+                    e.currentTarget.classList.add('animate-spin');
+                    setTimeout(() => e.currentTarget.classList.remove('animate-spin'), 1000);
+                  }}
+                >
+                  <CreditCard className="h-10 w-10" />
                 </div>
-                <h3 className="font-semibold text-xl">Fast Delivery</h3>
-                <p className="text-muted-foreground">
-                  Track your order in real-time until it reaches your doorstep
+                <h3 className="font-semibold text-lg">Payment</h3>
+                <p className="text-sm text-muted-foreground">
+                  Secure payment processing
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div 
+                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  onClick={(e) => {
+                    e.currentTarget.classList.add('animate-bounce');
+                    setTimeout(() => e.currentTarget.classList.remove('animate-bounce'), 1000);
+                  }}
+                >
+                  <ShoppingBagIcon className="h-10 w-10" />
+                </div>
+                <h3 className="font-semibold text-lg">We Shop For You</h3>
+                <p className="text-sm text-muted-foreground">
+                  Our team gets your items
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div 
+                  className="rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:rotate-12 active:scale-95"
+                  onClick={(e) => {
+                    e.currentTarget.classList.add('animate-pulse');
+                    setTimeout(() => e.currentTarget.classList.remove('animate-pulse'), 1000);
+                  }}
+                >
+                  <TruckIcon className="h-10 w-10" />
+                </div>
+                <h3 className="font-semibold text-lg">Fast Delivery</h3>
+                <p className="text-sm text-muted-foreground">
+                  Quick delivery to your door
                 </p>
               </div>
             </div>
@@ -190,14 +260,14 @@ const Home = () => {
         <section className="py-16 bg-gradient-to-br from-primary to-accent text-primary-foreground">
           <div className="container mx-auto px-4 text-center">
             <div className="flex flex-col items-center space-y-6">
-              <Clock className="h-16 w-16" />
+              <TruckIcon className="h-16 w-16 animate-pulse" />
               <h2 className="text-3xl font-bold">Ready to Order?</h2>
               <p className="text-lg max-w-2xl opacity-90">
                 Join thousands of satisfied customers who trust Desi Drop for their delivery needs
               </p>
               {!isRider && (
                 <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-                  <Button size="lg" variant="secondary" className="text-lg px-8">
+                  <Button size="lg" variant="secondary" className="text-lg px-8 hover:scale-105 transition-transform">
                     {isAuthenticated ? "Place Order Now" : "Sign Up Today"}
                   </Button>
                 </Link>
