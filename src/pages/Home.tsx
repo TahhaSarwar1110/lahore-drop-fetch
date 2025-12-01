@@ -169,9 +169,9 @@ const Home = () => {
         <section className="py-16 overflow-hidden">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12 animate-fade-in">How It Works</h2>
-            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
+            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6 items-start group/cascade">
               {/* Step 1 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -184,9 +184,10 @@ const Home = () => {
                     1
                   </div>
                 </div>
-                {/* Arrow from right side center to next icon's left side center */}
+                {/* Arrow 1 - appears first in cascade */}
                 <svg 
-                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover/cascade:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
+                  style={{ transitionDelay: '0s' }}
                   viewBox="0 0 300 100"
                   preserveAspectRatio="none"
                 >
@@ -199,7 +200,6 @@ const Home = () => {
                     </linearGradient>
                   </defs>
                   
-                  {/* Particles */}
                   {[...Array(25)].map((_, i) => (
                     <circle
                       key={`p1-${i}`}
@@ -213,21 +213,20 @@ const Home = () => {
                     />
                   ))}
                   
-                  {/* Arrow */}
                   <path
                     d="M 80 50 L 270 50 L 270 40 L 295 50 L 270 60 L 270 50 Z"
                     fill="url(#arrow1)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
-                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Place Your Order</h3>
+                <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors">Place Your Order</h3>
                 <p className="text-sm text-muted-foreground">
                   Tell us what you need
                 </p>
               </div>
 
               {/* Step 2 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -240,9 +239,10 @@ const Home = () => {
                     2
                   </div>
                 </div>
-                {/* Arrow from right side center to next icon's left side center */}
+                {/* Arrow 2 - appears second in cascade */}
                 <svg 
-                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover/cascade:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
+                  style={{ transitionDelay: '0.3s' }}
                   viewBox="0 0 300 100"
                   preserveAspectRatio="none"
                 >
@@ -274,14 +274,14 @@ const Home = () => {
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
-                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Verify & Confirm</h3>
+                <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '0.3s' }}>We Verify & Confirm</h3>
                 <p className="text-sm text-muted-foreground">
                   We review and confirm details
                 </p>
               </div>
 
               {/* Step 3 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -294,9 +294,10 @@ const Home = () => {
                     3
                   </div>
                 </div>
-                {/* Arrow from right side center to next icon's left side center */}
+                {/* Arrow 3 - appears third in cascade */}
                 <svg 
-                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover/cascade:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
+                  style={{ transitionDelay: '0.6s' }}
                   viewBox="0 0 300 100"
                   preserveAspectRatio="none"
                 >
@@ -328,14 +329,14 @@ const Home = () => {
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
-                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Payment</h3>
+                <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '0.6s' }}>Payment</h3>
                 <p className="text-sm text-muted-foreground">
                   Secure payment processing
                 </p>
               </div>
 
               {/* Step 4 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -348,9 +349,10 @@ const Home = () => {
                     4
                   </div>
                 </div>
-                {/* Arrow from right side center to next icon's left side center */}
+                {/* Arrow 4 - appears fourth in cascade */}
                 <svg 
-                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover/cascade:opacity-100 transition-opacity duration-700 z-0 pointer-events-none"
+                  style={{ transitionDelay: '0.9s' }}
                   viewBox="0 0 300 100"
                   preserveAspectRatio="none"
                 >
@@ -382,14 +384,14 @@ const Home = () => {
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
-                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Shop For You</h3>
+                <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '0.9s' }}>We Shop For You</h3>
                 <p className="text-sm text-muted-foreground">
                   Our team gets your items
                 </p>
               </div>
 
               {/* Step 5 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
+              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -402,7 +404,7 @@ const Home = () => {
                     5
                   </div>
                 </div>
-                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Fast Delivery</h3>
+                <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '1.2s' }}>Fast Delivery</h3>
                 <p className="text-sm text-muted-foreground">
                   Quick delivery to your door
                 </p>
