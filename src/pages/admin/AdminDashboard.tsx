@@ -6,11 +6,12 @@ import { Footer } from "@/components/Footer";
 import { OrdersTable } from "@/components/admin/OrdersTable";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { RolePermissionsManagement } from "@/components/admin/RolePermissionsManagement";
+import { RiderTrackingMap } from "@/components/admin/RiderTrackingMap";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Search, Package, Users } from "lucide-react";
+import { Search, Package, Users, MapPin } from "lucide-react";
 
 interface Order {
   id: string;
@@ -116,6 +117,10 @@ const AdminDashboard = () => {
               <Package className="h-4 w-4" />
               Orders
             </TabsTrigger>
+            <TabsTrigger value="tracking" className="gap-2">
+              <MapPin className="h-4 w-4" />
+              Rider Tracking
+            </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <Users className="h-4 w-4" />
               User Management
@@ -162,6 +167,10 @@ const AdminDashboard = () => {
             </div>
 
             <OrdersTable orders={filteredOrders} onOrderUpdated={fetchOrders} />
+          </TabsContent>
+
+          <TabsContent value="tracking">
+            <RiderTrackingMap />
           </TabsContent>
 
           <TabsContent value="users">

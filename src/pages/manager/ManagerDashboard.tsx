@@ -6,12 +6,13 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, CheckCircle, XCircle, Eye, User } from "lucide-react";
+import { Loader2, Package, CheckCircle, XCircle, Eye, User, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { AssignOrderDialog } from "@/components/admin/AssignOrderDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RiderTrackingMap } from "@/components/admin/RiderTrackingMap";
 
 interface Order {
   id: string;
@@ -246,6 +247,11 @@ const ManagerDashboard = () => {
                 <SelectItem value="Delivered">Delivered</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Rider Tracking Map */}
+          <div className="mb-8">
+            <RiderTrackingMap />
           </div>
 
           {orders.filter(order => statusFilter === "all" || order.status === statusFilter).length === 0 ? (

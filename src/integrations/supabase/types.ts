@@ -343,6 +343,30 @@ export type Database = {
         }
         Relationships: []
       }
+      rider_locations: {
+        Row: {
+          id: string
+          latitude: number
+          longitude: number
+          rider_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          latitude: number
+          longitude: number
+          rider_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          latitude?: number
+          longitude?: number
+          rider_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           created_at: string | null

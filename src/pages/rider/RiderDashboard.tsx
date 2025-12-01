@@ -12,6 +12,7 @@ import { AttachmentUpload } from "@/components/rider/AttachmentUpload";
 import { OrderDetailsDialog } from "@/components/rider/OrderDetailsDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RiderMapView } from "@/components/map/RiderMapView";
+import { LocationSharing } from "@/components/rider/LocationSharing";
 
 interface OrderAssignment {
   id: string;
@@ -321,6 +322,7 @@ const RiderDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header isAuthenticated={true} />
+      <LocationSharing />
       
       <main className="flex-1 py-4 md:py-8 bg-muted/30">
         <div className="container mx-auto px-4">
