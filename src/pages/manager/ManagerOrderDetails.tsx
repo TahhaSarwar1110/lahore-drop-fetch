@@ -160,9 +160,17 @@ const ManagerOrderDetails = () => {
     return orderItems.some(item => item.approval_status === 'rejected');
   };
 
+  const canConfirmOrder = () => {
+    return !hasRejectedItems() && order?.order_assignments?.rider_id;
+  };
+
   const handleConfirmOrder = async () => {
-    if (hasRejectedItems()) {
-      toast.error("Cannot confirm order with rejected items. Please ensure all items are approved.");
+    if (!canConfirmOrder()) {
+      if (hasRejectedItems()) {
+        toast.error("Cannot confirm order with rejected items. Please ensure all items are approved.");
+      } else if (!order?.order_assignments?.rider_id) {
+        toast.error("Cannot confirm order without a rider assigned. Please assign a rider first.");
+      }
       return;
     }
 
@@ -273,26 +281,37 @@ const ManagerOrderDetails = () => {
                 {!order.confirmed_at && order.status === "Pending" && (
                   <Button 
                     onClick={handleConfirmOrder}
-                    disabled={hasRejectedItems()}
-                    variant={hasRejectedItems() ? "outline" : "default"}
+                    disabled={!canConfirmOrder()}
+                    variant={!canConfirmOrder() ? "outline" : "default"}
                   >
-                    {hasRejectedItems() ? "Resolve Rejected Items First" : "Confirm Order"}
+                    {hasRejectedItems() 
+                      ? "Resolve Rejected Items First" 
+                      : !order.order_assignments?.rider_id
+                      ? "Assign Rider First"
+                      : "Confirm Order"}
                   </Button>
                 )}
               </div>
             </div>
           </div>
 
-          {hasRejectedItems() && (
+          {!canConfirmOrder() && order.status === "Pending" && (
             <Card className="mb-6 border-destructive bg-destructive/5">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">⚠️</span>
                   <div>
                     <h3 className="text-destructive font-semibold mb-2">Cannot Confirm Order</h3>
-                    <p className="text-sm">
-                      This order has rejected items. All items must be approved before you can confirm the order and assign a rider.
-                    </p>
+                    {hasRejectedItems() && (
+                      <p className="text-sm mb-2">
+                        This order has rejected items. All items must be approved first.
+                      </p>
+                    )}
+                    {!order.order_assignments?.rider_id && (
+                      <p className="text-sm">
+                        A rider must be assigned to this order before it can be confirmed.
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
