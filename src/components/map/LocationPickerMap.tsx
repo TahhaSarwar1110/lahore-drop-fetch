@@ -5,12 +5,21 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Navigation } from "lucide-react";
 
 // Fix for default marker icon
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+const iconRetinaUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png";
+const iconUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png";
+const shadowUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png";
+
+const defaultIcon = L.icon({
+  iconRetinaUrl,
+  iconUrl,
+  shadowUrl,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
+
+L.Marker.prototype.options.icon = defaultIcon;
 
 interface LocationPickerMapProps {
   onLocationSelect: (lat: number, lng: number) => void;
@@ -26,33 +35,34 @@ export const LocationPickerMap = ({
   label = "Selected Location"
 }: LocationPickerMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<L.Map | null>(null);
-  const marker = useRef<L.Marker | null>(null);
+  const mapInstance = useRef<L.Map | null>(null);
+  const markerInstance = useRef<L.Marker | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(
     initialLat && initialLng ? { lat: initialLat, lng: initialLng } : null
   );
 
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || mapInstance.current) return;
 
     // Default to Lahore coordinates
     const defaultLat = initialLat || 31.5204;
     const defaultLng = initialLng || 74.3587;
 
-    map.current = L.map(mapContainer.current).setView([defaultLat, defaultLng], 13);
+    // Initialize map
+    const map = L.map(mapContainer.current).setView([defaultLat, defaultLng], 13);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map.current);
+    }).addTo(map);
 
     // Add click handler to place marker
-    map.current.on("click", (e: L.LeafletMouseEvent) => {
+    map.on("click", (e: L.LeafletMouseEvent) => {
       const { lat, lng } = e.latlng;
       
-      if (marker.current) {
-        marker.current.setLatLng([lat, lng]);
+      if (markerInstance.current) {
+        markerInstance.current.setLatLng([lat, lng]);
       } else {
-        marker.current = L.marker([lat, lng]).addTo(map.current!);
+        markerInstance.current = L.marker([lat, lng], { icon: defaultIcon }).addTo(map);
       }
       
       setSelectedLocation({ lat, lng });
@@ -61,13 +71,17 @@ export const LocationPickerMap = ({
 
     // If initial coordinates exist, add marker
     if (initialLat && initialLng) {
-      marker.current = L.marker([initialLat, initialLng]).addTo(map.current);
+      markerInstance.current = L.marker([initialLat, initialLng], { icon: defaultIcon }).addTo(map);
     }
 
+    mapInstance.current = map;
+
     return () => {
-      map.current?.remove();
-      map.current = null;
-      marker.current = null;
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+      markerInstance.current = null;
     };
   }, []);
 
@@ -77,13 +91,13 @@ export const LocationPickerMap = ({
         (position) => {
           const { latitude, longitude } = position.coords;
           
-          if (map.current) {
-            map.current.setView([latitude, longitude], 15);
+          if (mapInstance.current) {
+            mapInstance.current.setView([latitude, longitude], 15);
             
-            if (marker.current) {
-              marker.current.setLatLng([latitude, longitude]);
+            if (markerInstance.current) {
+              markerInstance.current.setLatLng([latitude, longitude]);
             } else {
-              marker.current = L.marker([latitude, longitude]).addTo(map.current);
+              markerInstance.current = L.marker([latitude, longitude], { icon: defaultIcon }).addTo(mapInstance.current);
             }
           }
           
