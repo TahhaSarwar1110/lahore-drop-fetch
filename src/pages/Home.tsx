@@ -106,10 +106,10 @@ const Home = () => {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
-                <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
                   <h3 className="font-semibold text-lg">Clothing</h3>
                   <p className="text-sm text-muted-foreground">
-                    Designer wear, traditional outfits, and more from your favorite brands
+                    Designer wear, traditional outfits, and more
                   </p>
                 </CardContent>
               </Card>
@@ -122,10 +122,10 @@ const Home = () => {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
-                <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
                   <h3 className="font-semibold text-lg">Food</h3>
                   <p className="text-sm text-muted-foreground">
-                    Delicious meals from top restaurants and local eateries
+                    Delicious meals from top restaurants
                   </p>
                 </CardContent>
               </Card>
@@ -138,10 +138,10 @@ const Home = () => {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
-                <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
                   <h3 className="font-semibold text-lg">Groceries</h3>
                   <p className="text-sm text-muted-foreground">
-                    Fresh produce, daily essentials, and household items
+                    Fresh produce and daily essentials
                   </p>
                 </CardContent>
               </Card>
@@ -154,10 +154,10 @@ const Home = () => {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
-                <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
                   <h3 className="font-semibold text-lg">Gifts & More</h3>
                   <p className="text-sm text-muted-foreground">
-                    Special gifts, custom items, and anything else you need
+                    Special gifts and custom items
                   </p>
                 </CardContent>
               </Card>
