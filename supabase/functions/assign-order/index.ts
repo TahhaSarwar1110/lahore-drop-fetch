@@ -22,6 +22,12 @@ serve(async (req) => {
       }
     );
 
+    // Create service role client for admin operations
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // Verify admin user
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
 
@@ -92,7 +98,7 @@ serve(async (req) => {
     }
 
     // Create assignment (will update if already exists due to UNIQUE constraint)
-    const { error: assignError } = await supabaseClient
+    const { error: assignError } = await supabaseAdmin
       .from('order_assignments')
       .upsert({
         order_id,
