@@ -11,6 +11,7 @@ interface AssignOrderDialogProps {
   orderId: string;
   currentRiderId?: string;
   onAssigned: () => void;
+  isOrderConfirmed?: boolean;
 }
 
 interface Rider {
@@ -19,7 +20,7 @@ interface Rider {
   phone: string;
 }
 
-export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned }: AssignOrderDialogProps) => {
+export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, isOrderConfirmed = false }: AssignOrderDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [riders, setRiders] = useState<Rider[]>([]);
@@ -66,6 +67,11 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned }: Assig
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!isOrderConfirmed) {
+      toast.error("Order must be confirmed before assigning a rider");
+      return;
+    }
+
     if (!selectedRider) {
       toast.error("Please select a rider");
       return;
@@ -97,6 +103,16 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned }: Assig
       setLoading(false);
     }
   };
+
+  if (!isOrderConfirmed) {
+    return (
+      <div className="text-center py-4 px-4 bg-muted rounded-lg">
+        <p className="text-sm text-muted-foreground">
+          Please confirm the order before assigning a rider
+        </p>
+      </div>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

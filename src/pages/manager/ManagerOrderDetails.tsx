@@ -10,6 +10,7 @@ import { Loader2, ArrowLeft, User } from "lucide-react";
 import { toast } from "sonner";
 import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
 import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
+import { AssignOrderDialog } from "@/components/admin/AssignOrderDialog";
 
 interface OrderItem {
   id: string;
@@ -154,6 +155,39 @@ const ManagerOrderDetails = () => {
     return colors[status] || "bg-gray-500";
   };
 
+  const hasRejectedItems = () => {
+    return orderItems.some(item => item.approval_status === 'rejected');
+  };
+
+  const handleConfirmOrder = async () => {
+    if (hasRejectedItems()) {
+      toast.error("Cannot confirm order with rejected items. Please ensure all items are approved.");
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          confirmed_at: new Date().toISOString(),
+          confirmed_by: user.id,
+          status: "Order Received"
+        })
+        .eq("id", orderId);
+
+      if (error) throw error;
+
+      toast.success("Order confirmed successfully!");
+      fetchOrderDetails();
+    } catch (error) {
+      console.error("Error confirming order:", error);
+      toast.error("Failed to confirm order");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -201,11 +235,38 @@ const ManagerOrderDetails = () => {
                 <h1 className="text-3xl font-bold">Order Details</h1>
                 <p className="text-muted-foreground mt-1">Order #{order.id.slice(0, 8)}</p>
               </div>
-              <Badge className={getStatusColor(order.status)}>
-                {order.status}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge className={getStatusColor(order.status)}>
+                  {order.status}
+                </Badge>
+                {!order.confirmed_at && order.status === "Pending" && (
+                  <Button 
+                    onClick={handleConfirmOrder}
+                    disabled={hasRejectedItems()}
+                    variant={hasRejectedItems() ? "outline" : "default"}
+                  >
+                    {hasRejectedItems() ? "Resolve Rejected Items First" : "Confirm Order"}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
+
+          {hasRejectedItems() && (
+            <Card className="mb-6 border-destructive bg-destructive/5">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <h3 className="text-destructive font-semibold mb-2">Cannot Confirm Order</h3>
+                    <p className="text-sm">
+                      This order has rejected items. All items must be approved before you can confirm the order and assign a rider.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="grid gap-6">
             {/* Order Information Card */}
@@ -245,19 +306,34 @@ const ManagerOrderDetails = () => {
             </Card>
 
             {/* Assigned Rider Card */}
-            {assignedRider && (
+            {order.confirmed_at && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <User className="h-5 w-5 text-primary" />
                     Assigned Rider
+                    {assignedRider && (
+                      <Badge variant="outline" className="ml-2">Assigned</Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div>
-                    <p className="font-medium">{assignedRider.profiles.full_name}</p>
-                    <p className="text-sm text-muted-foreground">{assignedRider.profiles.phone}</p>
-                  </div>
+                  {assignedRider ? (
+                    <div>
+                      <p className="font-medium">{assignedRider.profiles.full_name}</p>
+                      <p className="text-sm text-muted-foreground">{assignedRider.profiles.phone}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">No rider assigned yet</p>
+                      <AssignOrderDialog
+                        orderId={order.id}
+                        currentRiderId={assignedRider?.rider_id}
+                        onAssigned={fetchOrderDetails}
+                        isOrderConfirmed={!!order.confirmed_at}
+                      />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
