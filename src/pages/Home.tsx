@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShoppingCart, CheckCircle, CreditCard, ShoppingBag as ShoppingBagIcon, TruckIcon } from "lucide-react";
+import { ShoppingCart, CheckCircle, CreditCard, ShoppingBag as ShoppingBagIcon, TruckIcon, ArrowRight } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
@@ -169,14 +169,14 @@ const Home = () => {
         <section className="py-16 overflow-hidden">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12 animate-fade-in">How It Works</h2>
-            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6">
+            <div className="relative grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
               {/* Animated connecting lines for desktop */}
               <div className="hidden md:block absolute top-[60px] left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-20">
                 <div className="h-full bg-gradient-to-r from-primary to-accent animate-[slide-in-right_2s_ease-out]" style={{ width: '100%' }}></div>
               </div>
 
               {/* Step 1 */}
-              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -189,14 +189,18 @@ const Home = () => {
                     1
                   </div>
                 </div>
-                <h3 className="font-semibold text-lg">Place Your Order</h3>
+                {/* Arrow to next step */}
+                <div className="hidden md:block absolute top-[50px] left-[calc(100%-20px)] opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.5s_ease-out_infinite]" />
+                </div>
+                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Place Your Order</h3>
                 <p className="text-sm text-muted-foreground">
                   Tell us what you need
                 </p>
               </div>
 
               {/* Step 2 */}
-              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -209,14 +213,18 @@ const Home = () => {
                     2
                   </div>
                 </div>
-                <h3 className="font-semibold text-lg">We Verify & Confirm</h3>
+                {/* Arrow to next step */}
+                <div className="hidden md:block absolute top-[50px] left-[calc(100%-20px)] opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.5s_ease-out_infinite]" />
+                </div>
+                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Verify & Confirm</h3>
                 <p className="text-sm text-muted-foreground">
                   We review and confirm details
                 </p>
               </div>
 
               {/* Step 3 */}
-              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -229,14 +237,18 @@ const Home = () => {
                     3
                   </div>
                 </div>
-                <h3 className="font-semibold text-lg">Payment</h3>
+                {/* Arrow to next step */}
+                <div className="hidden md:block absolute top-[50px] left-[calc(100%-20px)] opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.5s_ease-out_infinite]" />
+                </div>
+                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Payment</h3>
                 <p className="text-sm text-muted-foreground">
                   Secure payment processing
                 </p>
               </div>
 
               {/* Step 4 */}
-              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -249,14 +261,18 @@ const Home = () => {
                     4
                   </div>
                 </div>
-                <h3 className="font-semibold text-lg">We Shop For You</h3>
+                {/* Arrow to next step */}
+                <div className="hidden md:block absolute top-[50px] left-[calc(100%-20px)] opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
+                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.5s_ease-out_infinite]" />
+                </div>
+                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Shop For You</h3>
                 <p className="text-sm text-muted-foreground">
                   Our team gets your items
                 </p>
               </div>
 
               {/* Step 5 */}
-              <div className="flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -269,7 +285,7 @@ const Home = () => {
                     5
                   </div>
                 </div>
-                <h3 className="font-semibold text-lg">Fast Delivery</h3>
+                <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Fast Delivery</h3>
                 <p className="text-sm text-muted-foreground">
                   Quick delivery to your door
                 </p>
