@@ -160,6 +160,10 @@ const ManagerOrderDetails = () => {
     return orderItems.some(item => item.approval_status === 'rejected');
   };
 
+  const canAssignRider = () => {
+    return !hasRejectedItems();
+  };
+
   const canConfirmOrder = () => {
     return !hasRejectedItems() && order?.order_assignments?.rider_id;
   };
@@ -301,16 +305,34 @@ const ManagerOrderDetails = () => {
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">⚠️</span>
                   <div>
-                    <h3 className="text-destructive font-semibold mb-2">Cannot Confirm Order</h3>
-                    {hasRejectedItems() && (
-                      <p className="text-sm mb-2">
-                        This order has rejected items. All items must be approved first.
-                      </p>
-                    )}
-                    {!order.order_assignments?.rider_id && (
-                      <p className="text-sm">
-                        A rider must be assigned to this order before it can be confirmed.
-                      </p>
+                    <h3 className="text-destructive font-semibold mb-2">Order Workflow Status</h3>
+                    {hasRejectedItems() ? (
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <strong>Step 1:</strong> Approve all items first
+                        </p>
+                        <p className="text-sm text-muted-foreground ml-4">
+                          ❌ This order has rejected items. All items must be approved before proceeding.
+                        </p>
+                      </div>
+                    ) : !order.order_assignments?.rider_id ? (
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <strong>Step 2:</strong> Assign a rider
+                        </p>
+                        <p className="text-sm text-muted-foreground ml-4">
+                          ✅ All items approved. Please assign a rider to continue.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-sm">
+                          <strong>Step 3:</strong> Confirm order
+                        </p>
+                        <p className="text-sm text-muted-foreground ml-4">
+                          ✅ All items approved and rider assigned. Ready to confirm.
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -374,13 +396,23 @@ const ManagerOrderDetails = () => {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">No rider assigned yet</p>
-                    <AssignOrderDialog
-                      orderId={order.id}
-                      currentRiderId={assignedRider?.rider_id}
-                      onAssigned={fetchOrderDetails}
-                      isOrderConfirmed={!!order.confirmed_at}
-                    />
+                    {hasRejectedItems() ? (
+                      <div className="text-center py-4 px-4 bg-muted rounded-lg">
+                        <p className="text-sm text-muted-foreground">
+                          Please approve all items before assigning a rider
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm text-muted-foreground">No rider assigned yet</p>
+                        <AssignOrderDialog
+                          orderId={order.id}
+                          currentRiderId={assignedRider?.rider_id}
+                          onAssigned={fetchOrderDetails}
+                          hasRejectedItems={hasRejectedItems()}
+                        />
+                      </>
+                    )}
                   </div>
                 )}
               </CardContent>

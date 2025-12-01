@@ -39,6 +39,13 @@ interface Order {
   status: string;
   created_at: string;
   order_items: OrderItem[];
+  order_assignments?: {
+    rider_id: string;
+    profiles: {
+      full_name: string;
+      phone: string;
+    };
+  } | null;
 }
 
 const OrderDetails = () => {
@@ -82,6 +89,13 @@ const OrderDetails = () => {
           approval_status,
           manager_feedback,
           approved_at
+        ),
+        order_assignments (
+          rider_id,
+          profiles!order_assignments_rider_id_fkey (
+            full_name,
+            phone
+          )
         )
       `)
       .eq("id", orderIdParam)
@@ -93,7 +107,14 @@ const OrderDetails = () => {
       toast.error("Failed to load order");
       navigate("/order-history");
     } else {
-      setOrder(data as Order);
+      // Transform the data to handle array vs single object
+      const transformedOrder = {
+        ...data,
+        order_assignments: Array.isArray(data.order_assignments) && data.order_assignments.length > 0
+          ? data.order_assignments[0]
+          : null
+      };
+      setOrder(transformedOrder as Order);
     }
     setLoading(false);
   };
@@ -263,6 +284,26 @@ const OrderDetails = () => {
               )}
             </div>
           </div>
+
+          {/* Assigned Rider Card */}
+          {order.order_assignments && (
+            <Card className="mb-6">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-primary font-semibold">
+                      {order.order_assignments.profiles.full_name.charAt(0)}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">Delivery Rider</p>
+                    <p className="font-semibold">{order.order_assignments.profiles.full_name}</p>
+                    <p className="text-sm text-muted-foreground">{order.order_assignments.profiles.phone}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {hasChanges && (
             <Card className="mb-6 border-primary">
