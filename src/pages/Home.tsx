@@ -184,12 +184,11 @@ const Home = () => {
                     1
                   </div>
                 </div>
-                {/* Arrow from center to center */}
+                {/* Arrow from right side center to next icon's left side center */}
                 <svg 
-                  className="hidden md:block absolute top-[50%] -translate-y-1/2 left-[50%] w-[calc(100%+24px)] h-[120px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
-                  viewBox="0 0 300 120"
+                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 300 100"
                   preserveAspectRatio="none"
-                  style={{ overflow: 'visible' }}
                 >
                   <defs>
                     <linearGradient id="arrow1" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -200,12 +199,12 @@ const Home = () => {
                     </linearGradient>
                   </defs>
                   
-                  {/* Particles originating from icon center */}
+                  {/* Particles */}
                   {[...Array(25)].map((_, i) => (
                     <circle
                       key={`p1-${i}`}
-                      cx={20 + i * 8}
-                      cy={60 + (Math.sin(i * 0.5) * 20)}
+                      cx={10 + i * 8}
+                      cy={50 + (Math.sin(i * 0.5) * 15)}
                       r={2.5}
                       fill="hsl(var(--primary))"
                       opacity={0.4 + Math.random() * 0.4}
@@ -214,9 +213,9 @@ const Home = () => {
                     />
                   ))}
                   
-                  {/* Main arrow */}
+                  {/* Arrow */}
                   <path
-                    d="M 80 60 L 270 60 L 270 50 L 295 60 L 270 70 L 270 60 Z"
+                    d="M 80 50 L 270 50 L 270 40 L 295 50 L 270 60 L 270 50 Z"
                     fill="url(#arrow1)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
@@ -241,12 +240,11 @@ const Home = () => {
                     2
                   </div>
                 </div>
-                {/* Arrow from center to center */}
+                {/* Arrow from right side center to next icon's left side center */}
                 <svg 
-                  className="hidden md:block absolute top-[50%] -translate-y-1/2 left-[50%] w-[calc(100%+24px)] h-[120px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
-                  viewBox="0 0 300 120"
+                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 300 100"
                   preserveAspectRatio="none"
-                  style={{ overflow: 'visible' }}
                 >
                   <defs>
                     <linearGradient id="arrow2" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -260,8 +258,8 @@ const Home = () => {
                   {[...Array(25)].map((_, i) => (
                     <circle
                       key={`p2-${i}`}
-                      cx={20 + i * 8}
-                      cy={60 + (Math.sin(i * 0.5) * 20)}
+                      cx={10 + i * 8}
+                      cy={50 + (Math.sin(i * 0.5) * 15)}
                       r={2.5}
                       fill="hsl(var(--primary))"
                       opacity={0.4 + Math.random() * 0.4}
@@ -271,7 +269,7 @@ const Home = () => {
                   ))}
                   
                   <path
-                    d="M 80 60 L 270 60 L 270 50 L 295 60 L 270 70 L 270 60 Z"
+                    d="M 80 50 L 270 50 L 270 40 L 295 50 L 270 60 L 270 50 Z"
                     fill="url(#arrow2)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
@@ -296,12 +294,11 @@ const Home = () => {
                     3
                   </div>
                 </div>
-                {/* Arrow from center to center */}
+                {/* Arrow from right side center to next icon's left side center */}
                 <svg 
-                  className="hidden md:block absolute top-[50%] -translate-y-1/2 left-[50%] w-[calc(100%+24px)] h-[120px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
-                  viewBox="0 0 300 120"
+                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 300 100"
                   preserveAspectRatio="none"
-                  style={{ overflow: 'visible' }}
                 >
                   <defs>
                     <linearGradient id="arrow3" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -315,8 +312,8 @@ const Home = () => {
                   {[...Array(25)].map((_, i) => (
                     <circle
                       key={`p3-${i}`}
-                      cx={20 + i * 8}
-                      cy={60 + (Math.sin(i * 0.5) * 20)}
+                      cx={10 + i * 8}
+                      cy={50 + (Math.sin(i * 0.5) * 15)}
                       r={2.5}
                       fill="hsl(var(--primary))"
                       opacity={0.4 + Math.random() * 0.4}
@@ -326,7 +323,7 @@ const Home = () => {
                   ))}
                   
                   <path
-                    d="M 80 60 L 270 60 L 270 50 L 295 60 L 270 70 L 270 60 Z"
+                    d="M 80 50 L 270 50 L 270 40 L 295 50 L 270 60 L 270 50 Z"
                     fill="url(#arrow3)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
@@ -351,12 +348,11 @@ const Home = () => {
                     4
                   </div>
                 </div>
-                {/* Arrow from center to center */}
+                {/* Arrow from right side center to next icon's left side center */}
                 <svg 
-                  className="hidden md:block absolute top-[50%] -translate-y-1/2 left-[50%] w-[calc(100%+24px)] h-[120px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
-                  viewBox="0 0 300 120"
+                  className="hidden md:block absolute top-[41px] left-[calc(50%+41px)] w-[calc(100%+24px)] h-[100px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"
+                  viewBox="0 0 300 100"
                   preserveAspectRatio="none"
-                  style={{ overflow: 'visible' }}
                 >
                   <defs>
                     <linearGradient id="arrow4" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -370,8 +366,8 @@ const Home = () => {
                   {[...Array(25)].map((_, i) => (
                     <circle
                       key={`p4-${i}`}
-                      cx={20 + i * 8}
-                      cy={60 + (Math.sin(i * 0.5) * 20)}
+                      cx={10 + i * 8}
+                      cy={50 + (Math.sin(i * 0.5) * 15)}
                       r={2.5}
                       fill="hsl(var(--primary))"
                       opacity={0.4 + Math.random() * 0.4}
@@ -381,7 +377,7 @@ const Home = () => {
                   ))}
                   
                   <path
-                    d="M 80 60 L 270 60 L 270 50 L 295 60 L 270 70 L 270 60 Z"
+                    d="M 80 50 L 270 50 L 270 40 L 295 50 L 270 60 L 270 50 Z"
                     fill="url(#arrow4)"
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
