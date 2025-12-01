@@ -176,7 +176,7 @@ const Home = () => {
               </div>
 
               {/* Step 1 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -189,9 +189,11 @@ const Home = () => {
                     1
                   </div>
                 </div>
-                {/* Arrow to next step */}
-                <div className="hidden md:block absolute top-[50px] left-[calc(100%-20px)] opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
-                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.5s_ease-out_infinite]" />
+                {/* Arrow flowing to next step */}
+                <div className="hidden md:flex absolute top-[50px] -right-[50%] translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
                 </div>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Place Your Order</h3>
                 <p className="text-sm text-muted-foreground">
@@ -200,7 +202,7 @@ const Home = () => {
               </div>
 
               {/* Step 2 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -213,9 +215,11 @@ const Home = () => {
                     2
                   </div>
                 </div>
-                {/* Arrow to next step */}
-                <div className="hidden md:block absolute top-[50px] left-[calc(100%-20px)] opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
-                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.5s_ease-out_infinite]" />
+                {/* Arrow flowing to next step */}
+                <div className="hidden md:flex absolute top-[50px] -right-[50%] translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
                 </div>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Verify & Confirm</h3>
                 <p className="text-sm text-muted-foreground">
@@ -224,7 +228,7 @@ const Home = () => {
               </div>
 
               {/* Step 3 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -237,9 +241,11 @@ const Home = () => {
                     3
                   </div>
                 </div>
-                {/* Arrow to next step */}
-                <div className="hidden md:block absolute top-[50px] left-[calc(100%-20px)] opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
-                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.5s_ease-out_infinite]" />
+                {/* Arrow flowing to next step */}
+                <div className="hidden md:flex absolute top-[50px] -right-[50%] translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
                 </div>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">Payment</h3>
                 <p className="text-sm text-muted-foreground">
@@ -248,7 +254,7 @@ const Home = () => {
               </div>
 
               {/* Step 4 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -261,9 +267,11 @@ const Home = () => {
                     4
                   </div>
                 </div>
-                {/* Arrow to next step */}
-                <div className="hidden md:block absolute top-[50px] left-[calc(100%-20px)] opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
-                  <ArrowRight className="h-8 w-8 text-primary animate-[slide-in-right_0.5s_ease-out_infinite]" />
+                {/* Arrow flowing to next step */}
+                <div className="hidden md:flex absolute top-[50px] -right-[50%] translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 z-20 gap-1">
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite]" />
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-70" style={{ animationDelay: '0.2s' }} />
+                  <ArrowRight className="h-6 w-6 text-primary animate-[slide-in-right_0.8s_ease-out_infinite] opacity-40" style={{ animationDelay: '0.4s' }} />
                 </div>
                 <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">We Shop For You</h3>
                 <p className="text-sm text-muted-foreground">
@@ -272,7 +280,7 @@ const Home = () => {
               </div>
 
               {/* Step 5 */}
-              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
+              <div className="group flex flex-col items-center text-center space-y-4 animate-fade-in relative" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
                 <div 
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
@@ -290,29 +298,6 @@ const Home = () => {
                   Quick delivery to your door
                 </p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Section */}
-        <PricingBundles />
-
-        {/* CTA Section */}
-        <section className="py-16 bg-gradient-to-br from-primary to-accent text-primary-foreground">
-          <div className="container mx-auto px-4 text-center">
-            <div className="flex flex-col items-center space-y-6">
-              <TruckIcon className="h-16 w-16 animate-pulse" />
-              <h2 className="text-3xl font-bold">Ready to Order?</h2>
-              <p className="text-lg max-w-2xl opacity-90">
-                Join thousands of satisfied customers who trust Desi Drop for their delivery needs
-              </p>
-              {!isRider && (
-                <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-                  <Button size="lg" variant="secondary" className="text-lg px-8 hover:scale-105 transition-transform">
-                    {isAuthenticated ? "Place Order Now" : "Sign Up Today"}
-                  </Button>
-                </Link>
-              )}
             </div>
           </div>
         </section>
