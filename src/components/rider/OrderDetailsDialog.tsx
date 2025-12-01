@@ -5,13 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Package, Check, Upload, Image as ImageIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RiderMapView } from "@/components/map/RiderMapView";
 
 interface OrderItem {
   id: string;
   item_type: string;
   item_data: any;
   image_url: string | null;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
   pickup?: {
     id: string;
     picked_at: string;
@@ -36,6 +39,7 @@ export const OrderDetailsDialog = ({
   onPickupComplete,
 }: OrderDetailsDialogProps) => {
   const [items, setItems] = useState<OrderItem[]>([]);
+  const [deliveryLocation, setDeliveryLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState<string | null>(null);
 
@@ -50,6 +54,23 @@ export const OrderDetailsDialog = ({
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Fetch order delivery location
+      const { data: orderData, error: orderError } = await supabase
+        .from("orders")
+        .select("delivery_address, delivery_latitude, delivery_longitude")
+        .eq("id", orderId)
+        .single();
+
+      if (orderError) throw orderError;
+      
+      if (orderData?.delivery_latitude && orderData?.delivery_longitude) {
+        setDeliveryLocation({
+          lat: orderData.delivery_latitude,
+          lng: orderData.delivery_longitude,
+          address: orderData.delivery_address,
+        });
+      }
 
       // Fetch order items
       const { data: itemsData, error: itemsError } = await supabase
@@ -170,6 +191,34 @@ export const OrderDetailsDialog = ({
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Map View */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Route Map</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RiderMapView
+                  locations={[
+                    ...items
+                      .filter(item => item.pickup_latitude && item.pickup_longitude)
+                      .map((item, index) => ({
+                        lat: item.pickup_latitude!,
+                        lng: item.pickup_longitude!,
+                        label: `Pickup: ${item.item_type}`,
+                        type: "pickup" as const,
+                      })),
+                    ...(deliveryLocation ? [{
+                      lat: deliveryLocation.lat,
+                      lng: deliveryLocation.lng,
+                      label: `Delivery: ${deliveryLocation.address}`,
+                      type: "delivery" as const,
+                    }] : []),
+                  ]}
+                  height="300px"
+                />
+              </CardContent>
+            </Card>
+
             {allItemsPicked && (
               <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
                 <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">

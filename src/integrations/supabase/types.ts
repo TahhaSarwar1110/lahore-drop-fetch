@@ -145,6 +145,8 @@ export type Database = {
           item_type: string
           manager_feedback: string | null
           order_id: string
+          pickup_latitude: number | null
+          pickup_longitude: number | null
         }
         Insert: {
           approval_status?: string | null
@@ -157,6 +159,8 @@ export type Database = {
           item_type: string
           manager_feedback?: string | null
           order_id: string
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
         }
         Update: {
           approval_status?: string | null
@@ -169,6 +173,8 @@ export type Database = {
           item_type?: string
           manager_feedback?: string | null
           order_id?: string
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
         }
         Relationships: [
           {
@@ -217,6 +223,8 @@ export type Database = {
           confirmed_by: string | null
           created_at: string | null
           delivery_address: string
+          delivery_latitude: number | null
+          delivery_longitude: number | null
           id: string
           manager_feedback: string | null
           status: string
@@ -229,6 +237,8 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string | null
           delivery_address: string
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           id?: string
           manager_feedback?: string | null
           status?: string
@@ -241,6 +251,8 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string | null
           delivery_address?: string
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           id?: string
           manager_feedback?: string | null
           status?: string

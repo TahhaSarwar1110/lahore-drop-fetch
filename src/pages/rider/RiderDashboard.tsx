@@ -7,10 +7,11 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Phone, User, Eye } from "lucide-react";
+import { Loader2, Package, MapPin, Phone, User, Eye, Map } from "lucide-react";
 import { AttachmentUpload } from "@/components/rider/AttachmentUpload";
 import { OrderDetailsDialog } from "@/components/rider/OrderDetailsDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RiderMapView } from "@/components/map/RiderMapView";
 
 interface OrderAssignment {
   id: string;
@@ -20,6 +21,8 @@ interface OrderAssignment {
     id: string;
     created_at: string;
     delivery_address: string;
+    delivery_latitude: number | null;
+    delivery_longitude: number | null;
     status: string;
     profiles: {
       full_name: string;
@@ -28,6 +31,8 @@ interface OrderAssignment {
     order_items: {
       id: string;
       item_type: string;
+      pickup_latitude: number | null;
+      pickup_longitude: number | null;
     }[];
   };
 }
@@ -96,6 +101,8 @@ const RiderDashboard = () => {
             id,
             created_at,
             delivery_address,
+            delivery_latitude,
+            delivery_longitude,
             status,
             profiles (
               full_name,
@@ -103,7 +110,9 @@ const RiderDashboard = () => {
             ),
             order_items (
               id,
-              item_type
+              item_type,
+              pickup_latitude,
+              pickup_longitude
             )
           )
         `)
@@ -340,9 +349,55 @@ const RiderDashboard = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-4">
-                  {activeAssignments.map(renderOrderCard)}
-                </div>
+                <>
+                  {/* Map Overview */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Map className="h-5 w-5" />
+                        Delivery Map Overview
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <RiderMapView
+                        locations={activeAssignments.flatMap((assignment) => {
+                          const order = assignment.orders;
+                          const locations = [];
+                          
+                          // Add pickup locations from items
+                          order.order_items?.forEach((item, index) => {
+                            if (item.pickup_latitude && item.pickup_longitude) {
+                              locations.push({
+                                lat: item.pickup_latitude,
+                                lng: item.pickup_longitude,
+                                label: `${item.item_type} - Order #${order.id.slice(0, 8)}`,
+                                type: "pickup" as const,
+                              });
+                            }
+                          });
+                          
+                          // Add delivery location
+                          if (order.delivery_latitude && order.delivery_longitude) {
+                            locations.push({
+                              lat: order.delivery_latitude,
+                              lng: order.delivery_longitude,
+                              label: `Delivery to ${order.profiles.full_name}`,
+                              type: "delivery" as const,
+                            });
+                          }
+                          
+                          return locations;
+                        })}
+                        height="500px"
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Order Cards */}
+                  <div className="grid gap-4">
+                    {activeAssignments.map(renderOrderCard)}
+                  </div>
+                </>
               )}
             </TabsContent>
             
