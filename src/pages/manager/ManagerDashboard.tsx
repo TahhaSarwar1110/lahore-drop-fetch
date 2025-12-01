@@ -10,7 +10,7 @@ import { Loader2, Package, XCircle, Eye, User, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { AssignOrderDialog } from "@/components/admin/AssignOrderDialog";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RiderTrackingMap } from "@/components/admin/RiderTrackingMap";
 
@@ -298,21 +298,14 @@ const ManagerDashboard = () => {
                     )}
 
                     <div className="pt-4 border-t space-y-3">
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => handleViewDetails(order.id)}
-                          variant="outline"
-                          className="flex-1"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details & Approve Items
-                        </Button>
-                        <AssignOrderDialog 
-                          orderId={order.id}
-                          currentRiderId={assignedRider?.rider_id}
-                          onAssigned={() => fetchOrders()} 
-                        />
-                      </div>
+                      <Button
+                        onClick={() => handleViewDetails(order.id)}
+                        variant="default"
+                        className="w-full"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details & Approve Items
+                      </Button>
 
                       {order.status === "Pending" && feedback[order.id] && (
                         <div className="space-y-2">
