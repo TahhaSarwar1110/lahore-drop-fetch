@@ -81,7 +81,9 @@ const OrderDetails = () => {
 
   const loadOrder = async (orderIdParam: string, userId: string) => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    // First fetch the order data
+    const { data: orderData, error: orderError } = await supabase
       .from("orders")
       .select(`
         id,
@@ -101,33 +103,48 @@ const OrderDetails = () => {
           approval_status,
           manager_feedback,
           approved_at
-        ),
-        order_assignments (
-          rider_id,
-          profiles!order_assignments_rider_id_fkey (
-            full_name,
-            phone
-          )
         )
       `)
       .eq("id", orderIdParam)
       .eq("user_id", userId)
       .single();
 
-    if (error) {
-      console.error("Error loading order:", error);
+    if (orderError) {
+      console.error("Error loading order:", orderError);
       toast.error("Failed to load order");
       navigate("/order-history");
-    } else {
-      // Transform the data to handle array vs single object
-      const transformedOrder = {
-        ...data,
-        order_assignments: Array.isArray(data.order_assignments) && data.order_assignments.length > 0
-          ? data.order_assignments[0]
-          : null
-      };
-      setOrder(transformedOrder as Order);
+      return;
     }
+
+    // Fetch assignment separately
+    const { data: assignmentData } = await supabase
+      .from("order_assignments")
+      .select("rider_id")
+      .eq("order_id", orderIdParam)
+      .maybeSingle();
+
+    let riderProfile = null;
+    if (assignmentData?.rider_id) {
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("id", assignmentData.rider_id)
+        .single();
+      
+      if (profileData) {
+        riderProfile = {
+          rider_id: assignmentData.rider_id,
+          profiles: profileData
+        };
+      }
+    }
+
+    const transformedOrder = {
+      ...orderData,
+      order_assignments: riderProfile
+    };
+    
+    setOrder(transformedOrder as Order);
     setLoading(false);
   };
 
