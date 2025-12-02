@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
 import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
 import { AssignOrderDialog } from "@/components/admin/AssignOrderDialog";
+import { PaymentConfirmation } from "@/components/manager/PaymentConfirmation";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
 
 interface OrderItem {
@@ -34,6 +35,11 @@ interface Order {
   confirmed_at: string | null;
   additional_charges: number;
   charges_description: string | null;
+  payment_status: string;
+  payment_proof_url: string | null;
+  payment_proof_name: string | null;
+  payment_submitted_at: string | null;
+  payment_confirmed_at: string | null;
   profiles: {
     full_name: string;
     phone: string;
@@ -152,6 +158,7 @@ const ManagerOrderDetails = () => {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       "Pending": "bg-yellow-500",
+      "Order Confirmed": "bg-blue-500",
       "Order Received": "bg-blue-500",
       "Shopper Assigned": "bg-purple-500",
       "Purchasing": "bg-orange-500",
@@ -196,7 +203,7 @@ const ManagerOrderDetails = () => {
         .update({
           confirmed_at: new Date().toISOString(),
           confirmed_by: user.id,
-          status: "Order Received"
+          status: "Order Confirmed"
         })
         .eq("id", orderId);
 
@@ -430,6 +437,21 @@ const ManagerOrderDetails = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Payment Confirmation Card - Show after order is confirmed */}
+            {order.confirmed_at && (
+              <PaymentConfirmation
+                orderId={order.id}
+                userId={order.user_id}
+                paymentStatus={order.payment_status || "pending"}
+                paymentProofUrl={order.payment_proof_url}
+                paymentProofName={order.payment_proof_name}
+                paymentSubmittedAt={order.payment_submitted_at}
+                paymentConfirmedAt={order.payment_confirmed_at}
+                assignedRiderId={order.order_assignments?.rider_id}
+                onUpdate={fetchOrderDetails}
+              />
+            )}
 
             {/* Additional Charges Card */}
             <AdditionalCharges
