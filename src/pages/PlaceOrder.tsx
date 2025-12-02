@@ -39,27 +39,33 @@ const PlaceOrder = () => {
   const { calculateBundlePrice } = useBundlePricing();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const loadUserData = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
         navigate("/login");
-      } else {
-        setIsAuthenticated(true);
-        setUserId(session.user.id);
-        
-        // Load profile data
-        supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              setFullName(data.full_name || "");
-              setPhone(data.phone || "");
-            }
-          });
+        return;
       }
-    });
+      
+      setIsAuthenticated(true);
+      setUserId(session.user.id);
+      
+      // Load profile data
+      const { data: profileData, error } = await supabase
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("id", session.user.id)
+        .single();
+      
+      if (profileData && !error) {
+        setFullName(profileData.full_name || "");
+        setPhone(profileData.phone || "");
+      } else {
+        console.log("Profile fetch error or no profile:", error);
+      }
+    };
+
+    loadUserData();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
