@@ -18,8 +18,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem as FormOrderItem } from "@/components/OrderItemForm";
+import { PaymentUpload } from "@/components/customer/PaymentUpload";
+import { RiderContactDialog } from "@/components/customer/RiderContactDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Trash2, Plus, Save } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Save, User } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -38,6 +40,11 @@ interface Order {
   delivery_address: string;
   status: string;
   created_at: string;
+  confirmed_at: string | null;
+  payment_status: string;
+  payment_proof_url: string | null;
+  payment_submitted_at: string | null;
+  payment_confirmed_at: string | null;
   order_items: OrderItem[];
   order_assignments?: {
     rider_id: string;
@@ -81,6 +88,11 @@ const OrderDetails = () => {
         delivery_address,
         status,
         created_at,
+        confirmed_at,
+        payment_status,
+        payment_proof_url,
+        payment_submitted_at,
+        payment_confirmed_at,
         order_items (
           id,
           item_type,
@@ -291,18 +303,41 @@ const OrderDetails = () => {
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary font-semibold">
-                      {order.order_assignments.profiles.full_name.charAt(0)}
-                    </span>
+                    <User className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm text-muted-foreground">Delivery Rider</p>
-                    <p className="font-semibold">{order.order_assignments.profiles.full_name}</p>
-                    <p className="text-sm text-muted-foreground">{order.order_assignments.profiles.phone}</p>
+                    <RiderContactDialog
+                      riderName={order.order_assignments.profiles.full_name}
+                      riderPhone={order.order_assignments.profiles.phone}
+                    >
+                      <button className="font-semibold text-primary hover:underline cursor-pointer">
+                        {order.order_assignments.profiles.full_name}
+                      </button>
+                    </RiderContactDialog>
+                    <p className="text-xs text-muted-foreground">Click name for contact details</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Payment Section - Show after order is confirmed */}
+          {order.confirmed_at && (
+            <div className="mb-6">
+              <PaymentUpload
+                orderId={order.id}
+                paymentStatus={order.payment_status || "pending"}
+                paymentProofUrl={order.payment_proof_url}
+                paymentSubmittedAt={order.payment_submitted_at}
+                paymentConfirmedAt={order.payment_confirmed_at}
+                onUpdate={() => {
+                  supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user && orderId) loadOrder(orderId, user.id);
+                  });
+                }}
+              />
+            </div>
           )}
 
           {hasChanges && (

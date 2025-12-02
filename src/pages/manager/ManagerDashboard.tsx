@@ -179,6 +179,7 @@ const ManagerDashboard = () => {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       "Pending": "bg-yellow-500",
+      "Order Confirmed": "bg-blue-500",
       "Order Received": "bg-blue-500",
       "Shopper Assigned": "bg-purple-500",
       "Purchasing": "bg-orange-500",
@@ -215,7 +216,7 @@ const ManagerDashboard = () => {
               <SelectContent>
                 <SelectItem value="all">All Orders</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Order Received">Order Received</SelectItem>
+                <SelectItem value="Order Confirmed">Order Confirmed</SelectItem>
                 <SelectItem value="Shopper Assigned">Shopper Assigned</SelectItem>
                 <SelectItem value="Purchasing">Purchasing</SelectItem>
                 <SelectItem value="In Delivery">In Delivery</SelectItem>
@@ -282,7 +283,7 @@ const ManagerDashboard = () => {
 
                     {order.additional_charges > 0 && (
                       <div className="bg-primary/10 p-3 rounded-md">
-                        <p className="text-sm font-medium mb-1">Additional Charges</p>
+                        <p className="text-sm font-medium mb-1">Total Order Price</p>
                         <p className="text-lg font-bold text-primary">PKR {order.additional_charges.toFixed(2)}</p>
                         {order.charges_description && (
                           <p className="text-sm text-muted-foreground mt-1">{order.charges_description}</p>

@@ -25,6 +25,7 @@ interface OrderAssignment {
     delivery_latitude: number | null;
     delivery_longitude: number | null;
     status: string;
+    payment_status: string | null;
     profiles: {
       full_name: string;
       phone: string;
@@ -105,6 +106,7 @@ const RiderDashboard = () => {
             delivery_latitude,
             delivery_longitude,
             status,
+            payment_status,
             profiles (
               full_name,
               phone
@@ -217,6 +219,9 @@ const RiderDashboard = () => {
 
   const renderOrderCard = (assignment: OrderAssignment) => {
     const order = assignment.orders;
+    const isPaymentConfirmed = order.payment_status === 'confirmed';
+    const canStartPickup = isPaymentConfirmed;
+
     return (
       <Card key={assignment.id} className="overflow-hidden">
         <CardHeader className="pb-3 bg-muted/50">
@@ -254,7 +259,19 @@ const RiderDashboard = () => {
             </div>
           </div>
 
-          {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
+          {/* Payment Status Banner */}
+          {!canStartPickup && order.status !== 'Delivered' && order.status !== 'Cancelled' && (
+            <div className="bg-yellow-50 dark:bg-yellow-950 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                ⏳ Waiting for Payment Confirmation
+              </p>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                You can start pickup and delivery once the customer's payment is confirmed by the manager.
+              </p>
+            </div>
+          )}
+
+          {order.status !== 'Delivered' && order.status !== 'Cancelled' && canStartPickup && (
             <>
               <div className="pt-3 border-t">
                 <p className="text-sm font-medium mb-2">
@@ -294,7 +311,7 @@ const RiderDashboard = () => {
                 </div>
               )}
 
-              {(order.status === 'Pending' || order.status === 'In Progress') && (
+              {(order.status === 'Pending' || order.status === 'In Progress' || order.status === 'Order Confirmed') && (
                 <div className="pt-3 border-t">
                   <Button
                     onClick={() => updateOrderStatus(order.id, 'Picked')}

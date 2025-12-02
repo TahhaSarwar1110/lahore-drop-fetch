@@ -268,6 +268,12 @@ export type Database = {
           delivery_longitude: number | null
           id: string
           manager_feedback: string | null
+          payment_confirmed_at: string | null
+          payment_confirmed_by: string | null
+          payment_proof_name: string | null
+          payment_proof_url: string | null
+          payment_status: string | null
+          payment_submitted_at: string | null
           status: string
           user_id: string
         }
@@ -282,6 +288,12 @@ export type Database = {
           delivery_longitude?: number | null
           id?: string
           manager_feedback?: string | null
+          payment_confirmed_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_proof_name?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          payment_submitted_at?: string | null
           status?: string
           user_id: string
         }
@@ -296,6 +308,12 @@ export type Database = {
           delivery_longitude?: number | null
           id?: string
           manager_feedback?: string | null
+          payment_confirmed_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_proof_name?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          payment_submitted_at?: string | null
           status?: string
           user_id?: string
         }
