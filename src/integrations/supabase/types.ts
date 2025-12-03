@@ -481,6 +481,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_customer_ids_for_rider_orders: {
+        Args: { _rider_id: string }
+        Returns: string[]
+      }
+      get_rider_ids_for_user_orders: {
+        Args: { _user_id: string }
+        Returns: string[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -488,9 +496,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      rider_assigned_to_order: {
+        Args: { _order_id: string; _rider_id: string }
+        Returns: boolean
+      }
       update_order_status: {
         Args: { p_new_status: string; p_order_id: string }
         Returns: undefined
+      }
+      user_owns_order: {
+        Args: { _order_id: string; _user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
