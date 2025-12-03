@@ -7,11 +7,9 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, Phone, User, Eye, Map } from "lucide-react";
+import { Loader2, Package, MapPin, Phone, User, Eye } from "lucide-react";
 import { AttachmentUpload } from "@/components/rider/AttachmentUpload";
-import { OrderDetailsDialog } from "@/components/rider/OrderDetailsDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RiderMapView } from "@/components/map/RiderMapView";
 import { LocationSharing } from "@/components/rider/LocationSharing";
 
 interface OrderAssignment {
@@ -33,6 +31,7 @@ interface OrderAssignment {
     order_items: {
       id: string;
       item_type: string;
+      item_data: any;
       pickup_latitude: number | null;
       pickup_longitude: number | null;
     }[];
@@ -43,7 +42,6 @@ const RiderDashboard = () => {
   const [assignments, setAssignments] = useState<OrderAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<{ id: string; number: string } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -114,6 +112,7 @@ const RiderDashboard = () => {
             order_items (
               id,
               item_type,
+              item_data,
               pickup_latitude,
               pickup_longitude
             )
@@ -271,6 +270,14 @@ const RiderDashboard = () => {
             </div>
           )}
 
+          {/* Total Order Price */}
+          <div className="flex items-center justify-between pt-3 border-t">
+            <span className="text-sm font-medium">Total Order Price:</span>
+            <span className="font-bold text-primary">
+              PKR {order.order_items?.reduce((sum, item) => sum + (Number(item.item_data?.expected_price) || 0), 0).toLocaleString()}
+            </span>
+          </div>
+
           {order.status !== 'Delivered' && order.status !== 'Cancelled' && canStartPickup && (
             <>
               <div className="pt-3 border-t">
@@ -280,7 +287,7 @@ const RiderDashboard = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSelectedOrder({ id: order.id, number: order.id.slice(0, 8) })}
+                  onClick={() => navigate(`/rider/order/${order.id}`)}
                   className="w-full"
                 >
                   <Eye className="h-4 w-4 mr-2" />
@@ -368,55 +375,9 @@ const RiderDashboard = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <>
-                  {/* Map Overview */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Map className="h-5 w-5" />
-                        Delivery Map Overview
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <RiderMapView
-                        locations={activeAssignments.flatMap((assignment) => {
-                          const order = assignment.orders;
-                          const locations = [];
-                          
-                          // Add pickup locations from items
-                          order.order_items?.forEach((item, index) => {
-                            if (item.pickup_latitude && item.pickup_longitude) {
-                              locations.push({
-                                lat: item.pickup_latitude,
-                                lng: item.pickup_longitude,
-                                label: `${item.item_type} - Order #${order.id.slice(0, 8)}`,
-                                type: "pickup" as const,
-                              });
-                            }
-                          });
-                          
-                          // Add delivery location
-                          if (order.delivery_latitude && order.delivery_longitude) {
-                            locations.push({
-                              lat: order.delivery_latitude,
-                              lng: order.delivery_longitude,
-                              label: `Delivery to ${order.profiles.full_name}`,
-                              type: "delivery" as const,
-                            });
-                          }
-                          
-                          return locations;
-                        })}
-                        height="500px"
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Order Cards */}
-                  <div className="grid gap-4">
-                    {activeAssignments.map(renderOrderCard)}
-                  </div>
-                </>
+                <div className="grid gap-4">
+                  {activeAssignments.map(renderOrderCard)}
+                </div>
               )}
             </TabsContent>
             
@@ -442,16 +403,6 @@ const RiderDashboard = () => {
       </main>
       
       <Footer />
-
-      {selectedOrder && (
-        <OrderDetailsDialog
-          open={!!selectedOrder}
-          onOpenChange={(open) => !open && setSelectedOrder(null)}
-          orderId={selectedOrder.id}
-          orderNumber={selectedOrder.number}
-          onPickupComplete={fetchAssignments}
-        />
-      )}
     </div>
   );
 };

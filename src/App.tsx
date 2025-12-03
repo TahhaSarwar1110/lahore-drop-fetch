@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 import RiderDashboard from "./pages/rider/RiderDashboard";
+import RiderOrderDetails from "./pages/rider/RiderOrderDetails";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import ManagerOrderDetails from "./pages/manager/ManagerOrderDetails";
 import { PricingManagement } from "./pages/manager/PricingManagement";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/order-details" element={<OrderDetails />} />
           <Route path="/orders" element={<RiderDashboard />} />
+          <Route path="/rider/order/:orderId" element={<RiderOrderDetails />} />
           <Route path="/track" element={<TrackOrder />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<AdminDashboard />} />
