@@ -14,6 +14,15 @@ import { X } from "lucide-react";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type DeliveryType = "within_city" | "out_of_city" | "out_of_country";
 
 const orderSchema = z.object({
   fullName: z.string().trim().min(2, "Name required"),
@@ -26,8 +35,11 @@ const PlaceOrder = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [deliveryType, setDeliveryType] = useState<DeliveryType>("within_city");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryLocation, setDeliveryLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -65,6 +77,13 @@ const PlaceOrder = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Reset delivery location when switching away from within_city
+  useEffect(() => {
+    if (deliveryType !== "within_city") {
+      setDeliveryLocation(null);
+    }
+  }, [deliveryType]);
 
   const handleAddItem = (item: OrderItem) => {
     setOrderItems([...orderItems, item]);
@@ -105,7 +124,7 @@ const PlaceOrder = () => {
         .from("orders")
         .insert({
           user_id: userId,
-          delivery_address: deliveryAddress,
+          delivery_address: `[${deliveryType.replace(/_/g, " ").toUpperCase()}] ${deliveryAddress}`,
           delivery_latitude: deliveryLocation?.lat,
           delivery_longitude: deliveryLocation?.lng,
           status: "Pending",
@@ -123,10 +142,13 @@ const PlaceOrder = () => {
       const itemsToInsert = orderItems.map((item) => ({
         order_id: orderData.id,
         item_type: item.itemType,
-        item_data: item.itemData,
+        item_data: {
+          ...item.itemData,
+          pickup_address: pickupAddress || undefined,
+        },
         image_url: item.imageUrl || null,
-        pickup_latitude: item.pickupLat,
-        pickup_longitude: item.pickupLng,
+        pickup_latitude: item.pickupLat || pickupLocation?.lat,
+        pickup_longitude: item.pickupLng || pickupLocation?.lng,
       }));
 
       const { error: itemsError } = await supabase
@@ -157,6 +179,17 @@ const PlaceOrder = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getDeliveryTypeLabel = (type: DeliveryType) => {
+    switch (type) {
+      case "within_city":
+        return "Within City";
+      case "out_of_city":
+        return "Out of City";
+      case "out_of_country":
+        return "Out of Country";
     }
   };
 
@@ -202,8 +235,33 @@ const PlaceOrder = () => {
                     />
                   </div>
 
+                  {/* Delivery Type Dropdown */}
                   <div className="space-y-2">
-                    <Label>Delivery Address</Label>
+                    <Label>
+                      Delivery Type
+                      <span className="text-red-500 ml-1">*</span>
+                    </Label>
+                    <Select
+                      value={deliveryType}
+                      onValueChange={(value: DeliveryType) => setDeliveryType(value)}
+                    >
+                      <SelectTrigger className="w-full bg-background">
+                        <SelectValue placeholder="Select delivery type" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border border-border z-50">
+                        <SelectItem value="within_city">Within City</SelectItem>
+                        <SelectItem value="out_of_city">Out of City</SelectItem>
+                        <SelectItem value="out_of_country">Out of Country</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Delivery Address - Always shown */}
+                  <div className="space-y-2">
+                    <Label>
+                      Delivery Address
+                      <span className="text-red-500 ml-1">*</span>
+                    </Label>
                     <Input
                       placeholder="Complete delivery address"
                       value={deliveryAddress}
@@ -211,18 +269,48 @@ const PlaceOrder = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>
-                      Delivery Location
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Click on the map to mark your delivery location
+                  {/* Delivery Location Map - Only for within city */}
+                  {deliveryType === "within_city" && (
+                    <div className="space-y-2">
+                      <Label>
+                        Delivery Location (Optional)
+                      </Label>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Click on the map to mark your delivery location
+                      </p>
+                      <LocationPickerMap
+                        onLocationSelect={(lat, lng) => setDeliveryLocation({ lat, lng })}
+                        label="Delivery Location"
+                      />
+                    </div>
+                  )}
+
+                  {/* Pickup Section - Optional */}
+                  <div className="border-t pt-6 space-y-4">
+                    <h3 className="text-lg font-semibold">Pickup Details (Optional)</h3>
+                    <p className="text-sm text-muted-foreground">
+                      If you want to specify a pickup location, you can add the address or select it on the map
                     </p>
-                    <LocationPickerMap
-                      onLocationSelect={(lat, lng) => setDeliveryLocation({ lat, lng })}
-                      label="Delivery Location"
-                    />
+                    
+                    <div className="space-y-2">
+                      <Label>Pickup Address (Optional)</Label>
+                      <Input
+                        placeholder="Enter pickup address"
+                        value={pickupAddress}
+                        onChange={(e) => setPickupAddress(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Pickup Location from Map (Optional)</Label>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Click on the map to mark pickup location
+                      </p>
+                      <LocationPickerMap
+                        onLocationSelect={(lat, lng) => setPickupLocation({ lat, lng })}
+                        label="Pickup Location"
+                      />
+                    </div>
                   </div>
 
                   <div className="border-t pt-6">
@@ -258,6 +346,11 @@ const PlaceOrder = () => {
                           </CardContent>
                         </Card>
                       ))}
+                      
+                      <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+                        <span className="font-semibold">Delivery Type:</span>
+                        <span>{getDeliveryTypeLabel(deliveryType)}</span>
+                      </div>
                       
                       <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
                         <span className="font-semibold">Total Items:</span>
@@ -306,10 +399,10 @@ const PlaceOrder = () => {
                         </p>
                       </div>
                     )}
-                    {(!fullName || !phone || !deliveryAddress || !deliveryLocation) && (
+                    {(!fullName || !phone || !deliveryAddress) && (
                       <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                         <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                          ⚠️ Please complete all required fields and select delivery location
+                          ⚠️ Please complete all required fields (Name, Phone, Delivery Address)
                         </p>
                       </div>
                     )}
