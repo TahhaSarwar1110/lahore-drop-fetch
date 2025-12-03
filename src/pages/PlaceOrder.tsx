@@ -49,7 +49,7 @@ const PlaceOrder = () => {
         // Load profile data
         supabase
           .from("profiles")
-          .select("full_name, phone")
+          .select("*")
           .eq("id", session.user.id)
           .single()
           .then(({ data }) => {
