@@ -4,9 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 
 export interface OrderItem {
   id: string;
@@ -26,6 +28,8 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
   const [itemType, setItemType] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showPickupMap, setShowPickupMap] = useState(false);
   const { toast } = useToast();
 
   const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean }[]> = {
@@ -140,6 +144,8 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
       itemData: formData,
       imageFile: imageFile || undefined,
       imageUrl,
+      pickupLat: pickupLocation?.lat,
+      pickupLng: pickupLocation?.lng,
     };
 
     onAddItem(item);
@@ -148,6 +154,8 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
     setItemType("");
     setFormData({});
     setImageFile(null);
+    setPickupLocation(null);
+    setShowPickupMap(false);
     
     toast({
       title: "Item Added",
@@ -215,6 +223,45 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
                 </span>
               )}
             </div>
+          </div>
+
+          <div className="border-t pt-4 space-y-4">
+            <h4 className="text-sm font-medium text-muted-foreground">Pickup Details (Optional)</h4>
+            
+            <div className="space-y-2">
+              <Label>Pickup Address (Optional)</Label>
+              <Input
+                placeholder="Enter pickup address for this item"
+                value={formData["Pickup Address"] || ""}
+                onChange={(e) => handleFieldChange("Pickup Address", e.target.value)}
+              />
+            </div>
+
+            <Collapsible open={showPickupMap} onOpenChange={setShowPickupMap}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" size="sm" className="w-full justify-between">
+                  <span className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Select Pickup Location on Map (Optional)
+                  </span>
+                  {showPickupMap ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-4">
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">Click on the map to mark pickup location</p>
+                  <LocationPickerMap
+                    onLocationSelect={(lat, lng) => setPickupLocation({ lat, lng })}
+                    label="Pickup Location"
+                  />
+                  {pickupLocation && (
+                    <p className="text-sm text-green-600">
+                      ✓ Location: {pickupLocation.lat.toFixed(4)}, {pickupLocation.lng.toFixed(4)}
+                    </p>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           <div className="space-y-2">
