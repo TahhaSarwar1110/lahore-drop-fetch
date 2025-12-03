@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 
 export interface OrderItem {
   id: string;
@@ -27,7 +26,6 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
   const [itemType, setItemType] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { toast } = useToast();
 
   const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean }[]> = {
@@ -89,7 +87,6 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
 
   const isFormValid = () => {
     if (!itemType) return false;
-    if (!pickupLocation) return false;
     const fields = itemTypeFields[itemType];
     if (!fields) return false;
     
@@ -143,8 +140,6 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
       itemData: formData,
       imageFile: imageFile || undefined,
       imageUrl,
-      pickupLat: pickupLocation?.lat,
-      pickupLng: pickupLocation?.lng,
     };
 
     onAddItem(item);
@@ -153,7 +148,6 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
     setItemType("");
     setFormData({});
     setImageFile(null);
-    setPickupLocation(null);
     
     toast({
       title: "Item Added",
@@ -166,10 +160,10 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
       <div className="space-y-2">
         <Label>Item Type</Label>
         <Select value={itemType} onValueChange={setItemType}>
-          <SelectTrigger>
+          <SelectTrigger className="bg-background">
             <SelectValue placeholder="Select item type" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-background border border-border z-50">
             <SelectItem value="Cloth">Cloth</SelectItem>
             <SelectItem value="Food">Food</SelectItem>
             <SelectItem value="Commodities">Commodities</SelectItem>
@@ -224,24 +218,10 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label>
-              Pickup Location
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <p className="text-xs text-muted-foreground mb-2">
-              Click on the map to mark the pickup location for this item
-            </p>
-            <LocationPickerMap
-              onLocationSelect={(lat, lng) => setPickupLocation({ lat, lng })}
-              label="Pickup Location"
-            />
-          </div>
-
-          <div className="space-y-2">
             {!isFormValid() && (
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                 <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                  ⚠️ Please fill all required fields (marked with *) and select a pickup location
+                  ⚠️ Please fill all required fields (marked with *)
                 </p>
               </div>
             )}

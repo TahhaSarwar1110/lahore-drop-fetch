@@ -10,7 +10,7 @@ import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem } from "@/components/OrderItemForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { X } from "lucide-react";
+import { X, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
@@ -21,6 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 type DeliveryType = "within_city" | "out_of_city" | "out_of_country";
 
@@ -42,6 +47,8 @@ const PlaceOrder = () => {
   const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showDeliveryMap, setShowDeliveryMap] = useState(false);
+  const [showPickupMap, setShowPickupMap] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { calculateBundlePrice } = useBundlePricing();
@@ -82,6 +89,7 @@ const PlaceOrder = () => {
   useEffect(() => {
     if (deliveryType !== "within_city") {
       setDeliveryLocation(null);
+      setShowDeliveryMap(false);
     }
   }, [deliveryType]);
 
@@ -147,8 +155,8 @@ const PlaceOrder = () => {
           pickup_address: pickupAddress || undefined,
         },
         image_url: item.imageUrl || null,
-        pickup_latitude: item.pickupLat || pickupLocation?.lat,
-        pickup_longitude: item.pickupLng || pickupLocation?.lng,
+        pickup_latitude: pickupLocation?.lat,
+        pickup_longitude: pickupLocation?.lng,
       }));
 
       const { error: itemsError } = await supabase
@@ -269,23 +277,45 @@ const PlaceOrder = () => {
                     />
                   </div>
 
-                  {/* Delivery Location Map - Only for within city */}
+                  {/* Delivery Location Map - Only for within city, collapsible */}
                   {deliveryType === "within_city" && (
-                    <div className="space-y-2">
-                      <Label>
-                        Delivery Location (Optional)
-                      </Label>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        Click on the map to mark your delivery location
-                      </p>
-                      <LocationPickerMap
-                        onLocationSelect={(lat, lng) => setDeliveryLocation({ lat, lng })}
-                        label="Delivery Location"
-                      />
-                    </div>
+                    <Collapsible open={showDeliveryMap} onOpenChange={setShowDeliveryMap}>
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between"
+                        >
+                          <span className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            Select Delivery Location on Map (Optional)
+                          </span>
+                          {showDeliveryMap ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-4">
+                        <div className="space-y-2">
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Click on the map to mark your delivery location
+                          </p>
+                          <LocationPickerMap
+                            onLocationSelect={(lat, lng) => setDeliveryLocation({ lat, lng })}
+                            label="Delivery Location"
+                          />
+                          {deliveryLocation && (
+                            <p className="text-sm text-green-600">
+                              ✓ Location selected: {deliveryLocation.lat.toFixed(4)}, {deliveryLocation.lng.toFixed(4)}
+                            </p>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   )}
 
-                  {/* Pickup Section - Optional */}
+                  {/* Pickup Section - Optional, Collapsible */}
                   <div className="border-t pt-6 space-y-4">
                     <h3 className="text-lg font-semibold">Pickup Details (Optional)</h3>
                     <p className="text-sm text-muted-foreground">
@@ -301,16 +331,40 @@ const PlaceOrder = () => {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Pickup Location from Map (Optional)</Label>
-                      <p className="text-xs text-muted-foreground mb-2">
-                        Click on the map to mark pickup location
-                      </p>
-                      <LocationPickerMap
-                        onLocationSelect={(lat, lng) => setPickupLocation({ lat, lng })}
-                        label="Pickup Location"
-                      />
-                    </div>
+                    <Collapsible open={showPickupMap} onOpenChange={setShowPickupMap}>
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between"
+                        >
+                          <span className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            Select Pickup Location on Map (Optional)
+                          </span>
+                          {showPickupMap ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-4">
+                        <div className="space-y-2">
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Click on the map to mark pickup location
+                          </p>
+                          <LocationPickerMap
+                            onLocationSelect={(lat, lng) => setPickupLocation({ lat, lng })}
+                            label="Pickup Location"
+                          />
+                          {pickupLocation && (
+                            <p className="text-sm text-green-600">
+                              ✓ Location selected: {pickupLocation.lat.toFixed(4)}, {pickupLocation.lng.toFixed(4)}
+                            </p>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
 
                   <div className="border-t pt-6">
