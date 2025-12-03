@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Plus, Upload, MapPin } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
@@ -15,7 +15,6 @@ export interface OrderItem {
   itemData: Record<string, string>;
   imageFile?: File;
   imageUrl?: string;
-  pickupAddress?: string;
   pickupLat?: number;
   pickupLng?: number;
 }
@@ -28,9 +27,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
   const [itemType, setItemType] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [pickupAddress, setPickupAddress] = useState("");
   const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [showPickupMap, setShowPickupMap] = useState(false);
   const { toast } = useToast();
 
   const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean }[]> = {
@@ -92,6 +89,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
 
   const isFormValid = () => {
     if (!itemType) return false;
+    if (!pickupLocation) return false;
     const fields = itemTypeFields[itemType];
     if (!fields) return false;
     
@@ -145,7 +143,6 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
       itemData: formData,
       imageFile: imageFile || undefined,
       imageUrl,
-      pickupAddress: pickupAddress || undefined,
       pickupLat: pickupLocation?.lat,
       pickupLng: pickupLocation?.lng,
     };
@@ -156,9 +153,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
     setItemType("");
     setFormData({});
     setImageFile(null);
-    setPickupAddress("");
     setPickupLocation(null);
-    setShowPickupMap(false);
     
     toast({
       title: "Item Added",
@@ -190,7 +185,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
             <div key={field.label} className="space-y-2">
               <Label>
                 {field.label}
-                {field.required && <span className="text-destructive ml-1">*</span>}
+                {field.required && <span className="text-red-500 ml-1">*</span>}
               </Label>
               {field.type === "textarea" ? (
                 <Textarea
@@ -228,60 +223,25 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
             </div>
           </div>
 
-          <div className="space-y-4 p-4 border border-dashed rounded-lg bg-muted/30">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-medium">
-                Pickup Location
-                <span className="text-muted-foreground text-xs ml-2">(Optional)</span>
-              </Label>
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-sm">Pickup Address</Label>
-              <Input
-                placeholder="Enter pickup address (optional)"
-                value={pickupAddress}
-                onChange={(e) => setPickupAddress(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPickupMap(!showPickupMap)}
-                className="w-full"
-              >
-                <MapPin className="h-4 w-4 mr-2" />
-                {showPickupMap ? "Hide Map" : "Or Select Location on Map"}
-              </Button>
-              
-              {showPickupMap && (
-                <div className="mt-3">
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Click on the map to mark the pickup location for this item
-                  </p>
-                  <LocationPickerMap
-                    onLocationSelect={(lat, lng) => setPickupLocation({ lat, lng })}
-                    label="Pickup Location"
-                  />
-                </div>
-              )}
-              
-              {pickupLocation && (
-                <p className="text-xs text-primary">
-                  📍 Location selected: {pickupLocation.lat.toFixed(4)}, {pickupLocation.lng.toFixed(4)}
-                </p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label>
+              Pickup Location
+              <span className="text-red-500 ml-1">*</span>
+            </Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Click on the map to mark the pickup location for this item
+            </p>
+            <LocationPickerMap
+              onLocationSelect={(lat, lng) => setPickupLocation({ lat, lng })}
+              label="Pickup Location"
+            />
           </div>
 
           <div className="space-y-2">
             {!isFormValid() && (
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                 <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                  ⚠️ Please fill all required fields (marked with *)
+                  ⚠️ Please fill all required fields (marked with *) and select a pickup location
                 </p>
               </div>
             )}
