@@ -286,8 +286,10 @@ const RiderOrderDetails = () => {
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="font-semibold capitalize text-lg">{item.item_type}</p>
-                          {item.item_data.brand && (
-                            <p className="text-sm text-muted-foreground">Brand: {item.item_data.brand}</p>
+                          {(item.item_data.Brand || item.item_data["Item Name"] || item.item_data["Restaurant/Shop Name"] || item.item_data["Shop/Store Name"]) && (
+                            <p className="text-sm text-muted-foreground">
+                              {item.item_data.Brand || item.item_data["Item Name"] || item.item_data["Restaurant/Shop Name"] || item.item_data["Shop/Store Name"]}
+                            </p>
                           )}
                         </div>
                         {item.pickup ? (
@@ -301,31 +303,31 @@ const RiderOrderDetails = () => {
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-sm">
-                        {item.item_data.quantity && (
+                        {(item.item_data.Quantity || item.item_data.quantity) && (
                           <div>
                             <span className="text-muted-foreground">Quantity:</span>{" "}
-                            <span className="font-medium">{item.item_data.quantity}</span>
+                            <span className="font-medium">{item.item_data.Quantity || item.item_data.quantity}</span>
                           </div>
                         )}
-                        {item.item_data.expected_price && (
+                        {(item.item_data["Expected Price (PKR)"] || item.item_data["Price (PKR)"]) && (
                           <div>
                             <span className="text-muted-foreground">Price:</span>{" "}
-                            <span className="font-medium">PKR {item.item_data.expected_price}</span>
+                            <span className="font-medium">PKR {item.item_data["Expected Price (PKR)"] || item.item_data["Price (PKR)"]}</span>
                           </div>
                         )}
                       </div>
 
-                      {item.item_data.description && (
+                      {(item.item_data["Item Description"] || item.item_data.description) && (
                         <div className="text-sm">
                           <span className="text-muted-foreground">Description:</span>{" "}
-                          <span>{item.item_data.description}</span>
+                          <span>{item.item_data["Item Description"] || item.item_data.description}</span>
                         </div>
                       )}
 
-                      {item.item_data.special_instructions && (
+                      {item.item_data["Special Instructions"] && (
                         <div className="text-sm bg-yellow-50 dark:bg-yellow-950 p-2 rounded">
                           <span className="text-muted-foreground">Special Instructions:</span>{" "}
-                          <span>{item.item_data.special_instructions}</span>
+                          <span>{item.item_data["Special Instructions"]}</span>
                         </div>
                       )}
 
