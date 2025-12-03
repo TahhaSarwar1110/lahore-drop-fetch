@@ -43,12 +43,9 @@ const PlaceOrder = () => {
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("within_city");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryLocation, setDeliveryLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [pickupAddress, setPickupAddress] = useState("");
-  const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDeliveryMap, setShowDeliveryMap] = useState(false);
-  const [showPickupMap, setShowPickupMap] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { calculateBundlePrice } = useBundlePricing();
@@ -146,17 +143,14 @@ const PlaceOrder = () => {
 
       if (orderError) throw orderError;
 
-      // Insert order items with pickup locations
+      // Insert order items with pickup locations from each item
       const itemsToInsert = orderItems.map((item) => ({
         order_id: orderData.id,
         item_type: item.itemType,
-        item_data: {
-          ...item.itemData,
-          pickup_address: pickupAddress || undefined,
-        },
+        item_data: item.itemData,
         image_url: item.imageUrl || null,
-        pickup_latitude: pickupLocation?.lat,
-        pickup_longitude: pickupLocation?.lng,
+        pickup_latitude: item.pickupLat,
+        pickup_longitude: item.pickupLng,
       }));
 
       const { error: itemsError } = await supabase
@@ -314,58 +308,6 @@ const PlaceOrder = () => {
                       </CollapsibleContent>
                     </Collapsible>
                   )}
-
-                  {/* Pickup Section - Optional, Collapsible */}
-                  <div className="border-t pt-6 space-y-4">
-                    <h3 className="text-lg font-semibold">Pickup Details (Optional)</h3>
-                    <p className="text-sm text-muted-foreground">
-                      If you want to specify a pickup location, you can add the address or select it on the map
-                    </p>
-                    
-                    <div className="space-y-2">
-                      <Label>Pickup Address (Optional)</Label>
-                      <Input
-                        placeholder="Enter pickup address"
-                        value={pickupAddress}
-                        onChange={(e) => setPickupAddress(e.target.value)}
-                      />
-                    </div>
-
-                    <Collapsible open={showPickupMap} onOpenChange={setShowPickupMap}>
-                      <CollapsibleTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-between"
-                        >
-                          <span className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            Select Pickup Location on Map (Optional)
-                          </span>
-                          {showPickupMap ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="pt-4">
-                        <div className="space-y-2">
-                          <p className="text-xs text-muted-foreground mb-2">
-                            Click on the map to mark pickup location
-                          </p>
-                          <LocationPickerMap
-                            onLocationSelect={(lat, lng) => setPickupLocation({ lat, lng })}
-                            label="Pickup Location"
-                          />
-                          {pickupLocation && (
-                            <p className="text-sm text-green-600">
-                              ✓ Location selected: {pickupLocation.lat.toFixed(4)}, {pickupLocation.lng.toFixed(4)}
-                            </p>
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </div>
 
                   <div className="border-t pt-6">
                     <h3 className="text-xl font-semibold mb-4">Add Items</h3>
