@@ -274,7 +274,7 @@ const RiderDashboard = () => {
           <div className="flex items-center justify-between pt-3 border-t">
             <span className="text-sm font-medium">Total Order Price:</span>
             <span className="font-bold text-primary">
-              PKR {order.order_items?.reduce((sum, item) => sum + (Number(item.item_data?.expected_price) || 0), 0).toLocaleString()}
+              PKR {order.order_items?.reduce((sum, item) => sum + (Number(item.item_data?.["Expected Price (PKR)"] || item.item_data?.["Price (PKR)"]) || 0), 0).toLocaleString()}
             </span>
           </div>
 
