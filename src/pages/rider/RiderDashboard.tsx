@@ -9,8 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Package, MapPin, Phone, User, Eye } from "lucide-react";
 import { AttachmentUpload } from "@/components/rider/AttachmentUpload";
-import { OrderDetailsDialog } from "@/components/rider/OrderDetailsDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LocationSharing } from "@/components/rider/LocationSharing";
 
 interface OrderAssignment {
   id: string;
@@ -20,7 +20,10 @@ interface OrderAssignment {
     id: string;
     created_at: string;
     delivery_address: string;
+    delivery_latitude: number | null;
+    delivery_longitude: number | null;
     status: string;
+    payment_status: string | null;
     profiles: {
       full_name: string;
       phone: string;
@@ -28,6 +31,9 @@ interface OrderAssignment {
     order_items: {
       id: string;
       item_type: string;
+      item_data: any;
+      pickup_latitude: number | null;
+      pickup_longitude: number | null;
     }[];
   };
 }
@@ -36,7 +42,6 @@ const RiderDashboard = () => {
   const [assignments, setAssignments] = useState<OrderAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<{ id: string; number: string } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -96,14 +101,20 @@ const RiderDashboard = () => {
             id,
             created_at,
             delivery_address,
+            delivery_latitude,
+            delivery_longitude,
             status,
+            payment_status,
             profiles (
               full_name,
               phone
             ),
             order_items (
               id,
-              item_type
+              item_type,
+              item_data,
+              pickup_latitude,
+              pickup_longitude
             )
           )
         `)
@@ -207,6 +218,9 @@ const RiderDashboard = () => {
 
   const renderOrderCard = (assignment: OrderAssignment) => {
     const order = assignment.orders;
+    const isPaymentConfirmed = order.payment_status === 'confirmed';
+    const canStartPickup = isPaymentConfirmed;
+
     return (
       <Card key={assignment.id} className="overflow-hidden">
         <CardHeader className="pb-3 bg-muted/50">
@@ -244,7 +258,27 @@ const RiderDashboard = () => {
             </div>
           </div>
 
-          {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
+          {/* Payment Status Banner */}
+          {!canStartPickup && order.status !== 'Delivered' && order.status !== 'Cancelled' && (
+            <div className="bg-yellow-50 dark:bg-yellow-950 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                ⏳ Waiting for Payment Confirmation
+              </p>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                You can start pickup and delivery once the customer's payment is confirmed by the manager.
+              </p>
+            </div>
+          )}
+
+          {/* Total Order Price */}
+          <div className="flex items-center justify-between pt-3 border-t">
+            <span className="text-sm font-medium">Total Order Price:</span>
+            <span className="font-bold text-primary">
+              PKR {order.order_items?.reduce((sum, item) => sum + (Number(item.item_data?.["Expected Price (PKR)"] || item.item_data?.["Price (PKR)"]) || 0), 0).toLocaleString()}
+            </span>
+          </div>
+
+          {order.status !== 'Delivered' && order.status !== 'Cancelled' && canStartPickup && (
             <>
               <div className="pt-3 border-t">
                 <p className="text-sm font-medium mb-2">
@@ -253,7 +287,7 @@ const RiderDashboard = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSelectedOrder({ id: order.id, number: order.id.slice(0, 8) })}
+                  onClick={() => navigate(`/rider/order/${order.id}`)}
                   className="w-full"
                 >
                   <Eye className="h-4 w-4 mr-2" />
@@ -261,7 +295,30 @@ const RiderDashboard = () => {
                 </Button>
               </div>
 
-              {order.status === 'Pending' || order.status === 'In Progress' ? (
+              {order.status === 'Picked' && (
+                <div className="pt-3 border-t space-y-3 bg-primary/5 -mx-6 px-6 py-4 mt-4 rounded-lg">
+                  <p className="text-sm font-medium text-primary">All items picked! Ready for delivery</p>
+                  <AttachmentUpload 
+                    orderId={order.id} 
+                    onUploadComplete={fetchAssignments}
+                  />
+                  <Button
+                    onClick={() => updateOrderStatus(order.id, 'Delivered')}
+                    disabled={updating === order.id}
+                    variant="default"
+                    className="w-full"
+                    size="lg"
+                  >
+                    {updating === order.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <><Package className="h-4 w-4 mr-2" />Mark as Delivered</>
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {(order.status === 'Pending' || order.status === 'In Progress' || order.status === 'Order Confirmed') && (
                 <div className="pt-3 border-t">
                   <Button
                     onClick={() => updateOrderStatus(order.id, 'Picked')}
@@ -271,37 +328,14 @@ const RiderDashboard = () => {
                     {updating === order.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      'Mark All Items as Picked'
+                      'Confirm All Items Picked'
                     )}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2 text-center">
                     All items must be picked individually first
                   </p>
                 </div>
-              ) : null}
-              
-              {order.status === 'Picked' ? (
-                <>
-                  <AttachmentUpload 
-                    orderId={order.id} 
-                    onUploadComplete={fetchAssignments}
-                  />
-                  <div className="pt-3 border-t">
-                    <Button
-                      onClick={() => updateOrderStatus(order.id, 'Delivered')}
-                      disabled={updating === order.id}
-                      variant="default"
-                      className="w-full"
-                    >
-                      {updating === order.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        'Mark as Delivered'
-                      )}
-                    </Button>
-                  </div>
-                </>
-              ) : null}
+              )}
             </>
           )}
         </CardContent>
@@ -312,6 +346,7 @@ const RiderDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header isAuthenticated={true} />
+      <LocationSharing />
       
       <main className="flex-1 py-4 md:py-8 bg-muted/30">
         <div className="container mx-auto px-4">
@@ -368,16 +403,6 @@ const RiderDashboard = () => {
       </main>
       
       <Footer />
-
-      {selectedOrder && (
-        <OrderDetailsDialog
-          open={!!selectedOrder}
-          onOpenChange={(open) => !open && setSelectedOrder(null)}
-          orderId={selectedOrder.id}
-          orderNumber={selectedOrder.number}
-          onPickupComplete={fetchAssignments}
-        />
-      )}
     </div>
   );
 };

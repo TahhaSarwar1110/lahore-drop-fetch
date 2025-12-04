@@ -1,4 +1,5 @@
 import { Package, Mail, Phone, MapPin, Truck, Facebook, Instagram } from "lucide-react";
+import logo from "@/assets/desi-drop-logo.jpeg";
 
 export const Footer = () => {
   return (
@@ -6,14 +7,8 @@ export const Footer = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="rounded-lg bg-gradient-to-br from-primary to-accent p-2 relative">
-                <Package className="h-5 w-5 text-primary-foreground" />
-                <Truck className="h-3 w-3 text-primary-foreground absolute -top-1 -right-1" />
-              </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Desi Drop
-              </span>
+            <div className="mb-4">
+              <img src={logo} alt="Desi Drop Logo" className="h-16 w-auto object-contain" />
             </div>
             <p className="text-sm text-muted-foreground mb-4">
               Your trusted delivery service from Lahore. Order anything, anytime!

@@ -52,6 +52,47 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          order_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          order_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          order_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_order"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_assignments: {
         Row: {
           assigned_at: string | null
@@ -135,28 +176,46 @@ export type Database = {
       }
       order_items: {
         Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
           created_at: string | null
           id: string
           image_url: string | null
           item_data: Json
           item_type: string
+          manager_feedback: string | null
           order_id: string
+          pickup_latitude: number | null
+          pickup_longitude: number | null
         }
         Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string | null
           id?: string
           image_url?: string | null
           item_data: Json
           item_type: string
+          manager_feedback?: string | null
           order_id: string
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
         }
         Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string | null
           id?: string
           image_url?: string | null
           item_data?: Json
           item_type?: string
+          manager_feedback?: string | null
           order_id?: string
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
         }
         Relationships: [
           {
@@ -199,32 +258,62 @@ export type Database = {
       }
       orders: {
         Row: {
+          additional_charges: number | null
+          charges_description: string | null
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string | null
           delivery_address: string
+          delivery_latitude: number | null
+          delivery_longitude: number | null
           id: string
           manager_feedback: string | null
+          payment_confirmed_at: string | null
+          payment_confirmed_by: string | null
+          payment_proof_name: string | null
+          payment_proof_url: string | null
+          payment_status: string | null
+          payment_submitted_at: string | null
           status: string
           user_id: string
         }
         Insert: {
+          additional_charges?: number | null
+          charges_description?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
           delivery_address: string
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           id?: string
           manager_feedback?: string | null
+          payment_confirmed_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_proof_name?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          payment_submitted_at?: string | null
           status?: string
           user_id: string
         }
         Update: {
+          additional_charges?: number | null
+          charges_description?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
           delivery_address?: string
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           id?: string
           manager_feedback?: string | null
+          payment_confirmed_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_proof_name?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
+          payment_submitted_at?: string | null
           status?: string
           user_id?: string
         }
@@ -259,6 +348,39 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_bundles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          items_allowed: number
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          items_allowed: number
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          items_allowed?: number
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -277,6 +399,30 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string
+        }
+        Relationships: []
+      }
+      rider_locations: {
+        Row: {
+          id: string
+          latitude: number
+          longitude: number
+          rider_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          latitude: number
+          longitude: number
+          rider_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          latitude?: number
+          longitude?: number
+          rider_id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -335,6 +481,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_customer_ids_for_rider_orders: {
+        Args: { _rider_id: string }
+        Returns: string[]
+      }
+      get_rider_ids_for_user_orders: {
+        Args: { _user_id: string }
+        Returns: string[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -342,9 +496,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      rider_assigned_to_order: {
+        Args: { _order_id: string; _rider_id: string }
+        Returns: boolean
+      }
       update_order_status: {
         Args: { p_new_status: string; p_order_id: string }
         Returns: undefined
+      }
+      user_owns_order: {
+        Args: { _order_id: string; _user_id: string }
+        Returns: boolean
       }
     }
     Enums: {

@@ -11,6 +11,7 @@ interface AssignOrderDialogProps {
   orderId: string;
   currentRiderId?: string;
   onAssigned: () => void;
+  hasRejectedItems?: boolean;
 }
 
 interface Rider {
@@ -19,7 +20,7 @@ interface Rider {
   phone: string;
 }
 
-export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned }: AssignOrderDialogProps) => {
+export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasRejectedItems = false }: AssignOrderDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [riders, setRiders] = useState<Rider[]>([]);
@@ -66,6 +67,11 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned }: Assig
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (hasRejectedItems) {
+      toast.error("All items must be approved before assigning a rider");
+      return;
+    }
+
     if (!selectedRider) {
       toast.error("Please select a rider");
       return;

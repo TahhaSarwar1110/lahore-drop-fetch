@@ -1,9 +1,22 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AssignOrderDialog } from "./AssignOrderDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Order {
   id: string;
@@ -41,6 +54,38 @@ const getStatusColor = (status: string) => {
 
 export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
   const navigate = useNavigate();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteClick = (orderId: string) => {
+    setOrderToDelete(orderId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!orderToDelete) return;
+
+    try {
+      setDeleting(true);
+      const { error } = await supabase
+        .from("orders")
+        .delete()
+        .eq("id", orderToDelete);
+
+      if (error) throw error;
+
+      toast.success("Order deleted successfully");
+      onOrderUpdated?.();
+      setDeleteDialogOpen(false);
+      setOrderToDelete(null);
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      toast.error("Failed to delete order");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="rounded-md border border-border bg-card">
@@ -96,6 +141,13 @@ export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
                       orderId={order.id}
                       onAssigned={() => onOrderUpdated?.()}
                     />
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDeleteClick(order.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -103,6 +155,27 @@ export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
           )}
         </TableBody>
       </Table>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this order? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

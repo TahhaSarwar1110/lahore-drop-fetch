@@ -10,8 +10,24 @@ import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem } from "@/components/OrderItemForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { X } from "lucide-react";
+import { X, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { z } from "zod";
+import { useBundlePricing } from "@/hooks/useBundlePricing";
+import { LocationPickerMap } from "@/components/map/LocationPickerMap";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+type DeliveryType = "within_city" | "out_of_city" | "out_of_country";
 
 const orderSchema = z.object({
   fullName: z.string().trim().min(2, "Name required"),
@@ -24,11 +40,15 @@ const PlaceOrder = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [deliveryType, setDeliveryType] = useState<DeliveryType>("within_city");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryLocation, setDeliveryLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showDeliveryMap, setShowDeliveryMap] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { calculateBundlePrice } = useBundlePricing();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -62,6 +82,14 @@ const PlaceOrder = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Reset delivery location when switching away from within_city
+  useEffect(() => {
+    if (deliveryType !== "within_city") {
+      setDeliveryLocation(null);
+      setShowDeliveryMap(false);
+    }
+  }, [deliveryType]);
+
   const handleAddItem = (item: OrderItem) => {
     setOrderItems([...orderItems, item]);
   };
@@ -93,25 +121,36 @@ const PlaceOrder = () => {
       orderSchema.parse({ fullName, phone, deliveryAddress });
       setLoading(true);
 
-      // Create order
+      // Calculate bundle pricing based on item count
+      const { bundle, price: bundlePrice } = calculateBundlePrice(orderItems.length);
+      
+      // Create order with bundle pricing and delivery location
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .insert({
           user_id: userId,
-          delivery_address: deliveryAddress,
+          delivery_address: `[${deliveryType.replace(/_/g, " ").toUpperCase()}] ${deliveryAddress}`,
+          delivery_latitude: deliveryLocation?.lat,
+          delivery_longitude: deliveryLocation?.lng,
           status: "Pending",
+          additional_charges: bundlePrice,
+          charges_description: bundle 
+            ? `Delivery charges (${bundle.name} - ${orderItems.length} items)` 
+            : "No delivery bundle applied",
         })
         .select()
         .single();
 
       if (orderError) throw orderError;
 
-      // Insert order items
+      // Insert order items with pickup locations from each item
       const itemsToInsert = orderItems.map((item) => ({
         order_id: orderData.id,
         item_type: item.itemType,
         item_data: item.itemData,
         image_url: item.imageUrl || null,
+        pickup_latitude: item.pickupLat,
+        pickup_longitude: item.pickupLng,
       }));
 
       const { error: itemsError } = await supabase
@@ -142,6 +181,17 @@ const PlaceOrder = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getDeliveryTypeLabel = (type: DeliveryType) => {
+    switch (type) {
+      case "within_city":
+        return "Within City";
+      case "out_of_city":
+        return "Out of City";
+      case "out_of_country":
+        return "Out of Country";
     }
   };
 
@@ -187,14 +237,77 @@ const PlaceOrder = () => {
                     />
                   </div>
 
+                  {/* Delivery Type Dropdown */}
                   <div className="space-y-2">
-                    <Label>Delivery Address</Label>
+                    <Label>
+                      Delivery Type
+                      <span className="text-red-500 ml-1">*</span>
+                    </Label>
+                    <Select
+                      value={deliveryType}
+                      onValueChange={(value: DeliveryType) => setDeliveryType(value)}
+                    >
+                      <SelectTrigger className="w-full bg-background">
+                        <SelectValue placeholder="Select delivery type" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background border border-border z-50">
+                        <SelectItem value="within_city">Within City</SelectItem>
+                        <SelectItem value="out_of_city">Out of City</SelectItem>
+                        <SelectItem value="out_of_country">Out of Country</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Delivery Address - Always shown */}
+                  <div className="space-y-2">
+                    <Label>
+                      Delivery Address
+                      <span className="text-red-500 ml-1">*</span>
+                    </Label>
                     <Input
                       placeholder="Complete delivery address"
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
                     />
                   </div>
+
+                  {/* Delivery Location Map - Only for within city, collapsible */}
+                  {deliveryType === "within_city" && (
+                    <Collapsible open={showDeliveryMap} onOpenChange={setShowDeliveryMap}>
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between"
+                        >
+                          <span className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            Select Delivery Location on Map (Optional)
+                          </span>
+                          {showDeliveryMap ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-4">
+                        <div className="space-y-2">
+                          <p className="text-xs text-muted-foreground mb-2">
+                            Click on the map to mark your delivery location
+                          </p>
+                          <LocationPickerMap
+                            onLocationSelect={(lat, lng) => setDeliveryLocation({ lat, lng })}
+                            label="Delivery Location"
+                          />
+                          {deliveryLocation && (
+                            <p className="text-sm text-green-600">
+                              ✓ Location selected: {deliveryLocation.lat.toFixed(4)}, {deliveryLocation.lng.toFixed(4)}
+                            </p>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
 
                   <div className="border-t pt-6">
                     <h3 className="text-xl font-semibold mb-4">Add Items</h3>
@@ -231,14 +344,43 @@ const PlaceOrder = () => {
                       ))}
                       
                       <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+                        <span className="font-semibold">Delivery Type:</span>
+                        <span>{getDeliveryTypeLabel(deliveryType)}</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
                         <span className="font-semibold">Total Items:</span>
                         <span>{orderItems.length}</span>
                       </div>
                       
-                      <div className="flex justify-between items-center p-4 bg-primary/10 rounded-lg">
-                        <span className="font-semibold">Expected Total:</span>
-                        <span className="text-xl font-bold text-primary">
+                      <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+                        <span className="font-semibold">Items Total:</span>
+                        <span className="text-lg font-bold">
                           PKR {calculateTotalPrice().toLocaleString()}
+                        </span>
+                      </div>
+                      
+                      {(() => {
+                        const { bundle, price } = calculateBundlePrice(orderItems.length);
+                        return bundle ? (
+                          <div className="flex justify-between items-center p-4 bg-accent/10 rounded-lg">
+                            <div>
+                              <span className="font-semibold block">Delivery Charges</span>
+                              <span className="text-xs text-muted-foreground">
+                                {bundle.name} ({orderItems.length} of {bundle.items_allowed} items)
+                              </span>
+                            </div>
+                            <span className="text-lg font-bold">
+                              PKR {price.toLocaleString()}
+                            </span>
+                          </div>
+                        ) : null;
+                      })()}
+                      
+                      <div className="flex justify-between items-center p-4 bg-primary/10 rounded-lg">
+                        <span className="font-semibold">Grand Total:</span>
+                        <span className="text-xl font-bold text-primary">
+                          PKR {(calculateTotalPrice() + calculateBundlePrice(orderItems.length).price).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -256,7 +398,7 @@ const PlaceOrder = () => {
                     {(!fullName || !phone || !deliveryAddress) && (
                       <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                         <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                          ⚠️ Please complete all required fields above
+                          ⚠️ Please complete all required fields (Name, Phone, Delivery Address)
                         </p>
                       </div>
                     )}

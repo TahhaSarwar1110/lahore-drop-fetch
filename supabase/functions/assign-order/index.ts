@@ -22,6 +22,12 @@ serve(async (req) => {
       }
     );
 
+    // Create service role client for admin operations
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // Verify admin user
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
 
@@ -33,17 +39,17 @@ serve(async (req) => {
       });
     }
 
-    // Check if user is admin
-    const { data: adminRole } = await supabaseClient
+    // Check if user is admin or manager
+    const { data: userRole } = await supabaseClient
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
-      .eq('role', 'admin')
+      .in('role', ['admin', 'manager'])
       .maybeSingle();
 
-    if (!adminRole) {
-      console.error('User is not admin');
-      return new Response(JSON.stringify({ error: 'Forbidden - Admin only' }), {
+    if (!userRole) {
+      console.error('User is not admin or manager');
+      return new Response(JSON.stringify({ error: 'Forbidden - Admin or Manager only' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -75,8 +81,24 @@ serve(async (req) => {
       });
     }
 
+    // Check if order has any rejected items
+    const { data: rejectedItems } = await supabaseClient
+      .from('order_items')
+      .select('id')
+      .eq('order_id', order_id)
+      .eq('approval_status', 'rejected');
+
+    if (rejectedItems && rejectedItems.length > 0) {
+      return new Response(JSON.stringify({ 
+        error: 'Cannot assign rider: all items must be approved first. This order has rejected items.' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Create assignment (will update if already exists due to UNIQUE constraint)
-    const { error: assignError } = await supabaseClient
+    const { error: assignError } = await supabaseAdmin
       .from('order_assignments')
       .upsert({
         order_id,

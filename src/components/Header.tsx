@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import logo from "@/assets/desi-drop-logo.jpeg";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { NotificationBell } from "./NotificationBell";
 
 export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
   const navigate = useNavigate();
@@ -58,62 +59,68 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-14 md:h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center">
-          <img src={logo} alt="Desi Drop Logo" className="h-10 md:h-12 w-auto" />
+      <div className="container mx-auto flex h-20 md:h-24 items-center justify-between px-4">
+        <Link to="/" className="flex items-center py-2">
+          <img src={logo} alt="Desi Drop Logo" className="h-16 md:h-20 w-auto object-contain" />
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
+          <Link to="/" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
             Home
           </Link>
           {isAuthenticated ? (
             <>
-              {(!isRider || isAdmin || isManager) && (
+              {(!isRider && !isManager) || isAdmin ? (
                 <>
-                  <Link to="/place-order" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/place-order" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                     Place Order
                   </Link>
-                  <Link to="/order-history" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/order-history" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                     My Orders
                   </Link>
-                  <Link to="/track" className="text-sm font-medium transition-colors hover:text-primary">
+                  <Link to="/track" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                     Track
                   </Link>
                 </>
-              )}
+              ) : null}
               {isRider && (
-                <Link to="/orders" className="text-sm font-medium transition-colors hover:text-primary">
+                <Link to="/orders" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                   Orders
                 </Link>
               )}
-              <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/contact" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                 Contact
               </Link>
               {isAdmin && (
-                <Link to="/admin" className="text-sm font-medium transition-colors hover:text-primary flex items-center gap-1">
+                <Link to="/admin" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110 flex items-center gap-1">
                   <Shield className="h-4 w-4" />
                   Admin
                 </Link>
               )}
               {isManager && (
-                <Link to="/manager" className="text-sm font-medium transition-colors hover:text-primary">
-                  Manager
-                </Link>
+                <>
+                  <Link to="/manager" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+                    Manager
+                  </Link>
+                  <Link to="/manager/pricing" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+                    Pricing
+                  </Link>
+                </>
               )}
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <NotificationBell />
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="transition-all duration-300 hover:scale-105">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
             </>
           ) : (
             <>
-              <Link to="/contact" className="text-sm font-medium transition-colors hover:text-primary">
+              <Link to="/contact" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
                 Contact
               </Link>
               <Link to="/login">
-                <Button variant="default" size="sm">
+                <Button variant="default" size="sm" className="transition-all duration-300 hover:scale-105">
                   Login
                 </Button>
               </Link>
@@ -124,7 +131,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
         {/* Mobile Navigation */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="transition-all duration-300 hover:scale-110">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
@@ -139,7 +146,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
               </Link>
               {isAuthenticated ? (
                 <>
-                  {(!isRider || isAdmin || isManager) && (
+                  {(!isRider && !isManager) || isAdmin ? (
                     <>
                       <Link 
                         to="/place-order" 
@@ -163,7 +170,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                         Track
                       </Link>
                     </>
-                  )}
+                  ) : null}
                   {isRider && (
                     <Link 
                       to="/orders" 
@@ -191,17 +198,26 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                     </Link>
                   )}
                   {isManager && (
-                    <Link 
-                      to="/manager" 
-                      className="text-base font-medium transition-colors hover:text-primary py-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Manager Dashboard
-                    </Link>
+                    <>
+                      <Link 
+                        to="/manager" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Manager Dashboard
+                      </Link>
+                      <Link 
+                        to="/manager/pricing" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Pricing Management
+                      </Link>
+                    </>
                   )}
                   <Button 
                     variant="outline" 
-                    className="justify-start" 
+                    className="justify-start transition-all duration-300 hover:scale-105" 
                     onClick={() => {
                       handleLogout();
                       setMobileMenuOpen(false);
@@ -221,7 +237,7 @@ export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
                     Contact
                   </Link>
                   <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="default" className="w-full">
+                    <Button variant="default" className="w-full transition-all duration-300 hover:scale-105">
                       Login
                     </Button>
                   </Link>

@@ -6,10 +6,13 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Package, XCircle, Eye, User, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RiderTrackingMap } from "@/components/admin/RiderTrackingMap";
 
 interface Order {
   id: string;
@@ -19,10 +22,19 @@ interface Order {
   user_id: string;
   manager_feedback: string | null;
   confirmed_at: string | null;
+  additional_charges: number;
+  charges_description: string | null;
   profiles: {
     full_name: string;
     phone: string;
   };
+  order_assignments?: {
+    rider_id: string;
+    profiles: {
+      full_name: string;
+      phone: string;
+    };
+  } | null;
 }
 
 const ManagerDashboard = () => {
@@ -31,6 +43,7 @@ const ManagerDashboard = () => {
   const [updating, setUpdating] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Record<string, string>>({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,80 +51,106 @@ const ManagerDashboard = () => {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      navigate("/login");
-      return;
-    }
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      console.log("Manager Dashboard - Session:", session ? "Authenticated" : "Not authenticated");
+      
+      if (!session) {
+        console.log("Manager Dashboard - No session, redirecting to login");
+        navigate("/login");
+        return;
+      }
 
-    setIsAuthenticated(true);
+      setIsAuthenticated(true);
 
-    // Check if user has manager role
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .eq("role", "manager");
+      // Check if user has manager or admin role
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .in("role", ["manager", "admin"]);
 
-    if (!roles || roles.length === 0) {
-      toast.error("Access denied. Manager role required.");
+      console.log("Manager Dashboard - Roles check:", { roles, rolesError, userId: session.user.id });
+
+      if (rolesError) {
+        console.error("Manager Dashboard - Error checking roles:", rolesError);
+        toast.error("Failed to verify manager role");
+        navigate("/");
+        return;
+      }
+
+      if (!roles || roles.length === 0) {
+        console.log("Manager Dashboard - User does not have manager role");
+        toast.error("Access denied. Manager role required.");
+        navigate("/");
+        return;
+      }
+
+      console.log("Manager Dashboard - Access granted, fetching orders");
+      fetchOrders();
+    } catch (error) {
+      console.error("Manager Dashboard - Auth check error:", error);
+      toast.error("Authentication error");
       navigate("/");
-      return;
     }
-
-    fetchOrders();
   };
 
   const fetchOrders = async () => {
     try {
+      console.log("Manager Dashboard - Fetching orders...");
       setLoading(true);
+      
       const { data, error } = await supabase
         .from("orders")
         .select(`
           *,
-          profiles:user_id (
+          profiles!fk_user (
             full_name,
             phone
+          ),
+          order_assignments (
+            rider_id,
+            profiles!order_assignments_rider_id_fkey (
+              full_name,
+              phone
+            )
           )
         `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setOrders(data || []);
+      console.log("Manager Dashboard - Orders fetch result:", { 
+        dataCount: data?.length, 
+        error,
+        sampleData: data?.[0] 
+      });
+
+      if (error) {
+        console.error("Manager Dashboard - Error fetching orders:", error);
+        throw error;
+      }
+      
+      // Transform the data to ensure profiles is an object, not an array
+      const transformedData = (data || []).map(order => ({
+        ...order,
+        profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
+      }));
+      
+      console.log("Manager Dashboard - Transformed orders:", transformedData.length);
+      setOrders(transformedData);
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("Manager Dashboard - Catch block error:", error);
       toast.error("Failed to load orders");
     } finally {
       setLoading(false);
+      console.log("Manager Dashboard - Fetch orders completed");
     }
   };
 
-  const confirmOrder = async (orderId: string) => {
-    try {
-      setUpdating(orderId);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const { error } = await supabase
-        .from("orders")
-        .update({
-          status: "Order Received",
-          confirmed_by: user?.id,
-          confirmed_at: new Date().toISOString(),
-        })
-        .eq("id", orderId);
-
-      if (error) throw error;
-
-      toast.success("Order confirmed successfully");
-      fetchOrders();
-    } catch (error) {
-      console.error("Error confirming order:", error);
-      toast.error("Failed to confirm order");
-    } finally {
-      setUpdating(null);
-    }
+  const handleViewDetails = (orderId: string) => {
+    navigate(`/manager/orders/${orderId}`);
   };
+
 
   const sendFeedback = async (orderId: string) => {
     try {
@@ -140,6 +179,7 @@ const ManagerDashboard = () => {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       "Pending": "bg-yellow-500",
+      "Order Confirmed": "bg-blue-500",
       "Order Received": "bg-blue-500",
       "Shopper Assigned": "bg-purple-500",
       "Purchasing": "bg-orange-500",
@@ -167,9 +207,30 @@ const ManagerDashboard = () => {
 
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-6">Manager Dashboard</h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Manager Dashboard</h1>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Orders</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Order Confirmed">Order Confirmed</SelectItem>
+                <SelectItem value="Shopper Assigned">Shopper Assigned</SelectItem>
+                <SelectItem value="Purchasing">Purchasing</SelectItem>
+                <SelectItem value="In Delivery">In Delivery</SelectItem>
+                <SelectItem value="Delivered">Delivered</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          {orders.length === 0 ? (
+          {/* Rider Tracking Map */}
+          <div className="mb-8">
+            <RiderTrackingMap />
+          </div>
+
+          {orders.filter(order => statusFilter === "all" || order.status === statusFilter).length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
@@ -178,7 +239,9 @@ const ManagerDashboard = () => {
             </Card>
           ) : (
             <div className="grid gap-4">
-              {orders.map((order) => (
+              {orders.filter(order => statusFilter === "all" || order.status === statusFilter).map((order) => {
+                const assignedRider = order.order_assignments;
+                return (
                 <Card key={order.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -206,6 +269,28 @@ const ManagerDashboard = () => {
                       <p className="text-sm text-muted-foreground">{order.delivery_address}</p>
                     </div>
 
+                    {assignedRider && (
+                      <div className="bg-primary/5 p-3 rounded-md border border-primary/20">
+                        <div className="flex items-center gap-2 mb-1">
+                          <User className="h-4 w-4 text-primary" />
+                          <p className="text-sm font-medium">Assigned Rider</p>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {assignedRider.profiles.full_name} - {assignedRider.profiles.phone}
+                        </p>
+                      </div>
+                    )}
+
+                    {order.additional_charges > 0 && (
+                      <div className="bg-primary/10 p-3 rounded-md">
+                        <p className="text-sm font-medium mb-1">Total Order Price</p>
+                        <p className="text-lg font-bold text-primary">PKR {order.additional_charges.toFixed(2)}</p>
+                        {order.charges_description && (
+                          <p className="text-sm text-muted-foreground mt-1">{order.charges_description}</p>
+                        )}
+                      </div>
+                    )}
+
                     {order.manager_feedback && (
                       <div className="bg-muted p-3 rounded-md">
                         <p className="text-sm font-medium mb-1">Previous Feedback</p>
@@ -213,10 +298,19 @@ const ManagerDashboard = () => {
                       </div>
                     )}
 
-                    {order.status === "Pending" && (
-                      <div className="space-y-4 pt-4 border-t">
+                    <div className="pt-4 border-t space-y-3">
+                      <Button
+                        onClick={() => handleViewDetails(order.id)}
+                        variant="default"
+                        className="w-full"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details & Approve Items
+                      </Button>
+
+                      {order.status === "Pending" && feedback[order.id] && (
                         <div className="space-y-2">
-                          <Label htmlFor={`feedback-${order.id}`}>Feedback (Optional)</Label>
+                          <Label htmlFor={`feedback-${order.id}`}>Order Feedback (Optional)</Label>
                           <Textarea
                             id={`feedback-${order.id}`}
                             placeholder="Add feedback for the customer..."
@@ -224,39 +318,22 @@ const ManagerDashboard = () => {
                             onChange={(e) => setFeedback({ ...feedback, [order.id]: e.target.value })}
                             rows={3}
                           />
-                        </div>
-
-                        <div className="flex gap-2">
                           <Button
-                            onClick={() => confirmOrder(order.id)}
+                            variant="outline"
+                            onClick={() => sendFeedback(order.id)}
                             disabled={updating === order.id}
-                            className="flex-1"
+                            className="w-full"
                           >
                             {updating === order.id ? (
                               <Loader2 className="h-4 w-4 animate-spin mr-2" />
                             ) : (
-                              <CheckCircle className="h-4 w-4 mr-2" />
+                              <XCircle className="h-4 w-4 mr-2" />
                             )}
-                            Confirm Order
+                            Send Feedback
                           </Button>
-
-                          {feedback[order.id] && (
-                            <Button
-                              variant="outline"
-                              onClick={() => sendFeedback(order.id)}
-                              disabled={updating === order.id}
-                            >
-                              {updating === order.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              ) : (
-                                <XCircle className="h-4 w-4 mr-2" />
-                              )}
-                              Send Feedback
-                            </Button>
-                          )}
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     {order.confirmed_at && (
                       <div className="text-sm text-muted-foreground pt-4 border-t">
@@ -265,7 +342,7 @@ const ManagerDashboard = () => {
                     )}
                   </CardContent>
                 </Card>
-              ))}
+              )})}
             </div>
           )}
         </div>

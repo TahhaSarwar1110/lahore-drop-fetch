@@ -3,20 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { supabase } from "@/integrations/supabase/client";
 import { Package, Eye, MapPin } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface Order {
   id: string;
@@ -28,6 +21,9 @@ interface Order {
     item_type: string;
     item_data: Record<string, string>;
     image_url: string | null;
+    approval_status: string | null;
+    manager_feedback: string | null;
+    approved_at: string | null;
   }[];
 }
 
@@ -69,7 +65,10 @@ const OrderHistory = () => {
           id,
           item_type,
           item_data,
-          image_url
+          image_url,
+          approval_status,
+          manager_feedback,
+          approved_at
         )
       `)
       .eq("user_id", userId)
@@ -97,12 +96,14 @@ const OrderHistory = () => {
   };
 
   const calculateTotalPrice = (items: Order["order_items"]) => {
-    return items.reduce((total, item) => {
-      const priceField = Object.entries(item.item_data).find(
-        ([key]) => key.toLowerCase().includes("price")
-      );
-      return total + (priceField ? parseFloat(priceField[1]) || 0 : 0);
-    }, 0);
+    return items
+      .filter(item => item.approval_status === 'approved')
+      .reduce((total, item) => {
+        const priceField = Object.entries(item.item_data).find(
+          ([key]) => key.toLowerCase().includes("price")
+        );
+        return total + (priceField ? parseFloat(priceField[1]) || 0 : 0);
+      }, 0);
   };
 
   return (
@@ -173,48 +174,14 @@ const OrderHistory = () => {
                       </div>
 
                       <div className="flex gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Order Details</DialogTitle>
-                              <DialogDescription>
-                                Order #{order.id.slice(0, 8)} - {format(new Date(order.created_at), "PPP")}
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 mt-4">
-                              {order.order_items.map((item) => (
-                                <Card key={item.id}>
-                                  <CardContent className="p-4">
-                                    <p className="font-semibold text-primary mb-2">
-                                      {item.item_type}
-                                    </p>
-                                    <div className="space-y-1 text-sm">
-                                      {Object.entries(item.item_data).map(([key, value]) => (
-                                        <p key={key} className="text-muted-foreground">
-                                          <span className="font-medium text-foreground">{key}:</span>{" "}
-                                          {value}
-                                        </p>
-                                      ))}
-                                    </div>
-                                    {item.image_url && (
-                                      <img
-                                        src={item.image_url}
-                                        alt="Item"
-                                        className="mt-3 rounded-lg max-h-48 object-cover"
-                                      />
-                                    )}
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => navigate(`/order-details?orderId=${order.id}`)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
 
                         <Button
                           variant="default"
