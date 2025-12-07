@@ -300,44 +300,44 @@ const RiderOrderDetails = () => {
           <div className="space-y-4">
             {items.map((item) => (
               <Card key={item.id}>
-                <CardContent className="pt-4">
-                  <div className="flex gap-4">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     {item.image_url ? (
                       <img
                         src={item.image_url}
                         alt="Item"
-                        className="w-24 h-24 object-cover rounded-lg border"
+                        className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg border flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center">
+                      <div className="w-full sm:w-20 h-32 sm:h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
                         <ImageIcon className="h-8 w-8 text-muted-foreground" />
                       </div>
                     )}
                     
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-semibold capitalize text-lg">{item.item_type}</p>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold capitalize text-base sm:text-lg truncate">{item.item_type}</p>
                           {(item.item_data.Brand || item.item_data["Item Name"] || item.item_data["Restaurant/Shop Name"] || item.item_data["Shop/Store Name"]) && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground truncate">
                               {item.item_data.Brand || item.item_data["Item Name"] || item.item_data["Restaurant/Shop Name"] || item.item_data["Shop/Store Name"]}
                             </p>
                           )}
                         </div>
                         {item.pickup ? (
-                          <Badge className="bg-green-500">
+                          <Badge className="bg-green-500 flex-shrink-0">
                             <Check className="h-3 w-3 mr-1" />
                             Picked
                           </Badge>
                         ) : (
-                          <Badge variant="outline">Pending</Badge>
+                          <Badge variant="outline" className="flex-shrink-0">Pending</Badge>
                         )}
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                         {(item.item_data.Quantity || item.item_data.quantity) && (
                           <div>
-                            <span className="text-muted-foreground">Quantity:</span>{" "}
+                            <span className="text-muted-foreground">Qty:</span>{" "}
                             <span className="font-medium">{item.item_data.Quantity || item.item_data.quantity}</span>
                           </div>
                         )}
@@ -352,14 +352,14 @@ const RiderOrderDetails = () => {
                       {(item.item_data["Item Description"] || item.item_data.description) && (
                         <div className="text-sm">
                           <span className="text-muted-foreground">Description:</span>{" "}
-                          <span>{item.item_data["Item Description"] || item.item_data.description}</span>
+                          <span className="break-words">{item.item_data["Item Description"] || item.item_data.description}</span>
                         </div>
                       )}
 
                       {item.item_data["Special Instructions"] && (
                         <div className="text-sm bg-yellow-50 dark:bg-yellow-950 p-2 rounded">
                           <span className="text-muted-foreground">Special Instructions:</span>{" "}
-                          <span>{item.item_data["Special Instructions"]}</span>
+                          <span className="break-words">{item.item_data["Special Instructions"]}</span>
                         </div>
                       )}
 
@@ -370,7 +370,7 @@ const RiderOrderDetails = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => openDirections(item.pickup_latitude!, item.pickup_longitude!)}
-                            className="text-primary"
+                            className="text-primary w-full sm:w-auto"
                           >
                             <Navigation className="h-4 w-4 mr-2" />
                             Get Pickup Directions
@@ -396,11 +396,12 @@ const RiderOrderDetails = () => {
                           )}
                         </div>
                       ) : (
-                        <div className="flex gap-2 pt-2 border-t">
+                        <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t">
                           <Button
                             size="sm"
                             onClick={() => handleMarkAsPicked(item.id)}
                             disabled={uploading === item.id}
+                            className="w-full sm:w-auto"
                           >
                             {uploading === item.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
@@ -411,7 +412,7 @@ const RiderOrderDetails = () => {
                               </>
                             )}
                           </Button>
-                          <label>
+                          <label className="w-full sm:w-auto">
                             <input
                               type="file"
                               accept="image/*"
@@ -427,6 +428,7 @@ const RiderOrderDetails = () => {
                               variant="outline"
                               disabled={uploading === item.id}
                               asChild
+                              className="w-full"
                             >
                               <span>
                                 <Upload className="h-4 w-4 mr-1" />
