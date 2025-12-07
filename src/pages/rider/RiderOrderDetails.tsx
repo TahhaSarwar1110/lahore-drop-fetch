@@ -8,6 +8,7 @@ import { Loader2, Check, Upload, Image as ImageIcon, ArrowLeft, MapPin, Navigati
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { RiderMapView } from "@/components/map/RiderMapView";
 
 interface OrderItem {
   id: string;
@@ -231,11 +232,42 @@ const RiderOrderDetails = () => {
             </p>
           </div>
 
-          {/* Delivery Location Card */}
+          {/* Route Map */}
           <Card className="mb-6">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MapPin className="h-5 w-5 text-primary" />
+                Route Map
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RiderMapView
+                locations={[
+                  ...items
+                    .filter(item => item.pickup_latitude && item.pickup_longitude)
+                    .map((item) => ({
+                      lat: item.pickup_latitude!,
+                      lng: item.pickup_longitude!,
+                      label: `Pickup: ${item.item_data?.Brand || item.item_data?.["Item Name"] || item.item_type}`,
+                      type: "pickup" as const,
+                    })),
+                  ...(order.delivery_latitude && order.delivery_longitude ? [{
+                    lat: order.delivery_latitude,
+                    lng: order.delivery_longitude,
+                    label: `Delivery: ${order.delivery_address}`,
+                    type: "delivery" as const,
+                  }] : []),
+                ]}
+                height="300px"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Delivery Location Card */}
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Navigation className="h-5 w-5 text-primary" />
                 Delivery Location
               </CardTitle>
             </CardHeader>
