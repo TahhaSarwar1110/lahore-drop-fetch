@@ -14,6 +14,7 @@ import { X, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Select,
   SelectContent,
@@ -197,7 +198,7 @@ const PlaceOrder = () => {
 
   return (
     <div className="min-h-screen flex flex-col tap-highlight-none overflow-x-hidden">
-      <Header isAuthenticated={isAuthenticated} />
+      <Header />
 
       <main className="flex-1 pb-8 native-scroll overflow-x-hidden">
         <div className="container mx-auto px-0 sm:px-4 max-w-full overflow-x-hidden">

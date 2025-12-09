@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Package, Eye, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Order {
   id: string;
@@ -108,7 +109,7 @@ const OrderHistory = () => {
 
   return (
     <div className="min-h-screen flex flex-col tap-highlight-none">
-      <Header isAuthenticated={isAuthenticated} />
+      <Header />
 
       <main className="flex-1 py-4 sm:py-8 native-scroll">
         <div className="container mx-auto px-4">

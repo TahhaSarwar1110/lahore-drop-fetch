@@ -6,57 +6,18 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { PricingBundles } from "@/components/PricingBundles";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import clothingImg from "@/assets/clothing-delivery.jpg";
 import foodImg from "@/assets/food-delivery.jpg";
 import groceriesImg from "@/assets/groceries-delivery.jpg";
 import giftsImg from "@/assets/gifts-delivery.jpg";
 
 const Home = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isRider, setIsRider] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-      
-      if (session?.user) {
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .eq("role", "rider");
-        
-        setIsRider(roles && roles.length > 0);
-      }
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setIsAuthenticated(!!session);
-      
-      if (session?.user) {
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .eq("role", "rider");
-        
-        setIsRider(roles && roles.length > 0);
-      } else {
-        setIsRider(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { isAuthenticated, isRider } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={isAuthenticated} />
+      <Header />
       
       <main className="flex-1">
         {/* Hero Section */}
@@ -344,9 +305,9 @@ const Home = () => {
                     className="animate-[slide-in-right_1.5s_ease-out_infinite]"
                   />
                 </svg>
-                <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '0.6s' }}>Payment</h3>
+                <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '0.6s' }}>Secure Payment</h3>
                 <p className="text-sm text-muted-foreground">
-                  Secure payment processing
+                  Pay online securely
                 </p>
               </div>
 
@@ -356,8 +317,8 @@ const Home = () => {
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
                     const target = e.currentTarget;
-                    target.classList.add('animate-bounce');
-                    setTimeout(() => target.classList.remove('animate-bounce'), 1000);
+                    target.classList.add('animate-[wiggle_0.5s_ease-in-out]');
+                    setTimeout(() => target.classList.remove('animate-[wiggle_0.5s_ease-in-out]'), 500);
                   }}
                 >
                   <ShoppingBagIcon className="h-10 w-10" />
@@ -399,7 +360,7 @@ const Home = () => {
                 </svg>
                 <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '0.9s' }}>We Shop For You</h3>
                 <p className="text-sm text-muted-foreground">
-                  Our team gets your items
+                  Our team picks up your items
                 </p>
               </div>
 
@@ -409,18 +370,50 @@ const Home = () => {
                   className="relative rounded-full bg-gradient-to-br from-primary to-accent p-6 text-primary-foreground cursor-pointer transition-all duration-300 hover:scale-110 hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] active:scale-95 z-10"
                   onClick={(e) => {
                     const target = e.currentTarget;
-                    target.classList.add('animate-pulse');
-                    setTimeout(() => target.classList.remove('animate-pulse'), 1000);
+                    target.classList.add('animate-ping');
+                    setTimeout(() => target.classList.remove('animate-ping'), 500);
                   }}
                 >
                   <TruckIcon className="h-10 w-10" />
                 </div>
                 <h3 className="font-semibold text-lg group-hover/cascade:text-primary transition-colors" style={{ transitionDelay: '1.2s' }}>Fast Delivery</h3>
                 <p className="text-sm text-muted-foreground">
-                  Quick delivery to your door
+                  Get it delivered to your door
                 </p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Pricing Bundles Section */}
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-4">Delivery Pricing</h2>
+            <p className="text-center text-muted-foreground mb-8">
+              Choose the bundle that fits your needs
+            </p>
+            <PricingBundles />
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="py-16 bg-gradient-to-r from-primary to-accent text-primary-foreground">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl font-bold mb-4 animate-fade-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>Ready to Order?</h2>
+            <p className="text-lg mb-8 opacity-90 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
+              Start shopping from Lahore's best stores today!
+            </p>
+            <Link to={isAuthenticated ? "/place-order" : "/signup"}>
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="text-lg px-8 animate-fade-in transition-all duration-300 hover:scale-105 hover:shadow-lg" 
+                style={{ animationDelay: '0.5s', animationFillMode: 'both' }}
+              >
+                {isAuthenticated ? "Place Your Order" : "Create Account"}
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </section>
       </main>
