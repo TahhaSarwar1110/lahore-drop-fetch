@@ -250,7 +250,7 @@ const ManagerOrderDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header isAuthenticated={isAuthenticated} />
+        <Header />
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -262,7 +262,7 @@ const ManagerOrderDetails = () => {
   if (!order) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header isAuthenticated={isAuthenticated} />
+        <Header />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">Order not found</p>
         </div>
@@ -275,7 +275,7 @@ const ManagerOrderDetails = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={isAuthenticated} />
+      <Header />
 
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4 max-w-6xl">

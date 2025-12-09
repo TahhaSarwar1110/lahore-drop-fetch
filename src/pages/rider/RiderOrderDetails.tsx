@@ -194,7 +194,7 @@ const RiderOrderDetails = () => {
   if (!order) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header isAuthenticated={true} />
+        <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-xl font-semibold">Order not found</h2>
@@ -210,7 +210,7 @@ const RiderOrderDetails = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={true} />
+      <Header />
       
       <main className="flex-1 py-4 md:py-8 bg-muted/30">
         <div className="container mx-auto px-4">
