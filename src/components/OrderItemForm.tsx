@@ -164,11 +164,11 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="space-y-2">
-        <Label>Item Type</Label>
+        <label className="mobile-label">Item Type</label>
         <Select value={itemType} onValueChange={setItemType}>
-          <SelectTrigger className="bg-background">
+          <SelectTrigger className="mobile-input">
             <SelectValue placeholder="Select item type" />
           </SelectTrigger>
           <SelectContent className="bg-background border border-border z-50">
@@ -185,12 +185,13 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
         <>
           {itemTypeFields[itemType].map((field) => (
             <div key={field.label} className="space-y-2">
-              <Label>
+              <label className="mobile-label">
                 {field.label}
-                {field.required && <span className="text-red-500 ml-1">*</span>}
-              </Label>
+                {field.required && <span className="text-destructive ml-1">*</span>}
+              </label>
               {field.type === "textarea" ? (
                 <Textarea
+                  className="mobile-input min-h-[100px] py-3"
                   placeholder={field.placeholder}
                   value={formData[field.label] || ""}
                   onChange={(e) => handleFieldChange(field.label, e.target.value)}
@@ -198,6 +199,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
                 />
               ) : (
                 <Input
+                  className="mobile-input"
                   type={field.type}
                   placeholder={field.placeholder}
                   value={formData[field.label] || ""}
@@ -208,29 +210,30 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
           ))}
 
           <div className="space-y-2">
-            <Label>Attach Image (Optional)</Label>
-            <div className="flex items-center gap-2">
+            <label className="mobile-label">Attach Image (Optional)</label>
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="flex-1"
+                className="mobile-input flex-1 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary/10 file:text-primary"
               />
               {imageFile && (
-                <span className="text-sm text-muted-foreground">
-                  <Upload className="h-4 w-4 inline mr-1" />
-                  {imageFile.name}
+                <span className="text-sm text-muted-foreground flex items-center">
+                  <Upload className="h-4 w-4 mr-1" />
+                  <span className="truncate max-w-[150px]">{imageFile.name}</span>
                 </span>
               )}
             </div>
           </div>
 
           <div className="border-t pt-4 space-y-4">
-            <h4 className="text-sm font-medium text-muted-foreground">Pickup Details (Optional)</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground">Pickup Details (Optional)</h4>
             
             <div className="space-y-2">
-              <Label>Pickup Address (Optional)</Label>
+              <label className="mobile-label">Pickup Address (Optional)</label>
               <Input
+                className="mobile-input"
                 placeholder="Enter pickup address for this item"
                 value={formData["Pickup Address"] || ""}
                 onChange={(e) => handleFieldChange("Pickup Address", e.target.value)}
@@ -239,10 +242,10 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
 
             <Collapsible open={showPickupMap} onOpenChange={setShowPickupMap}>
               <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full justify-between">
+                <Button variant="outline" className="w-full justify-between h-12 rounded-xl">
                   <span className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    Select Pickup Location on Map (Optional)
+                    <span className="text-sm">Select Pickup on Map</span>
                   </span>
                   {showPickupMap ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 </Button>
@@ -255,7 +258,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
                     label="Pickup Location"
                   />
                   {pickupLocation && (
-                    <p className="text-sm text-green-600">
+                    <p className="text-sm text-green-600 font-medium">
                       ✓ Location: {pickupLocation.lat.toFixed(4)}, {pickupLocation.lng.toFixed(4)}
                     </p>
                   )}
@@ -264,20 +267,20 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
             </Collapsible>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3 pt-2">
             {!isFormValid() && (
-              <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                <p className="text-sm text-yellow-700 dark:text-yellow-300">
+              <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl">
+                <p className="text-sm text-accent-foreground">
                   ⚠️ Please fill all required fields (marked with *)
                 </p>
               </div>
             )}
             <Button 
               onClick={handleAddItem} 
-              className="w-full"
+              className="w-full mobile-button"
               disabled={!isFormValid()}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-5 w-5 mr-2" />
               Add Item to Order
             </Button>
           </div>

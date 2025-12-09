@@ -196,13 +196,13 @@ const PlaceOrder = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col tap-highlight-none">
       <Header isAuthenticated={isAuthenticated} />
 
-      <main className="flex-1 py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Left - Image */}
+      <main className="flex-1 pb-8 native-scroll">
+        <div className="container mx-auto px-0 sm:px-4">
+          <div className="grid lg:grid-cols-2 gap-0 lg:gap-8">
+            {/* Left - Image - Hidden on mobile */}
             <div className="hidden lg:flex items-center justify-center bg-gradient-to-br from-primary to-accent rounded-lg p-12">
               <div className="text-primary-foreground text-center space-y-6">
                 <h1 className="text-4xl font-bold">Place Your Order</h1>
@@ -213,14 +213,15 @@ const PlaceOrder = () => {
             </div>
 
             {/* Right - Form */}
-            <div className="space-y-6">
-              <Card>
-                <CardContent className="p-6 space-y-6">
-                  <h2 className="text-2xl font-bold">Order Details</h2>
+            <div className="space-y-0 sm:space-y-6">
+              <Card className="mobile-card border-0 sm:border rounded-none sm:rounded-2xl shadow-none sm:shadow-lg">
+                <CardContent className="p-4 sm:p-6 space-y-5">
+                  <h2 className="mobile-header">Order Details</h2>
 
                   <div className="space-y-2">
-                    <Label>Full Name</Label>
+                    <label className="mobile-label">Full Name</label>
                     <Input
+                      className="mobile-input"
                       placeholder="Your name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
@@ -228,8 +229,9 @@ const PlaceOrder = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Phone Number</Label>
+                    <label className="mobile-label">Phone Number</label>
                     <Input
+                      className="mobile-input"
                       type="tel"
                       placeholder="Your phone"
                       value={phone}
@@ -239,15 +241,15 @@ const PlaceOrder = () => {
 
                   {/* Delivery Type Dropdown */}
                   <div className="space-y-2">
-                    <Label>
+                    <label className="mobile-label">
                       Delivery Type
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
+                      <span className="text-destructive ml-1">*</span>
+                    </label>
                     <Select
                       value={deliveryType}
                       onValueChange={(value: DeliveryType) => setDeliveryType(value)}
                     >
-                      <SelectTrigger className="w-full bg-background">
+                      <SelectTrigger className="mobile-input w-full">
                         <SelectValue placeholder="Select delivery type" />
                       </SelectTrigger>
                       <SelectContent className="bg-background border border-border z-50">
@@ -260,11 +262,12 @@ const PlaceOrder = () => {
 
                   {/* Delivery Address - Always shown */}
                   <div className="space-y-2">
-                    <Label>
+                    <label className="mobile-label">
                       Delivery Address
-                      <span className="text-red-500 ml-1">*</span>
-                    </Label>
+                      <span className="text-destructive ml-1">*</span>
+                    </label>
                     <Input
+                      className="mobile-input"
                       placeholder="Complete delivery address"
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
@@ -387,24 +390,24 @@ const PlaceOrder = () => {
                   )}
 
                   {/* Always show Place Order button with validation */}
-                  <div className="border-t pt-6 space-y-3">
+                  <div className="border-t pt-5 space-y-3">
                     {orderItems.length === 0 && (
-                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl">
+                        <p className="text-sm text-accent-foreground">
                           ⚠️ Please add at least one item to your order
                         </p>
                       </div>
                     )}
                     {(!fullName || !phone || !deliveryAddress) && (
-                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl">
+                        <p className="text-sm text-accent-foreground">
                           ⚠️ Please complete all required fields (Name, Phone, Delivery Address)
                         </p>
                       </div>
                     )}
                     <Button
                       onClick={handleSubmitOrder}
-                      className="w-full"
+                      className="w-full mobile-button"
                       size="lg"
                       disabled={loading}
                     >

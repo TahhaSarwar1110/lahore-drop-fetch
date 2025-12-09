@@ -107,14 +107,14 @@ const OrderHistory = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col tap-highlight-none">
       <Header isAuthenticated={isAuthenticated} />
 
-      <main className="flex-1 py-12">
+      <main className="flex-1 py-4 sm:py-8 native-scroll">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold">My Orders</h1>
-            <Button onClick={() => navigate("/place-order")}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h1 className="mobile-header">My Orders</h1>
+            <Button onClick={() => navigate("/place-order")} className="mobile-button w-full sm:w-auto">
               <Package className="h-4 w-4 mr-2" />
               Place New Order
             </Button>
@@ -125,49 +125,49 @@ const OrderHistory = () => {
               <p className="text-muted-foreground">Loading orders...</p>
             </div>
           ) : orders.length === 0 ? (
-            <Card>
+            <Card className="mobile-card">
               <CardContent className="py-12 text-center">
                 <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-lg text-muted-foreground mb-4">No orders yet</p>
-                <Button onClick={() => navigate("/place-order")}>
+                <Button onClick={() => navigate("/place-order")} className="mobile-button">
                   Place Your First Order
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {orders.map((order) => (
-                <Card key={order.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
+                <Card key={order.id} className="mobile-card active:scale-[0.99] transition-transform">
+                  <CardHeader className="pb-2 px-4">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-base sm:text-lg truncate">
+                          Order #{order.id.slice(0, 8)}
+                        </CardTitle>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                           {format(new Date(order.created_at), "PPP")}
                         </p>
                       </div>
-                      <Badge className={getStatusColor(order.status)}>
+                      <Badge className={`${getStatusColor(order.status)} text-xs shrink-0`}>
                         {order.status}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
+                  <CardContent className="px-4 pb-4">
+                    <div className="space-y-3">
                       <div className="flex items-start gap-2">
-                        <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
-                        <p className="text-sm">{order.delivery_address}</p>
+                        <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                        <p className="text-sm line-clamp-2">{order.delivery_address}</p>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
+                      <div className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded-xl text-sm">
+                        <div className="flex items-center gap-2">
                           <span className="text-muted-foreground">Items:</span>
-                          <span className="ml-2 font-semibold">
-                            {order.order_items.length}
-                          </span>
+                          <span className="font-semibold">{order.order_items.length}</span>
                         </div>
-                        <div>
+                        <div className="flex items-center gap-2">
                           <span className="text-muted-foreground">Total:</span>
-                          <span className="ml-2 font-semibold text-primary">
+                          <span className="font-semibold text-primary">
                             PKR {calculateTotalPrice(order.order_items).toLocaleString()}
                           </span>
                         </div>
@@ -176,19 +176,19 @@ const OrderHistory = () => {
                       <div className="flex gap-2">
                         <Button 
                           variant="outline" 
-                          size="sm"
+                          className="flex-1 h-11 rounded-xl text-sm"
                           onClick={() => navigate(`/order-details?orderId=${order.id}`)}
                         >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details
+                          <Eye className="h-4 w-4 mr-1.5" />
+                          Details
                         </Button>
 
                         <Button
                           variant="default"
-                          size="sm"
+                          className="flex-1 h-11 rounded-xl text-sm"
                           onClick={() => navigate(`/track?orderId=${order.id}`)}
                         >
-                          Track Order
+                          Track
                         </Button>
                       </div>
                     </div>
