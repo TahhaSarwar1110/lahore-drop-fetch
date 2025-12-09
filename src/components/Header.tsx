@@ -1,47 +1,22 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import logo from "@/assets/desi-drop-logo.jpeg";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NotificationBell } from "./NotificationBell";
+import { useAuth } from "@/hooks/useAuth";
 
-export const Header = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
+export const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [userRoles, setUserRoles] = useState<string[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      checkUserRole();
-    } else {
-      setUserRoles([]);
-    }
-  }, [isAuthenticated]);
-
-  const checkUserRole = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id);
-      
-      if (roles && roles.length > 0) {
-        setUserRoles(roles.map(r => r.role));
-      }
-    }
-  };
-
-  const isAdmin = userRoles.includes('admin');
-  const isManager = userRoles.includes('manager');
-  const isRider = userRoles.includes('rider');
+  
+  const { isAuthenticated, isAdmin, isManager, isRider, signOut, isLoading } = useAuth();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await signOut();
     if (error) {
       toast({
         title: "Error",

@@ -228,7 +228,7 @@ const OrderDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header isAuthenticated={isAuthenticated} />
+        <Header />
         <main className="flex-1 py-12">
           <div className="container mx-auto px-4">
             <p className="text-center text-muted-foreground">Loading order...</p>
@@ -242,7 +242,7 @@ const OrderDetails = () => {
   if (!order) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header isAuthenticated={isAuthenticated} />
+        <Header />
         <main className="flex-1 py-12">
           <div className="container mx-auto px-4">
             <p className="text-center text-muted-foreground">Order not found</p>
@@ -255,7 +255,7 @@ const OrderDetails = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={isAuthenticated} />
+      <Header />
 
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-4xl">

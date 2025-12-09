@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Circle, Package, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 interface StatusHistory {
   status: string;
@@ -233,7 +234,7 @@ const TrackOrder = () => {
 
   return (
     <div className="min-h-screen flex flex-col tap-highlight-none">
-      <Header isAuthenticated={isAuthenticated} />
+      <Header />
 
       <main className="flex-1 py-4 sm:py-8 native-scroll">
         <div className="container mx-auto px-4 max-w-3xl">

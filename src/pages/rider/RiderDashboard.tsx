@@ -345,7 +345,7 @@ const RiderDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isAuthenticated={true} />
+      <Header />
       <LocationSharing />
       
       <main className="flex-1 py-4 md:py-8 bg-muted/30">
