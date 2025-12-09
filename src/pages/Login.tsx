@@ -58,6 +58,7 @@ const Login = () => {
       });
 
       if (error) {
+        setLoading(false);
         toast({
           title: "Login Failed",
           description: error.message === "Invalid login credentials" 
@@ -65,32 +66,43 @@ const Login = () => {
             : error.message,
           variant: "destructive",
         });
-      } else if (data.session) {
-        // Check user role and redirect accordingly
-        const { data: roles } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", data.session.user.id);
+        return;
+      }
+      
+      if (data.session) {
+        toast({
+          title: "Welcome back!",
+          description: "Login successful",
+        });
 
-        if (roles && roles.length > 0) {
-          const userRole = roles[0].role;
-          toast({
-            title: "Welcome back!",
-            description: "Login successful",
-          });
-          
-          if (userRole === "admin") {
-            navigate("/admin");
-          } else if (userRole === "manager") {
-            navigate("/manager");
+        // Fetch roles with a timeout to prevent hanging
+        try {
+          const { data: roles } = await Promise.race([
+            supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", data.session.user.id),
+            new Promise<never>((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout')), 3000)
+            )
+          ]);
+
+          if (roles && roles.length > 0) {
+            const userRole = roles[0].role;
+            if (userRole === "admin") {
+              navigate("/admin");
+            } else if (userRole === "manager") {
+              navigate("/manager");
+            } else if (userRole === "rider") {
+              navigate("/rider");
+            } else {
+              navigate("/");
+            }
           } else {
             navigate("/");
           }
-        } else {
-          toast({
-            title: "Welcome back!",
-            description: "Login successful",
-          });
+        } catch {
+          // On timeout or error, just navigate to home
           navigate("/");
         }
       }
