@@ -232,19 +232,20 @@ const TrackOrder = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col tap-highlight-none">
       <Header isAuthenticated={isAuthenticated} />
 
-      <main className="flex-1 py-12">
+      <main className="flex-1 py-4 sm:py-8 native-scroll">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h1 className="text-3xl font-bold mb-8">Track Your Order</h1>
+          <h1 className="mobile-header mb-6">Track Your Order</h1>
 
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <Label>Order ID</Label>
+          <Card className="mobile-card mb-6">
+            <CardContent className="p-4">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 space-y-2">
+                  <label className="mobile-label">Order ID</label>
                   <Input
+                    className="mobile-input"
                     placeholder="Enter your order ID"
                     value={orderId}
                     onChange={(e) => setOrderId(e.target.value)}
@@ -253,7 +254,7 @@ const TrackOrder = () => {
                 <Button
                   onClick={trackOrder}
                   disabled={loading || !orderId}
-                  className="mt-8"
+                  className="mobile-button sm:mt-7"
                 >
                   {loading ? "Tracking..." : "Track"}
                 </Button>
@@ -262,56 +263,59 @@ const TrackOrder = () => {
           </Card>
 
           {orderData && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Order Status: <span className="text-primary">{getCurrentStatusLabel()}</span>
+            <Card className="mobile-card">
+              <CardHeader className="pb-2 px-4">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-base sm:text-lg">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    <span>Order Status:</span>
+                  </div>
+                  <span className="text-primary font-bold">{getCurrentStatusLabel()}</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-8">
+              <CardContent className="px-4">
+                <div className="space-y-0">
                   {getTrackingSteps().map((step, index) => {
                     const steps = getTrackingSteps();
                     const isLast = index === steps.length - 1;
 
                     return (
-                      <div key={step.key} className="flex gap-4">
+                      <div key={step.key} className="flex gap-3 sm:gap-4">
                         <div className="flex flex-col items-center">
                           <div
                             className={cn(
-                              "rounded-full p-2 transition-colors",
+                              "rounded-full p-1.5 sm:p-2 transition-colors shrink-0",
                               step.isCompleted
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted text-muted-foreground"
                             )}
                           >
                             {step.isCompleted ? (
-                              <CheckCircle2 className="h-6 w-6" />
+                              <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" />
                             ) : (
-                              <Circle className="h-6 w-6" />
+                              <Circle className="h-5 w-5 sm:h-6 sm:w-6" />
                             )}
                           </div>
                           {!isLast && (
                             <div
                               className={cn(
-                                "w-0.5 h-16 transition-colors",
+                                "w-0.5 h-12 sm:h-14 transition-colors",
                                 step.isCompleted ? "bg-primary" : "bg-muted"
                               )}
                             />
                           )}
                         </div>
-                        <div className="flex-1 pb-8">
+                        <div className="flex-1 pb-4 sm:pb-6 min-w-0">
                           <p
                             className={cn(
-                              "font-semibold",
+                              "font-semibold text-sm sm:text-base",
                               step.isCompleted ? "text-primary" : "text-muted-foreground"
                             )}
                           >
                             {step.label}
                           </p>
                           {step.timestamp && (
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                               {format(new Date(step.timestamp), "PPp")}
                             </p>
                           )}
