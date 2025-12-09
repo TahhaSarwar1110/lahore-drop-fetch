@@ -149,19 +149,28 @@ All colors MUST be HSL.
     @apply h-12 text-base rounded-xl border-2 border-border/50 bg-background px-4;
     @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
     @apply transition-all duration-200;
+    @apply w-full max-w-full;
+    box-sizing: border-box;
+    min-width: 0;
   }
   
   .mobile-select {
     @apply h-12 text-base rounded-xl border-2 border-border/50 bg-background;
+    @apply w-full max-w-full;
+    box-sizing: border-box;
+    min-width: 0;
   }
   
   .mobile-button {
     @apply h-12 text-base font-semibold rounded-xl;
     @apply active:scale-[0.98] transition-transform duration-100;
+    @apply w-full max-w-full;
+    box-sizing: border-box;
   }
   
   .mobile-card {
     @apply rounded-2xl border-0 shadow-lg shadow-foreground/5 bg-card;
+    @apply w-full max-w-full overflow-hidden;
   }
   
   .mobile-section {
@@ -174,5 +183,10 @@ All colors MUST be HSL.
   
   .mobile-label {
     @apply text-sm font-medium text-muted-foreground mb-2 block;
+  }
+  
+  .mobile-form-container {
+    @apply w-full max-w-full overflow-hidden px-4;
+    box-sizing: border-box;
   }
 }

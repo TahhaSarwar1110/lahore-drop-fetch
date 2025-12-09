@@ -196,11 +196,11 @@ const PlaceOrder = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col tap-highlight-none">
+    <div className="min-h-screen flex flex-col tap-highlight-none overflow-x-hidden">
       <Header isAuthenticated={isAuthenticated} />
 
-      <main className="flex-1 pb-8 native-scroll">
-        <div className="container mx-auto px-0 sm:px-4">
+      <main className="flex-1 pb-8 native-scroll overflow-x-hidden">
+        <div className="container mx-auto px-0 sm:px-4 max-w-full overflow-x-hidden">
           <div className="grid lg:grid-cols-2 gap-0 lg:gap-8">
             {/* Left - Image - Hidden on mobile */}
             <div className="hidden lg:flex items-center justify-center bg-gradient-to-br from-primary to-accent rounded-lg p-12">
@@ -213,25 +213,25 @@ const PlaceOrder = () => {
             </div>
 
             {/* Right - Form */}
-            <div className="space-y-0 sm:space-y-6">
-              <Card className="mobile-card border-0 sm:border rounded-none sm:rounded-2xl shadow-none sm:shadow-lg">
-                <CardContent className="p-4 sm:p-6 space-y-5">
+            <div className="space-y-0 sm:space-y-6 w-full max-w-full overflow-hidden">
+              <Card className="mobile-card border-0 sm:border rounded-none sm:rounded-2xl shadow-none sm:shadow-lg w-full">
+                <CardContent className="p-4 sm:p-6 space-y-5 w-full max-w-full overflow-hidden">
                   <h2 className="mobile-header">Order Details</h2>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full">
                     <label className="mobile-label">Full Name</label>
                     <Input
-                      className="mobile-input"
+                      className="mobile-input w-full"
                       placeholder="Your name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full">
                     <label className="mobile-label">Phone Number</label>
                     <Input
-                      className="mobile-input"
+                      className="mobile-input w-full"
                       type="tel"
                       placeholder="Your phone"
                       value={phone}
@@ -240,7 +240,7 @@ const PlaceOrder = () => {
                   </div>
 
                   {/* Delivery Type Dropdown */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full">
                     <label className="mobile-label">
                       Delivery Type
                       <span className="text-destructive ml-1">*</span>
@@ -261,13 +261,13 @@ const PlaceOrder = () => {
                   </div>
 
                   {/* Delivery Address - Always shown */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 w-full">
                     <label className="mobile-label">
                       Delivery Address
                       <span className="text-destructive ml-1">*</span>
                     </label>
                     <Input
-                      className="mobile-input"
+                      className="mobile-input w-full"
                       placeholder="Complete delivery address"
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
