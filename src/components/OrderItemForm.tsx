@@ -164,11 +164,11 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="space-y-2">
+    <div className="space-y-5 w-full max-w-full overflow-hidden">
+      <div className="space-y-2 w-full">
         <label className="mobile-label">Item Type</label>
         <Select value={itemType} onValueChange={setItemType}>
-          <SelectTrigger className="mobile-input">
+          <SelectTrigger className="mobile-input w-full">
             <SelectValue placeholder="Select item type" />
           </SelectTrigger>
           <SelectContent className="bg-background border border-border z-50">
@@ -184,14 +184,14 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
       {itemType && itemTypeFields[itemType] && (
         <>
           {itemTypeFields[itemType].map((field) => (
-            <div key={field.label} className="space-y-2">
+            <div key={field.label} className="space-y-2 w-full">
               <label className="mobile-label">
                 {field.label}
                 {field.required && <span className="text-destructive ml-1">*</span>}
               </label>
               {field.type === "textarea" ? (
                 <Textarea
-                  className="mobile-input min-h-[100px] py-3"
+                  className="mobile-input min-h-[100px] py-3 w-full"
                   placeholder={field.placeholder}
                   value={formData[field.label] || ""}
                   onChange={(e) => handleFieldChange(field.label, e.target.value)}
@@ -199,7 +199,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
                 />
               ) : (
                 <Input
-                  className="mobile-input"
+                  className="mobile-input w-full"
                   type={field.type}
                   placeholder={field.placeholder}
                   value={formData[field.label] || ""}
@@ -209,31 +209,31 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
             </div>
           ))}
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <label className="mobile-label">Attach Image (Optional)</label>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col gap-2 w-full">
               <Input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="mobile-input flex-1 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary/10 file:text-primary"
+                className="mobile-input w-full file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary/10 file:text-primary"
               />
               {imageFile && (
                 <span className="text-sm text-muted-foreground flex items-center">
-                  <Upload className="h-4 w-4 mr-1" />
-                  <span className="truncate max-w-[150px]">{imageFile.name}</span>
+                  <Upload className="h-4 w-4 mr-1 shrink-0" />
+                  <span className="truncate">{imageFile.name}</span>
                 </span>
               )}
             </div>
           </div>
 
-          <div className="border-t pt-4 space-y-4">
+          <div className="border-t pt-4 space-y-4 w-full">
             <h4 className="text-sm font-semibold text-muted-foreground">Pickup Details (Optional)</h4>
             
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <label className="mobile-label">Pickup Address (Optional)</label>
               <Input
-                className="mobile-input"
+                className="mobile-input w-full"
                 placeholder="Enter pickup address for this item"
                 value={formData["Pickup Address"] || ""}
                 onChange={(e) => handleFieldChange("Pickup Address", e.target.value)}
