@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,93 +11,115 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 258 60% 20%;
+    --foreground: 260 25% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 258 60% 20%;
+    --card-foreground: 260 25% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 258 60% 20%;
+    --popover-foreground: 260 25% 20%;
 
-    --primary: 258 65% 55%;
+    --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 340 82% 52%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 20 90% 70%;
+    --secondary-foreground: 260 25% 15%;
 
-    --muted: 258 20% 95%;
-    --muted-foreground: 258 15% 45%;
+    --muted: 260 20% 97%;
+    --muted-foreground: 260 10% 45%;
 
-    --accent: 25 100% 70%;
-    --accent-foreground: 258 60% 20%;
+    --accent: 25 100% 65%;
+    --accent-foreground: 260 25% 15%;
+
+    --peach: 20 90% 85%;
+    --peach-foreground: 260 25% 20%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 258 20% 90%;
-    --input: 258 20% 90%;
-    --ring: 258 65% 55%;
+    --border: 260 15% 92%;
+    --input: 260 15% 92%;
+    --ring: 262 83% 58%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
     
-    --gradient-primary: linear-gradient(135deg, hsl(258 65% 55%), hsl(340 82% 52%));
-    --gradient-accent: linear-gradient(135deg, hsl(340 82% 52%), hsl(25 100% 70%));
-    --shadow-primary: 0 10px 40px -10px hsl(258 65% 55% / 0.3);
+    --gradient-hero: linear-gradient(135deg, hsl(262 83% 58% / 0.08) 0%, hsl(20 90% 70% / 0.12) 50%, hsl(25 100% 65% / 0.08) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 58%), hsl(262 83% 48%));
+    --gradient-accent: linear-gradient(135deg, hsl(262 83% 58%), hsl(20 90% 70%));
+    --gradient-warm: linear-gradient(135deg, hsl(20 90% 70%), hsl(25 100% 65%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(260 20% 98%) 100%);
+    
+    --shadow-sm: 0 2px 8px -2px hsl(260 25% 20% / 0.08);
+    --shadow-md: 0 8px 24px -8px hsl(260 25% 20% / 0.12);
+    --shadow-lg: 0 16px 48px -12px hsl(260 25% 20% / 0.16);
+    --shadow-primary: 0 8px 32px -8px hsl(262 83% 58% / 0.35);
+    --shadow-hover: 0 20px 48px -12px hsl(260 25% 20% / 0.2);
+    
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    --sidebar-background: 258 60% 98%;
-
-    --sidebar-foreground: 258 60% 20%;
-
-    --sidebar-primary: 258 65% 55%;
-
+    --sidebar-background: 260 20% 98%;
+    --sidebar-foreground: 260 25% 20%;
+    --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-
-    --sidebar-accent: 258 20% 95%;
-
-    --sidebar-accent-foreground: 258 60% 20%;
-
-    --sidebar-border: 258 20% 90%;
-
-    --sidebar-ring: 258 65% 55%;
+    --sidebar-accent: 260 20% 95%;
+    --sidebar-accent-foreground: 260 25% 20%;
+    --sidebar-border: 260 15% 92%;
+    --sidebar-ring: 262 83% 58%;
+    
+    --font-heading: 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Inter', sans-serif;
   }
 
   .dark {
-    --background: 258 60% 8%;
+    --background: 260 25% 8%;
     --foreground: 0 0% 98%;
 
-    --card: 258 60% 10%;
+    --card: 260 25% 10%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 258 60% 10%;
+    --popover: 260 25% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 258 65% 60%;
+    --primary: 262 83% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 340 82% 58%;
+    --secondary: 20 85% 65%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 258 30% 18%;
-    --muted-foreground: 258 15% 65%;
+    --muted: 260 25% 15%;
+    --muted-foreground: 260 15% 65%;
 
-    --accent: 25 100% 70%;
-    --accent-foreground: 258 60% 8%;
+    --accent: 25 100% 65%;
+    --accent-foreground: 260 25% 8%;
+
+    --peach: 20 70% 25%;
+    --peach-foreground: 0 0% 98%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 258 30% 18%;
-    --input: 258 30% 18%;
-    --ring: 258 65% 60%;
-    --sidebar-background: 258 60% 10%;
+    --border: 260 25% 18%;
+    --input: 260 25% 18%;
+    --ring: 262 83% 65%;
+    
+    --gradient-hero: linear-gradient(135deg, hsl(262 83% 58% / 0.15) 0%, hsl(20 70% 50% / 0.1) 50%, hsl(25 100% 65% / 0.08) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(260 25% 12%) 0%, hsl(260 25% 10%) 100%);
+    
+    --sidebar-background: 260 25% 10%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 258 65% 60%;
+    --sidebar-primary: 262 83% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 258 30% 18%;
+    --sidebar-accent: 260 25% 15%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 258 30% 18%;
-    --sidebar-ring: 258 65% 60%;
+    --sidebar-border: 260 25% 18%;
+    --sidebar-ring: 262 83% 65%;
   }
 }
 
@@ -106,8 +130,14 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-bold tracking-tight;
   }
 }
 
@@ -140,6 +170,23 @@ All colors MUST be HSL.
   
   .touch-manipulation {
     touch-action: manipulation;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(262 83% 58%), hsl(20 90% 70%));
+  }
+  
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: var(--shadow-hover);
   }
 }
 
@@ -188,5 +235,28 @@ All colors MUST be HSL.
   .mobile-form-container {
     @apply w-full max-w-full overflow-hidden px-4;
     box-sizing: border-box;
+  }
+  
+  .premium-card {
+    @apply rounded-2xl bg-card border border-border/50 p-6;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-smooth);
+  }
+  
+  .premium-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+  }
+  
+  .step-icon {
+    @apply w-16 h-16 rounded-2xl flex items-center justify-center;
+    background: linear-gradient(135deg, hsl(262 83% 58%), hsl(20 90% 70%));
+    box-shadow: var(--shadow-primary);
+  }
+  
+  .trust-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium;
+    background: hsl(262 83% 58% / 0.1);
+    color: hsl(262 83% 50%);
   }
 }

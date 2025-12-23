@@ -1,103 +1,118 @@
-import { Package, Mail, Phone, MapPin, Truck, Facebook, Instagram } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import logo from "@/assets/desi-drop-logo.jpeg";
 
 export const Footer = () => {
+  const quickLinks = [
+    { label: "Home", href: "/" },
+    { label: "Place Order", href: "/place-order" },
+    { label: "Track Order", href: "/track" },
+    { label: "Contact Us", href: "/contact" },
+  ];
+
   return (
     <footer className="border-t border-border bg-muted/30">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <div className="mb-4">
-              <img src={logo} alt="Desi Drop Logo" className="h-16 w-auto object-contain" />
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Brand Section */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center gap-3 mb-4">
+              <img 
+                src={logo} 
+                alt="DesiDrop Logo" 
+                className="h-12 w-12 rounded-xl object-cover"
+              />
+              <div>
+                <h3 className="font-bold text-xl">DesiDrop</h3>
+                <p className="text-sm text-muted-foreground">Your personal shopper in Pakistan</p>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Your trusted delivery service from Lahore. Order anything, anytime!
+            <p className="text-muted-foreground mb-6 max-w-md">
+              We help overseas Pakistanis and local customers shop anything from Pakistan with complete transparency and reliability.
             </p>
-            <div className="flex items-center space-x-3">
-              <a 
-                href="https://facebook.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
-                aria-label="Facebook"
+            
+            {/* WhatsApp CTA */}
+            <a 
+              href="https://wa.me/923001234567" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button 
+                variant="outline" 
+                className="rounded-xl gap-2 hover:bg-success/10 hover:text-success hover:border-success transition-all"
               >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a 
-                href="https://instagram.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a 
-                href="https://tiktok.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
-                aria-label="TikTok"
-              >
-                <svg 
-                  className="h-5 w-5" 
-                  fill="currentColor" 
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                </svg>
-              </a>
-            </div>
+                <MessageCircle className="h-5 w-5" />
+                Chat on WhatsApp
+              </Button>
+            </a>
           </div>
 
+          {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <a href="/place-order" className="hover:text-primary transition-colors">
-                  Place Order
-                </a>
-              </li>
-              <li>
-                <a href="/orders" className="hover:text-primary transition-colors">
-                  Order History
-                </a>
-              </li>
-              <li>
-                <a href="/track" className="hover:text-primary transition-colors">
-                  Track Order
-                </a>
-              </li>
-              <li>
-                <a href="/contact" className="hover:text-primary transition-colors">
-                  Contact Us
-                </a>
-              </li>
+            <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
+            <ul className="space-y-3">
+              {quickLinks.map((link, index) => (
+                <li key={index}>
+                  <Link 
+                    to={link.href} 
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* Contact Info */}
           <div>
-            <h3 className="font-semibold mb-4">Contact Info</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4" />
-                <span>Lahore, Pakistan</span>
+            <h4 className="font-semibold text-lg mb-4">Contact Us</h4>
+            <ul className="space-y-4">
+              <li>
+                <a 
+                  href="https://maps.google.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                  <span>Lahore, Pakistan</span>
+                </a>
               </li>
-              <li className="flex items-center space-x-2">
-                <Phone className="h-4 w-4" />
-                <span>+92 300 1234567</span>
+              <li>
+                <a 
+                  href="tel:+923001234567" 
+                  className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Phone className="h-5 w-5 flex-shrink-0" />
+                  <span>+92 300 1234567</span>
+                </a>
               </li>
-              <li className="flex items-center space-x-2">
-                <Mail className="h-4 w-4" />
-                <span>info@desidrop.com</span>
+              <li>
+                <a 
+                  href="mailto:info@desidrop.com" 
+                  className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Mail className="h-5 w-5 flex-shrink-0" />
+                  <span>info@desidrop.com</span>
+                </a>
               </li>
             </ul>
           </div>
         </div>
+      </div>
 
-        <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          <p>&copy; 2025 Desi Drop. All rights reserved.</p>
+      {/* Bottom bar */}
+      <div className="border-t border-border">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} DesiDrop. All rights reserved.</p>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
