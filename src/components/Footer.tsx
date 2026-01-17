@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/desi-drop-logo.jpeg";
+import logo from "@/assets/pickyrider-logo.png";
 
 export const Footer = () => {
   const quickLinks = [
@@ -20,13 +20,9 @@ export const Footer = () => {
             <div className="flex items-center gap-3 mb-4">
               <img 
                 src={logo} 
-                alt="DesiDrop Logo" 
-                className="h-12 w-12 rounded-xl object-cover"
+                alt="PickyRider Logo" 
+                className="h-14 w-auto object-contain"
               />
-              <div>
-                <h3 className="font-bold text-xl">DesiDrop</h3>
-                <p className="text-sm text-muted-foreground">Your personal shopper in Pakistan</p>
-              </div>
             </div>
             <p className="text-muted-foreground mb-6 max-w-md">
               We help overseas Pakistanis and local customers shop anything from Pakistan with complete transparency and reliability.
