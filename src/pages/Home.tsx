@@ -31,6 +31,7 @@ import clothingImg from "@/assets/clothing-delivery.jpg";
 import foodImg from "@/assets/food-delivery.jpg";
 import groceriesImg from "@/assets/groceries-delivery.jpg";
 import giftsImg from "@/assets/gifts-delivery.jpg";
+import heroBg from "@/assets/pickyrider-hero-bg.jpg";
 
 const Home = () => {
   const { isAuthenticated, isRider } = useAuth();
@@ -135,8 +136,13 @@ const Home = () => {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden min-h-[90vh] flex items-center">
-          {/* Hero solid background */}
-          <div className="absolute inset-0 bg-primary" />
+          {/* Hero background image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${heroBg})` }}
+          />
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 bg-primary/80" />
           
           {/* Subtle pattern overlay */}
           <div className="absolute inset-0 opacity-[0.03]" style={{
