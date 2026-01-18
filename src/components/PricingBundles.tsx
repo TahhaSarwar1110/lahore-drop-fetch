@@ -81,7 +81,7 @@ export const PricingBundles = () => {
               <h3 className="text-2xl font-bold mb-2">{bundle.name}</h3>
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-4xl lg:text-5xl font-extrabold text-gradient">
-                  ${bundle.price.toFixed(0)}
+                  Rs. {bundle.price.toFixed(0)}
                 </span>
                 <span className="text-muted-foreground">/order</span>
               </div>
