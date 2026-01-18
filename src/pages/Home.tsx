@@ -152,7 +152,7 @@ const Home = () => {
                   >
                     We Shop Anything from <span className="text-gradient">Pakistan.</span>
                     <br />
-                    So You Don’t Have To.
+                    And Deliver It to Your Loved Ones.
                   </h1>
                   <p
                     className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 opacity-0 animate-fade-in"
