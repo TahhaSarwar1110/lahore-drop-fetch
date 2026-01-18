@@ -56,7 +56,7 @@ export const Footer = () => {
                 <li key={index}>
                   <Link 
                     to={link.href} 
-                    className="text-white/70 hover:text-white transition-colors text-sm"
+                    className="text-white/70 hover:text-accent transition-colors text-sm"
                   >
                     {link.label}
                   </Link>
@@ -74,7 +74,7 @@ export const Footer = () => {
                   href="https://maps.google.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-start gap-3 text-white/70 hover:text-white transition-colors text-sm"
+                  className="flex items-start gap-3 text-white/70 hover:text-accent transition-colors text-sm"
                 >
                   <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
                   <span>Lahore, Pakistan</span>
@@ -83,7 +83,7 @@ export const Footer = () => {
               <li>
                 <a 
                   href="tel:+923001234567" 
-                  className="flex items-center gap-3 text-white/70 hover:text-white transition-colors text-sm"
+                  className="flex items-center gap-3 text-white/70 hover:text-accent transition-colors text-sm"
                 >
                   <Phone className="h-5 w-5 flex-shrink-0" />
                   <span>+92 300 1234567</span>
@@ -92,7 +92,7 @@ export const Footer = () => {
               <li>
                 <a 
                   href="mailto:info@pickyrider.com" 
-                  className="flex items-center gap-3 text-white/70 hover:text-white transition-colors text-sm"
+                  className="flex items-center gap-3 text-white/70 hover:text-accent transition-colors text-sm"
                 >
                   <Mail className="h-5 w-5 flex-shrink-0" />
                   <span>info@pickyrider.com</span>
@@ -107,19 +107,19 @@ export const Footer = () => {
             <div className="flex gap-3 mb-6">
               <a 
                 href="#" 
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors"
               >
                 <Facebook className="h-5 w-5 text-white" />
               </a>
               <a 
                 href="#" 
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors"
               >
                 <Instagram className="h-5 w-5 text-white" />
               </a>
               <a 
                 href="#" 
-                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-accent transition-colors"
               >
                 <Twitter className="h-5 w-5 text-white" />
               </a>
@@ -131,7 +131,7 @@ export const Footer = () => {
                 <li key={index}>
                   <a 
                     href={link.href} 
-                    className="text-white/70 hover:text-white transition-colors text-sm"
+                    className="text-white/70 hover:text-accent transition-colors text-sm"
                   >
                     {link.label}
                   </a>
