@@ -168,8 +168,8 @@ const Home = () => {
                     className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] text-white opacity-0 animate-fade-in"
                     style={{ animationDelay: "0.1s" }}
                   >
-                    We Shop Anything from Anywhere —{" "}
-                    <span className="text-secondary">Delivered Straight to Your Door</span>
+                    We Shop Anything from Pakistan —{" "}
+                    <span className="text-secondary">Delivered Straight to Your Loved Ones</span>
                   </h1>
                   <p
                     className="text-lg sm:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 opacity-0 animate-fade-in"
