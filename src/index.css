@@ -269,8 +269,8 @@ All colors MUST be HSL.
   
   /* Step icon for timeline */
   .step-icon {
-    @apply w-16 h-16 rounded-2xl flex items-center justify-center text-white bg-primary;
-    box-shadow: var(--shadow-primary);
+    @apply w-16 h-16 rounded-2xl flex items-center justify-center text-white bg-secondary;
+    box-shadow: var(--shadow-accent);
   }
   
   /* Trust badge */
