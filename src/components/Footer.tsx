@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle, Facebook, Instagram, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/pickyrider-logo.png";
 
@@ -11,21 +11,26 @@ export const Footer = () => {
     { label: "Contact Us", href: "/contact" },
   ];
 
+  const legalLinks = [
+    { label: "Privacy Policy", href: "#" },
+    { label: "Terms of Service", href: "#" },
+  ];
+
   return (
-    <footer className="border-t border-border bg-muted/30">
+    <footer className="footer-dark">
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
               <img 
                 src={logo} 
                 alt="PickyRider Logo" 
-                className="h-14 w-auto object-contain"
+                className="h-12 w-auto object-contain brightness-0 invert"
               />
             </div>
-            <p className="text-muted-foreground mb-6 max-w-md">
-              We help overseas Pakistanis and local customers shop anything from Pakistan with complete transparency and reliability.
+            <p className="text-white/70 mb-6 text-sm leading-relaxed">
+              Your personal shopper in Pakistan. We help overseas Pakistanis and local customers shop anything with complete transparency and reliability.
             </p>
             
             {/* WhatsApp CTA */}
@@ -35,8 +40,7 @@ export const Footer = () => {
               rel="noopener noreferrer"
             >
               <Button 
-                variant="outline" 
-                className="rounded-xl gap-2 hover:bg-success/10 hover:text-success hover:border-success transition-all"
+                className="rounded-xl gap-2 bg-success hover:bg-success/90 text-white font-medium"
               >
                 <MessageCircle className="h-5 w-5" />
                 Chat on WhatsApp
@@ -46,13 +50,13 @@ export const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
+            <h4 className="font-semibold text-lg mb-5 text-white">Quick Links</h4>
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
                   <Link 
                     to={link.href} 
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-white/70 hover:text-white transition-colors text-sm"
                   >
                     {link.label}
                   </Link>
@@ -63,14 +67,14 @@ export const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Contact Us</h4>
+            <h4 className="font-semibold text-lg mb-5 text-white">Contact Us</h4>
             <ul className="space-y-4">
               <li>
                 <a 
                   href="https://maps.google.com" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-start gap-3 text-muted-foreground hover:text-primary transition-colors"
+                  className="flex items-start gap-3 text-white/70 hover:text-white transition-colors text-sm"
                 >
                   <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
                   <span>Lahore, Pakistan</span>
@@ -79,7 +83,7 @@ export const Footer = () => {
               <li>
                 <a 
                   href="tel:+923001234567" 
-                  className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                  className="flex items-center gap-3 text-white/70 hover:text-white transition-colors text-sm"
                 >
                   <Phone className="h-5 w-5 flex-shrink-0" />
                   <span>+92 300 1234567</span>
@@ -87,28 +91,63 @@ export const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="mailto:info@desidrop.com" 
-                  className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors"
+                  href="mailto:info@pickyrider.com" 
+                  className="flex items-center gap-3 text-white/70 hover:text-white transition-colors text-sm"
                 >
                   <Mail className="h-5 w-5 flex-shrink-0" />
-                  <span>info@desidrop.com</span>
+                  <span>info@pickyrider.com</span>
                 </a>
               </li>
+            </ul>
+          </div>
+
+          {/* Social & Legal */}
+          <div>
+            <h4 className="font-semibold text-lg mb-5 text-white">Follow Us</h4>
+            <div className="flex gap-3 mb-6">
+              <a 
+                href="#" 
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <Facebook className="h-5 w-5 text-white" />
+              </a>
+              <a 
+                href="#" 
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <Instagram className="h-5 w-5 text-white" />
+              </a>
+              <a 
+                href="#" 
+                className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <Twitter className="h-5 w-5 text-white" />
+              </a>
+            </div>
+
+            <h4 className="font-semibold text-sm mb-3 text-white">Legal</h4>
+            <ul className="space-y-2">
+              {legalLinks.map((link, index) => (
+                <li key={index}>
+                  <a 
+                    href={link.href} 
+                    className="text-white/70 hover:text-white transition-colors text-sm"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-border">
+      <div className="border-t border-white/10">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} DesiDrop. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-            </div>
-          </div>
+          <p className="text-center text-sm text-white/50">
+            &copy; {new Date().getFullYear()} PickyRider. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
