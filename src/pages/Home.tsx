@@ -135,8 +135,8 @@ const Home = () => {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden min-h-[90vh] flex items-center">
-          {/* Hero gradient background */}
-          <div className="absolute inset-0 bg-gradient-hero" />
+          {/* Hero solid background */}
+          <div className="absolute inset-0 bg-primary" />
           
           {/* Subtle pattern overlay */}
           <div className="absolute inset-0 opacity-[0.03]" style={{
@@ -294,7 +294,7 @@ const Home = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="h-48 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 flex flex-col items-center justify-center p-5 text-center">
+                    <div className="h-48 bg-primary/5 flex flex-col items-center justify-center p-5 text-center">
                       <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                         <item.icon className="h-7 w-7 text-primary" />
                       </div>
@@ -412,7 +412,7 @@ const Home = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 lg:py-28 relative overflow-hidden bg-gradient-hero">
+        <section className="py-20 lg:py-28 relative overflow-hidden bg-primary">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-72 h-72 bg-white rounded-full blur-3xl" />
