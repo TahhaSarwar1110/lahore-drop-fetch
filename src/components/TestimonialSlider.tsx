@@ -72,7 +72,7 @@ export const TestimonialSlider = () => {
       {/* Main testimonial card */}
       <div className="testimonial-card relative overflow-hidden">
         {/* Quote icon */}
-        <div className="absolute top-4 right-4 text-accent/10">
+        <div className="absolute top-4 right-4 text-primary/10">
           <Quote className="h-16 w-16" />
         </div>
 
@@ -103,7 +103,7 @@ export const TestimonialSlider = () => {
           variant="outline"
           size="icon"
           onClick={goToPrevious}
-          className="rounded-full h-10 w-10 border-border/50 hover:border-accent hover:bg-accent/5"
+          className="rounded-full h-10 w-10 border-border/50 hover:border-primary hover:bg-primary/5"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
@@ -119,8 +119,8 @@ export const TestimonialSlider = () => {
               }}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === currentIndex
-                  ? "w-8 bg-accent"
-                  : "w-2 bg-border hover:bg-accent/50"
+                  ? "w-8 bg-primary"
+                  : "w-2 bg-border hover:bg-primary/50"
               }`}
             />
           ))}
@@ -130,7 +130,7 @@ export const TestimonialSlider = () => {
           variant="outline"
           size="icon"
           onClick={goToNext}
-          className="rounded-full h-10 w-10 border-border/50 hover:border-accent hover:bg-accent/5"
+          className="rounded-full h-10 w-10 border-border/50 hover:border-primary hover:bg-primary/5"
         >
           <ChevronRight className="h-5 w-5" />
         </Button>

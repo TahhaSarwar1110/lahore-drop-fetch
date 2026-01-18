@@ -42,7 +42,7 @@ export const PricingBundles = () => {
     return (
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-80 rounded-2xl bg-muted animate-pulse" />
+          <div key={i} className="h-80 rounded-3xl bg-muted animate-pulse" />
         ))}
       </div>
     );
@@ -62,15 +62,15 @@ export const PricingBundles = () => {
         return (
           <Card 
             key={bundle.id} 
-            className={`relative rounded-2xl border-2 transition-all duration-300 hover:-translate-y-3 bg-card ${
+            className={`relative rounded-3xl border-2 transition-all duration-300 hover:-translate-y-3 bg-card ${
               isPopular 
-                ? "border-accent shadow-glow scale-105 lg:scale-110 z-10" 
-                : "border-border/50 shadow-card hover:shadow-hover"
+                ? "border-primary shadow-glow-primary scale-105 lg:scale-110 z-10" 
+                : "border-border/50 shadow-card hover:shadow-card-hover"
             }`}
           >
             {isPopular && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <Badge className="bg-accent text-accent-foreground px-4 py-1.5 rounded-full shadow-glow font-medium">
+                <Badge className="bg-primary text-primary-foreground px-4 py-1.5 rounded-full shadow-glow-primary font-medium">
                   <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                   Most Popular
                 </Badge>
@@ -78,9 +78,9 @@ export const PricingBundles = () => {
             )}
             
             <CardHeader className="text-center pt-8 pb-4">
-              <h3 className="text-2xl font-bold mb-2 text-foreground">{bundle.name}</h3>
+              <h3 className="text-2xl font-bold mb-2">{bundle.name}</h3>
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl lg:text-5xl font-bold text-accent">
+                <span className="text-4xl lg:text-5xl font-bold text-primary">
                   Rs. {bundle.price.toFixed(0)}
                 </span>
                 <span className="text-muted-foreground">/order</span>
@@ -93,7 +93,7 @@ export const PricingBundles = () => {
                   <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
                     <Check className="h-3 w-3 text-success" />
                   </div>
-                  <span className="text-sm text-foreground">
+                  <span className="text-sm">
                     Up to <span className="font-semibold">{bundle.items_allowed} items</span>
                   </span>
                 </li>
@@ -102,26 +102,26 @@ export const PricingBundles = () => {
                     <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check className="h-3 w-3 text-success" />
                     </div>
-                    <span className="text-sm text-foreground">{bundle.description}</span>
+                    <span className="text-sm">{bundle.description}</span>
                   </li>
                 )}
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
                     <Check className="h-3 w-3 text-success" />
                   </div>
-                  <span className="text-sm text-foreground">Real-time tracking</span>
+                  <span className="text-sm">Real-time tracking</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
                     <Check className="h-3 w-3 text-success" />
                   </div>
-                  <span className="text-sm text-foreground">Photo verification</span>
+                  <span className="text-sm">Photo verification</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
                     <Check className="h-3 w-3 text-success" />
                   </div>
-                  <span className="text-sm text-foreground">WhatsApp support</span>
+                  <span className="text-sm">WhatsApp support</span>
                 </li>
               </ul>
             </CardContent>

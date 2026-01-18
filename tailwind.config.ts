@@ -43,6 +43,10 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        peach: {
+          DEFAULT: "hsl(var(--peach))",
+          foreground: "hsl(var(--peach-foreground))",
+        },
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
@@ -74,12 +78,11 @@ export default {
         "3xl": "1.5rem",
       },
       boxShadow: {
-        'soft': '0 2px 8px -2px hsl(220 74% 17% / 0.08)',
-        'medium': '0 8px 24px -8px hsl(220 74% 17% / 0.12)',
-        'large': '0 16px 48px -12px hsl(220 74% 17% / 0.16)',
-        'glow': '0 8px 32px -8px hsl(18 89% 52% / 0.35)',
-        'glow-primary': '0 8px 32px -8px hsl(220 74% 17% / 0.35)',
-        'hover': '0 20px 48px -12px hsl(220 74% 17% / 0.2)',
+        'soft': '0 2px 8px -2px hsl(260 25% 20% / 0.08)',
+        'medium': '0 8px 24px -8px hsl(260 25% 20% / 0.12)',
+        'large': '0 16px 48px -12px hsl(260 25% 20% / 0.16)',
+        'glow': '0 8px 32px -8px hsl(262 83% 58% / 0.35)',
+        'hover': '0 20px 48px -12px hsl(260 25% 20% / 0.2)',
       },
       keyframes: {
         "accordion-down": {
