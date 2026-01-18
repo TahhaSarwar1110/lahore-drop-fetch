@@ -4,7 +4,6 @@ import { LogOut, Shield, Menu } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import logo from "@/assets/pickyrider-logo.png";
-import heroBg from "@/assets/pickyrider-hero-bg.jpg";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NotificationBell } from "./NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,16 +33,8 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border relative overflow-hidden">
-      {/* Background image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroBg})` }}
-      />
-      {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-primary/85" />
-      
-      <div className="container mx-auto flex h-20 md:h-24 items-center justify-between px-4 relative z-10">
+    <header className="absolute top-0 left-0 right-0 z-50 w-full">
+      <div className="container mx-auto flex h-20 md:h-24 items-center justify-between px-4">
         <Link to="/" className="flex items-center py-2">
           <img src={logo} alt="PickyRider Logo" className="h-16 md:h-20 w-auto object-contain brightness-0 invert" />
         </Link>
