@@ -82,7 +82,7 @@ const Home = () => {
     {
       icon: Truck,
       title: "Fast Delivery",
-      description: "Get it delivered to your door",
+      description: "Same-day in Lahore, worldwide shipping available",
       step: 5,
     },
   ];
@@ -142,15 +142,15 @@ const Home = () => {
                     style={{ animationDelay: '0.1s' }}
                   >
                     Shop Anything from{" "}
-                    <span className="text-gradient">Pakistan.</span>
+                    <span className="text-gradient">Lahore.</span>
                     <br />
-                    Delivered to Your Door.
+                    Delivered Worldwide.
                   </h1>
                   <p 
                     className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 opacity-0 animate-fade-in"
                     style={{ animationDelay: '0.3s' }}
                   >
-                    From groceries and food to fashion and gifts — DesiDrop shops, verifies, and delivers on your behalf.
+                    From groceries and food to fashion and gifts — we shop, verify, and deliver on your behalf. Same-day delivery within Lahore!
                   </p>
                 </div>
                 
@@ -191,7 +191,7 @@ const Home = () => {
                   </div>
                   <div className="trust-badge">
                     <Zap className="h-4 w-4" />
-                    <span>Fast Delivery</span>
+                    <span>Same-Day Lahore Delivery</span>
                   </div>
                 </div>
               </div>
@@ -322,12 +322,12 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Why Choose DesiDrop Section */}
+        {/* Why Choose Us Section */}
         <section className="py-20 lg:py-28 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                Why Choose DesiDrop?
+                Why Choose Us?
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 We're committed to making your shopping experience safe, transparent, and convenient
@@ -393,10 +393,10 @@ const Home = () => {
           
           <div className="container mx-auto px-4 relative z-10 text-center">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-primary-foreground">
-              Ready to Shop from Pakistan?
+              Ready to Shop from Lahore?
             </h2>
             <p className="text-xl text-primary-foreground/90 mb-10 max-w-2xl mx-auto">
-              Join thousands of satisfied customers who trust DesiDrop for their shopping needs
+              Join satisfied customers who trust us for their shopping needs — worldwide delivery available!
             </p>
             <Link to={isAuthenticated ? "/place-order" : "/signup"}>
               <Button 
