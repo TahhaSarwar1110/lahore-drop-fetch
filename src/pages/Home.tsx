@@ -222,42 +222,6 @@ const Home = () => {
                 </div>
               </div>
 
-              {/* Right side - Hero image/illustration */}
-              <div className="relative hidden lg:block opacity-0 animate-scale-in" style={{ animationDelay: "0.4s" }}>
-                <div className="relative">
-                  {/* Main image container */}
-                  <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm p-2">
-                    <div className="rounded-2xl overflow-hidden">
-                      <div className="grid grid-cols-2 gap-3 p-4 bg-white/5">
-                        {serviceItems.slice(0, 4).map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="rounded-2xl overflow-hidden shadow-lg bg-card transform hover:scale-105 transition-transform duration-300"
-                          >
-                            <img src={item.image!} alt={item.title} className="w-full h-32 object-cover" />
-                            <div className="p-3 bg-card">
-                              <p className="font-semibold text-sm text-foreground">{item.title}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Floating card */}
-                  <div className="absolute -bottom-6 -left-6 bg-card rounded-2xl shadow-xl p-4 animate-float">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                        <CheckCircle className="h-6 w-6 text-success" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-sm">Order Delivered!</p>
-                        <p className="text-xs text-muted-foreground">Just now</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>
