@@ -34,68 +34,68 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-20 md:h-24 items-center justify-between px-4">
+      <div className="container mx-auto flex h-20 items-center justify-between px-4">
         <Link to="/" className="flex items-center py-2">
-          <img src={logo} alt="PickyRider Logo" className="h-16 md:h-20 w-auto object-contain" />
+          <img src={logo} alt="PickyRider Logo" className="h-14 md:h-16 w-auto object-contain" />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+        <nav className="hidden md:flex items-center space-x-8">
+          <Link to="/" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
             Home
           </Link>
           {isAuthenticated ? (
             <>
               {(!isRider && !isManager) || isAdmin ? (
                 <>
-                  <Link to="/place-order" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/place-order" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
                     Place Order
                   </Link>
-                  <Link to="/order-history" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/order-history" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
                     My Orders
                   </Link>
-                  <Link to="/track" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/track" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
                     Track
                   </Link>
                 </>
               ) : null}
               {isRider && (
-                <Link to="/orders" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+                <Link to="/orders" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
                   Orders
                 </Link>
               )}
-              <Link to="/contact" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+              <Link to="/contact" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
                 Contact
               </Link>
               {isAdmin && (
-                <Link to="/admin" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110 flex items-center gap-1">
+                <Link to="/admin" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent flex items-center gap-1">
                   <Shield className="h-4 w-4" />
                   Admin
                 </Link>
               )}
               {isManager && (
                 <>
-                  <Link to="/manager" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/manager" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
                     Manager
                   </Link>
-                  <Link to="/manager/pricing" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/manager/pricing" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
                     Pricing
                   </Link>
                 </>
               )}
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="transition-all duration-300 hover:scale-105">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-foreground/80 hover:text-accent transition-all duration-300">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
             </>
           ) : (
             <>
-              <Link to="/contact" className="text-sm font-medium transition-all duration-300 hover:text-primary hover:scale-110">
+              <Link to="/contact" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-accent">
                 Contact
               </Link>
               <Link to="/login">
-                <Button variant="default" size="sm" className="transition-all duration-300 hover:scale-105">
+                <Button className="btn-cta rounded-xl px-6">
                   Login
                 </Button>
               </Link>
@@ -106,15 +106,15 @@ export const Header = () => {
         {/* Mobile Navigation */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" className="transition-all duration-300 hover:scale-110">
+            <Button variant="ghost" size="icon" className="transition-all duration-300 hover:text-accent">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-64">
+          <SheetContent side="right" className="w-64 bg-card">
             <nav className="flex flex-col space-y-4 mt-8">
               <Link 
                 to="/" 
-                className="text-base font-medium transition-colors hover:text-primary py-2"
+                className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
@@ -125,21 +125,21 @@ export const Header = () => {
                     <>
                       <Link 
                         to="/place-order" 
-                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Place Order
                       </Link>
                       <Link 
                         to="/order-history" 
-                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         My Orders
                       </Link>
                       <Link 
                         to="/track" 
-                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Track
@@ -149,7 +149,7 @@ export const Header = () => {
                   {isRider && (
                     <Link 
                       to="/orders" 
-                      className="text-base font-medium transition-colors hover:text-primary py-2"
+                      className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Orders
@@ -157,7 +157,7 @@ export const Header = () => {
                   )}
                   <Link 
                     to="/contact" 
-                    className="text-base font-medium transition-colors hover:text-primary py-2"
+                    className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Contact
@@ -165,7 +165,7 @@ export const Header = () => {
                   {isAdmin && (
                     <Link 
                       to="/admin" 
-                      className="text-base font-medium transition-colors hover:text-primary py-2 flex items-center gap-2"
+                      className="text-base font-medium text-foreground transition-colors hover:text-accent py-2 flex items-center gap-2"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Shield className="h-4 w-4" />
@@ -176,14 +176,14 @@ export const Header = () => {
                     <>
                       <Link 
                         to="/manager" 
-                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Manager Dashboard
                       </Link>
                       <Link 
                         to="/manager/pricing" 
-                        className="text-base font-medium transition-colors hover:text-primary py-2"
+                        className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Pricing Management
@@ -192,7 +192,7 @@ export const Header = () => {
                   )}
                   <Button 
                     variant="outline" 
-                    className="justify-start transition-all duration-300 hover:scale-105" 
+                    className="justify-start border-border hover:border-accent hover:text-accent transition-all duration-300" 
                     onClick={() => {
                       handleLogout();
                       setMobileMenuOpen(false);
@@ -206,13 +206,13 @@ export const Header = () => {
                 <>
                   <Link 
                     to="/contact" 
-                    className="text-base font-medium transition-colors hover:text-primary py-2"
+                    className="text-base font-medium text-foreground transition-colors hover:text-accent py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Contact
                   </Link>
                   <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="default" className="w-full transition-all duration-300 hover:scale-105">
+                    <Button className="w-full btn-cta rounded-xl">
                       Login
                     </Button>
                   </Link>
