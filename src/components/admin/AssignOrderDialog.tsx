@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserPlus, Loader2, User, Phone, MapPin, Package, Star, CheckCircle } from "lucide-react";
+import { UserPlus, Loader2, ArrowUpDown, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface AssignOrderDialogProps {
   orderId: string;
@@ -27,12 +33,17 @@ interface RiderWithDetails {
   currentStatus: 'available' | 'busy' | 'offline';
 }
 
+type SortKey = 'full_name' | 'city' | 'rating' | 'activeOrders' | 'completedOrders' | 'currentStatus';
+type SortDirection = 'asc' | 'desc';
+
 export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasRejectedItems = false }: AssignOrderDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchingRiders, setFetchingRiders] = useState(false);
   const [riders, setRiders] = useState<RiderWithDetails[]>([]);
   const [selectedRider, setSelectedRider] = useState<string>(currentRiderId || "");
+  const [sortKey, setSortKey] = useState<SortKey>('activeOrders');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   useEffect(() => {
     if (open) {
@@ -113,9 +124,6 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
         };
       });
 
-      // Sort by active orders (available riders first)
-      ridersWithDetails.sort((a, b) => a.activeOrders - b.activeOrders);
-
       setRiders(ridersWithDetails);
     } catch (error) {
       console.error("Error fetching riders:", error);
@@ -124,6 +132,40 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
       setFetchingRiders(false);
     }
   };
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedRiders = [...riders].sort((a, b) => {
+    let aValue: any = a[sortKey];
+    let bValue: any = b[sortKey];
+
+    // Handle status sorting
+    if (sortKey === 'currentStatus') {
+      const statusOrder = { available: 0, busy: 1, offline: 2 };
+      aValue = statusOrder[aValue as keyof typeof statusOrder];
+      bValue = statusOrder[bValue as keyof typeof statusOrder];
+    }
+
+    // Handle string comparison
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === 'asc' 
+        ? aValue.localeCompare(bValue) 
+        : bValue.localeCompare(aValue);
+    }
+
+    // Handle number comparison
+    if (sortDirection === 'asc') {
+      return (aValue ?? 0) - (bValue ?? 0);
+    }
+    return (bValue ?? 0) - (aValue ?? 0);
+  });
 
   const handleSubmit = async () => {
     if (hasRejectedItems) {
@@ -174,6 +216,18 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
     }
   };
 
+  const SortableHeader = ({ label, sortKeyName }: { label: string; sortKeyName: SortKey }) => (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-8 px-2 -ml-2 font-medium hover:bg-muted"
+      onClick={() => handleSort(sortKeyName)}
+    >
+      {label}
+      <ArrowUpDown className={`ml-1 h-3 w-3 ${sortKey === sortKeyName ? 'text-primary' : 'text-muted-foreground'}`} />
+    </Button>
+  );
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -182,11 +236,11 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
           {currentRiderId ? 'Reassign' : 'Assign Rider'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[550px] max-h-[80vh]">
+      <DialogContent className="sm:max-w-[800px] max-h-[85vh]">
         <DialogHeader>
           <DialogTitle>Assign Order to Rider</DialogTitle>
           <DialogDescription>
-            Select a rider to assign this order for delivery. Riders are sorted by availability.
+            Select a rider to assign this order. Click column headers to sort.
           </DialogDescription>
         </DialogHeader>
         
@@ -201,69 +255,69 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
               No riders available. Create a user with the "Rider" role first.
             </p>
           ) : (
-            <ScrollArea className="h-[350px] pr-4">
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Select a Rider</Label>
-                {riders.map((rider) => (
-                  <Card
-                    key={rider.id}
-                    className={`p-4 cursor-pointer transition-all hover:border-primary/50 ${
-                      selectedRider === rider.id 
-                        ? 'border-primary bg-primary/5 ring-1 ring-primary' 
-                        : 'border-border'
-                    }`}
-                    onClick={() => setSelectedRider(rider.id)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-foreground">{rider.full_name}</h4>
-                            {selectedRider === rider.id && (
-                              <CheckCircle className="h-4 w-4 text-primary" />
-                            )}
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {rider.phone}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {rider.city}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      {getStatusBadge(rider.currentStatus)}
-                    </div>
-                    
-                    <div className="mt-3 pt-3 border-t border-border flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1.5">
-                        <Package className="h-4 w-4 text-orange-500" />
-                        <span className="text-muted-foreground">
-                          <strong className="text-foreground">{rider.activeOrders}</strong> Active Orders
+            <ScrollArea className="h-[400px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10"></TableHead>
+                    <TableHead>
+                      <SortableHeader label="Name" sortKeyName="full_name" />
+                    </TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>
+                      <SortableHeader label="City" sortKeyName="city" />
+                    </TableHead>
+                    <TableHead>
+                      <SortableHeader label="Active Orders" sortKeyName="activeOrders" />
+                    </TableHead>
+                    <TableHead>
+                      <SortableHeader label="Completed" sortKeyName="completedOrders" />
+                    </TableHead>
+                    <TableHead>
+                      <SortableHeader label="Rating" sortKeyName="rating" />
+                    </TableHead>
+                    <TableHead>
+                      <SortableHeader label="Status" sortKeyName="currentStatus" />
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedRiders.map((rider) => (
+                    <TableRow
+                      key={rider.id}
+                      className={`cursor-pointer transition-colors ${
+                        selectedRider === rider.id 
+                          ? 'bg-primary/10 hover:bg-primary/15' 
+                          : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => setSelectedRider(rider.id)}
+                    >
+                      <TableCell>
+                        {selectedRider === rider.id && (
+                          <CheckCircle className="h-4 w-4 text-primary" />
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{rider.full_name}</TableCell>
+                      <TableCell className="text-muted-foreground">{rider.phone}</TableCell>
+                      <TableCell>{rider.city}</TableCell>
+                      <TableCell>
+                        <span className={rider.activeOrders > 0 ? 'text-orange-600 font-semibold' : ''}>
+                          {rider.activeOrders}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-muted-foreground">
-                          <strong className="text-foreground">{rider.completedOrders}</strong> Completed
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-green-600">{rider.completedOrders}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-yellow-600 font-medium">
+                          ⭐ {rider.rating?.toFixed(1)}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                        <span className="text-foreground font-medium">
-                          {rider.rating?.toFixed(1)}
-                        </span>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(rider.currentStatus)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </ScrollArea>
           )}
         </div>
