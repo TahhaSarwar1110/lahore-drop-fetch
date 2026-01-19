@@ -45,6 +45,7 @@ const RiderOrderDetails = () => {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [deliveringOrder, setDeliveringOrder] = useState(false);
 
   useEffect(() => {
     if (orderId) {
@@ -153,28 +154,45 @@ const RiderOrderDetails = () => {
     }
   };
 
-  const handleMarkAsPicked = async (itemId: string) => {
+  const handleDeliveryProofUpload = async (file: File) => {
     try {
-      setUploading(itemId);
+      setDeliveringOrder(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { error } = await supabase
-        .from("item_pickups")
-        .insert({
-          order_item_id: itemId,
-          rider_id: user.id,
-        });
+      const fileExt = file.name.split('.').pop();
+      const fileName = `delivery/${user.id}/${Date.now()}.${fileExt}`;
 
-      if (error) throw error;
+      const { error: uploadError } = await supabase.storage
+        .from("pickup-proofs")
+        .upload(fileName, file);
 
-      toast.success("Item marked as picked");
-      await fetchOrderDetails();
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("pickup-proofs")
+        .getPublicUrl(fileName);
+
+      // Update order status to Delivered with proof
+      const { error: updateError } = await supabase
+        .from("orders")
+        .update({
+          status: "Delivered",
+          delivery_proof_url: publicUrl,
+          delivery_proof_name: file.name,
+          delivered_at: new Date().toISOString(),
+        })
+        .eq("id", orderId);
+
+      if (updateError) throw updateError;
+
+      toast.success("Order marked as delivered successfully!");
+      navigate("/orders");
     } catch (error) {
-      console.error("Error marking item as picked:", error);
-      toast.error("Failed to mark item as picked");
+      console.error("Error marking order as delivered:", error);
+      toast.error("Failed to mark order as delivered");
     } finally {
-      setUploading(null);
+      setDeliveringOrder(false);
     }
   };
 
@@ -331,13 +349,56 @@ const RiderOrderDetails = () => {
                 </CardContent>
               </Card>
 
-              {allItemsPicked && (
-                <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                  <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
-                    <Check className="h-4 w-4" />
-                    All items picked! You can now mark the order as delivered from the dashboard.
-                  </p>
-                </div>
+              {allItemsPicked && order.status !== "Delivered" && (
+                <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+                  <CardContent className="p-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                          All items picked! Upload delivery proof to complete the order.
+                        </p>
+                      </div>
+                      <label className="w-full sm:w-auto">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDeliveryProofUpload(file);
+                          }}
+                          disabled={deliveringOrder}
+                        />
+                        <Button
+                          disabled={deliveringOrder}
+                          className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+                          asChild
+                        >
+                          <span>
+                            {deliveringOrder ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                              <Upload className="h-4 w-4 mr-2" />
+                            )}
+                            Mark as Delivered with Proof
+                          </span>
+                        </Button>
+                      </label>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {order.status === "Delivered" && (
+                <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+                  <CardContent className="p-4">
+                    <p className="text-sm text-blue-800 dark:text-blue-200 flex items-center gap-2">
+                      <Check className="h-4 w-4" />
+                      This order has been delivered.
+                    </p>
+                  </CardContent>
+                </Card>
               )}
 
               <div className="flex items-center gap-2">
@@ -446,23 +507,11 @@ const RiderOrderDetails = () => {
                               )}
                             </div>
                           ) : (
-                            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t">
-                              <Button
-                                size="sm"
-                                onClick={() => handleMarkAsPicked(item.id)}
-                                disabled={uploading === item.id}
-                                className="w-full sm:w-auto"
-                              >
-                                {uploading === item.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <>
-                                    <Check className="h-4 w-4 mr-1" />
-                                    Mark as Picked
-                                  </>
-                                )}
-                              </Button>
-                              <label className="w-full sm:w-auto">
+                            <div className="flex flex-col gap-2 pt-2 border-t">
+                              <p className="text-sm text-muted-foreground">
+                                📷 Upload pickup proof to mark this item as picked
+                              </p>
+                              <label className="w-full">
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -475,14 +524,17 @@ const RiderOrderDetails = () => {
                                 />
                                 <Button
                                   size="sm"
-                                  variant="outline"
                                   disabled={uploading === item.id}
                                   asChild
-                                  className="w-full"
+                                  className="w-full sm:w-auto"
                                 >
                                   <span>
-                                    <Upload className="h-4 w-4 mr-1" />
-                                    Pick with Proof
+                                    {uploading === item.id ? (
+                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    ) : (
+                                      <Upload className="h-4 w-4 mr-2" />
+                                    )}
+                                    Upload Pickup Proof
                                   </span>
                                 </Button>
                               </label>

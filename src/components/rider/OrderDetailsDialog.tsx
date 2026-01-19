@@ -146,31 +146,7 @@ export const OrderDetailsDialog = ({
     }
   };
 
-  const handleMarkAsPicked = async (itemId: string) => {
-    try {
-      setUploading(itemId);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { error } = await supabase
-        .from("item_pickups")
-        .insert({
-          order_item_id: itemId,
-          rider_id: user.id,
-        });
-
-      if (error) throw error;
-
-      toast.success("Item marked as picked");
-      await fetchOrderItems();
-      onPickupComplete();
-    } catch (error) {
-      console.error("Error marking item as picked:", error);
-      toast.error("Failed to mark item as picked");
-    } finally {
-      setUploading(null);
-    }
-  };
+  // Removed handleMarkAsPicked - pickup proof is now mandatory
 
   const allItemsPicked = items.length > 0 && items.every(item => item.pickup);
 
@@ -275,21 +251,10 @@ export const OrderDetailsDialog = ({
                           )}
                         </div>
                       ) : (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => handleMarkAsPicked(item.id)}
-                            disabled={uploading === item.id}
-                          >
-                            {uploading === item.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <>
-                                <Check className="h-4 w-4 mr-1" />
-                                Mark as Picked
-                              </>
-                            )}
-                          </Button>
+                        <div className="flex flex-col gap-2">
+                          <p className="text-sm text-muted-foreground">
+                            📷 Upload pickup proof to mark this item as picked
+                          </p>
                           <label>
                             <input
                               type="file"
@@ -303,13 +268,16 @@ export const OrderDetailsDialog = ({
                             />
                             <Button
                               size="sm"
-                              variant="outline"
                               disabled={uploading === item.id}
                               asChild
                             >
                               <span>
-                                <Upload className="h-4 w-4 mr-1" />
-                                Pick with Proof
+                                {uploading === item.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : (
+                                  <Upload className="h-4 w-4 mr-2" />
+                                )}
+                                Upload Pickup Proof
                               </span>
                             </Button>
                           </label>

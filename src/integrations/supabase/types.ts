@@ -263,9 +263,12 @@ export type Database = {
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string | null
+          delivered_at: string | null
           delivery_address: string
           delivery_latitude: number | null
           delivery_longitude: number | null
+          delivery_proof_name: string | null
+          delivery_proof_url: string | null
           id: string
           manager_feedback: string | null
           payment_confirmed_at: string | null
@@ -283,9 +286,12 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
+          delivered_at?: string | null
           delivery_address: string
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          delivery_proof_name?: string | null
+          delivery_proof_url?: string | null
           id?: string
           manager_feedback?: string | null
           payment_confirmed_at?: string | null
@@ -303,9 +309,12 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
+          delivered_at?: string | null
           delivery_address?: string
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          delivery_proof_name?: string | null
+          delivery_proof_url?: string | null
           id?: string
           manager_feedback?: string | null
           payment_confirmed_at?: string | null
