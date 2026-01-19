@@ -6,11 +6,10 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, User } from "lucide-react";
+import { Loader2, ArrowLeft, User, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
 import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
-import { AssignOrderDialog } from "@/components/admin/AssignOrderDialog";
 import { PaymentConfirmation } from "@/components/manager/PaymentConfirmation";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
 
@@ -425,12 +424,14 @@ const ManagerOrderDetails = () => {
                     ) : (
                       <>
                         <p className="text-sm text-muted-foreground">No rider assigned yet</p>
-                        <AssignOrderDialog
-                          orderId={order.id}
-                          currentRiderId={assignedRider?.rider_id}
-                          onAssigned={fetchOrderDetails}
-                          hasRejectedItems={!allItemsApproved()}
-                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/manager/assign-rider/${order.id}`)}
+                        >
+                          <UserPlus className="h-4 w-4 mr-1" />
+                          Assign Rider
+                        </Button>
                       </>
                     )}
                   </div>
