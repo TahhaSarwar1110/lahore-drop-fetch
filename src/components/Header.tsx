@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Menu } from "lucide-react";
+import { LogOut, Shield, Menu, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import logo from "@/assets/pickyrider-logo.png";
@@ -75,10 +75,16 @@ export const Header = () => {
                 Contact
               </Link>
               {isAdmin && (
-                <Link to="/admin" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110 flex items-center gap-1">
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </Link>
+                <>
+                  <Link to="/admin" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110 flex items-center gap-1">
+                    <Shield className="h-4 w-4" />
+                    Admin
+                  </Link>
+                  <Link to="/admin/reports" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110 flex items-center gap-1">
+                    <BarChart3 className="h-4 w-4" />
+                    Reports
+                  </Link>
+                </>
               )}
               {isManager && (
                 <>
@@ -170,14 +176,24 @@ export const Header = () => {
                     Contact
                   </Link>
                   {isAdmin && (
-                    <Link 
-                      to="/admin" 
-                      className="text-base font-medium transition-colors hover:text-primary py-2 flex items-center gap-2"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Shield className="h-4 w-4" />
-                      Admin Dashboard
-                    </Link>
+                    <>
+                      <Link 
+                        to="/admin" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2 flex items-center gap-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Shield className="h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                      <Link 
+                        to="/admin/reports" 
+                        className="text-base font-medium transition-colors hover:text-primary py-2 flex items-center gap-2"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <BarChart3 className="h-4 w-4" />
+                        Reports
+                      </Link>
+                    </>
                   )}
                   {isManager && (
                     <>
