@@ -27,10 +27,11 @@ import { AIBotButton } from "@/components/AIBotButton";
 import { PricingBundles } from "@/components/PricingBundles";
 import { useAuth } from "@/hooks/useAuth";
 import { TestimonialSlider } from "@/components/TestimonialSlider";
-import clothingImg from "@/assets/clothing-delivery.jpg";
-import foodImg from "@/assets/food-delivery.jpg";
-import groceriesImg from "@/assets/groceries-delivery.jpg";
-import giftsImg from "@/assets/gifts-delivery.jpg";
+import fashionImg from "@/assets/category-fashion.jpg";
+import foodImg from "@/assets/category-food.jpg";
+import groceriesImg from "@/assets/category-grocery.jpg";
+import giftsImg from "@/assets/category-gift.jpg";
+import othersImg from "@/assets/category-others.jpg";
 import heroBg from "@/assets/pickyrider-hero-bg.jpg";
 
 const Home = () => {
@@ -45,7 +46,7 @@ const Home = () => {
       title: "Fashion & Clothing",
       subtitle: "Designer wear, traditional outfits & local brands",
       icon: Shirt,
-      image: clothingImg,
+      image: fashionImg,
     },
     {
       title: "Gifting & Personal Items",
@@ -69,7 +70,7 @@ const Home = () => {
       title: "Anything Else",
       subtitle: "No product limitations — we shop it all",
       icon: Package,
-      image: null,
+      image: othersImg,
     },
   ];
 
