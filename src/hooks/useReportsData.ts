@@ -76,7 +76,7 @@ export const useReportsData = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      setOrders((data as unknown as OrderWithDetails[]) || []);
     } catch (err) {
       console.error("Error fetching orders:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch orders");
