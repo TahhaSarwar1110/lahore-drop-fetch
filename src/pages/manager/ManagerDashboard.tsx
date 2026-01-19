@@ -99,17 +99,39 @@ const ManagerDashboard = () => {
               full_name,
               phone
             )
+          ),
+          order_items (
+            id,
+            item_data,
+            approval_status
           )
         `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       
-      // Transform the data to ensure profiles is an object, not an array
-      const transformedData = (data || []).map(order => ({
-        ...order,
-        profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
-      }));
+      // Transform the data to ensure profiles is an object and calculate total price
+      const transformedData = (data || []).map(order => {
+        // Calculate total price from approved items only
+        const itemsTotal = (order.order_items || [])
+          .filter((item: any) => item.approval_status !== 'rejected')
+          .reduce((sum: number, item: any) => {
+            const itemData = item.item_data as any;
+            const price = parseFloat(itemData?.price || 0);
+            const quantity = parseInt(itemData?.quantity || 1, 10);
+            return sum + (price * quantity);
+          }, 0);
+        
+        // Total = items total + delivery/additional charges
+        const deliveryCharges = order.additional_charges || 0;
+        const totalPrice = itemsTotal + deliveryCharges;
+        
+        return {
+          ...order,
+          profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles,
+          total_price: totalPrice
+        };
+      });
       
       setOrders(transformedData);
     } catch (error) {
