@@ -24,9 +24,10 @@ interface OrderItemApprovalProps {
   items: OrderItem[];
   orderId: string;
   onUpdate: () => void;
+  isLocked?: boolean;
 }
 
-export const OrderItemApproval = ({ items, orderId, onUpdate }: OrderItemApprovalProps) => {
+export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }: OrderItemApprovalProps) => {
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
   const [statusMap, setStatusMap] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -194,8 +195,15 @@ export const OrderItemApproval = ({ items, orderId, onUpdate }: OrderItemApprova
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Item Approval</h3>
-        {hasChanges && (
+        <div>
+          <h3 className="text-lg font-semibold">Item Approval</h3>
+          {isLocked && (
+            <p className="text-sm text-muted-foreground">
+              🔒 Order is confirmed. Items cannot be modified.
+            </p>
+          )}
+        </div>
+        {hasChanges && !isLocked && (
           <Button
             onClick={handleSaveChanges}
             disabled={isSaving}
@@ -299,45 +307,55 @@ export const OrderItemApproval = ({ items, orderId, onUpdate }: OrderItemApprova
                 )}
               </div>
 
-              {/* Feedback Section */}
-              <div className="space-y-3 pt-4 border-t">
-                <div>
-                  <Label htmlFor={`feedback-${item.id}`}>
-                    Manager Feedback {item.approval_status === "pending" && "(Optional for approval, Required for rejection)"}
-                  </Label>
-                  <Textarea
-                    id={`feedback-${item.id}`}
-                    value={feedbackMap[item.id] || ""}
-                    onChange={(e) => setFeedbackMap(prev => ({ ...prev, [item.id]: e.target.value }))}
-                    placeholder="Add feedback for this item..."
-                    className="mt-1"
-                    disabled={isSaving}
-                  />
-                </div>
+              {/* Feedback Section - Only show if not locked */}
+              {!isLocked && (
+                <div className="space-y-3 pt-4 border-t">
+                  <div>
+                    <Label htmlFor={`feedback-${item.id}`}>
+                      Manager Feedback {item.approval_status === "pending" && "(Optional for approval, Required for rejection)"}
+                    </Label>
+                    <Textarea
+                      id={`feedback-${item.id}`}
+                      value={feedbackMap[item.id] || ""}
+                      onChange={(e) => setFeedbackMap(prev => ({ ...prev, [item.id]: e.target.value }))}
+                      placeholder="Add feedback for this item..."
+                      className="mt-1"
+                      disabled={isSaving}
+                    />
+                  </div>
 
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleApprove(item.id)}
-                    disabled={isSaving}
-                    size="sm"
-                    className="flex-1"
-                    variant={currentStatus === "approved" ? "default" : "outline"}
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    {currentStatus === "approved" ? "Approved" : "Approve"}
-                  </Button>
-                  <Button
-                    onClick={() => handleReject(item.id)}
-                    disabled={isSaving}
-                    variant={currentStatus === "rejected" ? "destructive" : "outline"}
-                    size="sm"
-                    className="flex-1"
-                  >
-                    <X className="h-4 w-4 mr-2" />
-                    {currentStatus === "rejected" ? "Rejected" : "Reject"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleApprove(item.id)}
+                      disabled={isSaving}
+                      size="sm"
+                      className="flex-1"
+                      variant={currentStatus === "approved" ? "default" : "outline"}
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      {currentStatus === "approved" ? "Approved" : "Approve"}
+                    </Button>
+                    <Button
+                      onClick={() => handleReject(item.id)}
+                      disabled={isSaving}
+                      variant={currentStatus === "rejected" ? "destructive" : "outline"}
+                      size="sm"
+                      className="flex-1"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      {currentStatus === "rejected" ? "Rejected" : "Reject"}
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Show feedback read-only when locked */}
+              {isLocked && item.manager_feedback && (
+                <div className="pt-4 border-t">
+                  <p className="text-sm font-medium text-muted-foreground">Manager Feedback:</p>
+                  <p className="text-sm">{item.manager_feedback}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

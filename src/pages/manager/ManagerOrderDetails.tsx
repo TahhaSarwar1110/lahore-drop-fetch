@@ -462,11 +462,12 @@ const ManagerOrderDetails = () => {
               onUpdate={fetchOrderDetails}
             />
 
-            {/* Order Items Approval */}
+            {/* Order Items Approval - Only editable before order is confirmed */}
             <OrderItemApproval
               items={orderItems}
               orderId={order.id}
               onUpdate={fetchOrderDetails}
+              isLocked={!!order.confirmed_at}
             />
           </div>
         </div>
