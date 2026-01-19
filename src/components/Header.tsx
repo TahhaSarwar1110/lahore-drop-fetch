@@ -32,11 +32,18 @@ export const Header = () => {
     }
   };
 
+  // Check if we're on the home page (hero section has dark background)
+  const isHomePage = window.location.pathname === "/";
+  
+  // Dynamic classes based on page
+  const headerBg = isHomePage ? "" : "bg-primary shadow-md";
+  const logoFilter = "brightness-0 invert"; // Always white logo on dark backgrounds
+
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 w-full">
+    <header className={`${isHomePage ? "absolute" : "sticky"} top-0 left-0 right-0 z-50 w-full ${headerBg}`}>
       <div className="container mx-auto flex h-20 md:h-24 items-center justify-between px-4">
         <Link to="/" className="flex items-center py-2">
-          <img src={logo} alt="PickyRider Logo" className="h-16 md:h-20 w-auto object-contain brightness-0 invert" />
+          <img src={logo} alt="PickyRider Logo" className={`h-16 md:h-20 w-auto object-contain ${logoFilter}`} />
         </Link>
 
         {/* Desktop Navigation */}
