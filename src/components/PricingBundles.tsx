@@ -62,16 +62,16 @@ export const PricingBundles = () => {
         return (
           <Card 
             key={bundle.id} 
-            className={`relative rounded-3xl border-2 transition-all duration-300 hover:-translate-y-2 ${
+            className={`relative rounded-3xl border-2 transition-all duration-300 hover:-translate-y-3 bg-card ${
               isPopular 
-                ? "border-primary shadow-glow scale-105 lg:scale-110 z-10" 
-                : "border-border/50 shadow-soft hover:shadow-medium"
+                ? "border-primary shadow-glow-primary scale-105 lg:scale-110 z-10" 
+                : "border-border/50 shadow-card hover:shadow-card-hover"
             }`}
           >
             {isPopular && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground px-4 py-1 rounded-full shadow-glow">
-                  <Sparkles className="h-3 w-3 mr-1" />
+                <Badge className="bg-primary text-primary-foreground px-4 py-1.5 rounded-full shadow-glow-primary font-medium">
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                   Most Popular
                 </Badge>
               </div>
@@ -80,8 +80,8 @@ export const PricingBundles = () => {
             <CardHeader className="text-center pt-8 pb-4">
               <h3 className="text-2xl font-bold mb-2">{bundle.name}</h3>
               <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl lg:text-5xl font-extrabold text-gradient">
-                  ${bundle.price.toFixed(0)}
+                <span className="text-4xl lg:text-5xl font-bold text-primary">
+                  Rs. {bundle.price.toFixed(0)}
                 </span>
                 <span className="text-muted-foreground">/order</span>
               </div>
