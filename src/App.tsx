@@ -13,11 +13,19 @@ import TrackOrder from "./pages/TrackOrder";
 import Contact from "./pages/Contact";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
+import BusinessOverview from "./pages/admin/reports/BusinessOverview";
+import OrdersReport from "./pages/admin/reports/OrdersReport";
+import SalesReport from "./pages/admin/reports/SalesReport";
+import RiderPerformance from "./pages/admin/reports/RiderPerformance";
+import ManagerPerformance from "./pages/admin/reports/ManagerPerformance";
+import CustomerInsights from "./pages/admin/reports/CustomerInsights";
+import ExportFilters from "./pages/admin/reports/ExportFilters";
 import RiderDashboard from "./pages/rider/RiderDashboard";
 import RiderOrderDetails from "./pages/rider/RiderOrderDetails";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import ManagerOrderDetails from "./pages/manager/ManagerOrderDetails";
 import { PricingManagement } from "./pages/manager/PricingManagement";
+import AssignRider from "./pages/manager/AssignRider";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,9 +49,17 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/orders/:orderId" element={<AdminOrderDetails />} />
+          <Route path="/admin/reports" element={<BusinessOverview />} />
+          <Route path="/admin/reports/orders" element={<OrdersReport />} />
+          <Route path="/admin/reports/sales" element={<SalesReport />} />
+          <Route path="/admin/reports/riders" element={<RiderPerformance />} />
+          <Route path="/admin/reports/managers" element={<ManagerPerformance />} />
+          <Route path="/admin/reports/customers" element={<CustomerInsights />} />
+          <Route path="/admin/reports/export" element={<ExportFilters />} />
           <Route path="/manager" element={<ManagerDashboard />} />
           <Route path="/manager/orders/:orderId" element={<ManagerOrderDetails />} />
           <Route path="/manager/pricing" element={<PricingManagement />} />
+          <Route path="/manager/assign-rider/:orderId" element={<AssignRider />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

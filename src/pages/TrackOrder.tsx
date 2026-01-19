@@ -61,6 +61,8 @@ const TrackOrder = () => {
   const [statusHistory, setStatusHistory] = useState<StatusHistory[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -95,19 +97,29 @@ const TrackOrder = () => {
   }, [orderId, orderData]);
 
   const trackOrder = async () => {
-    if (!orderId) return;
+    // Validate empty input
+    if (!orderId.trim()) {
+      setErrorMessage("Please enter an order ID to track your order.");
+      setOrderData(null);
+      setHasSearched(true);
+      return;
+    }
 
     setLoading(true);
+    setErrorMessage(null);
+    setHasSearched(true);
     
     // Fetch order data
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .select("status, confirmed_at, payment_status, payment_confirmed_at")
-      .eq("id", orderId)
+      .eq("id", orderId.trim())
       .single();
 
     if (orderError) {
       console.error("Error fetching order:", orderError);
+      setErrorMessage("Order not found. Please check your order ID and try again.");
+      setOrderData(null);
       setLoading(false);
       return;
     }
@@ -241,27 +253,50 @@ const TrackOrder = () => {
           <h1 className="mobile-header mb-6">Track Your Order</h1>
 
           <Card className="mobile-card mb-6">
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-1 space-y-2">
-                  <label className="mobile-label">Order ID</label>
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="orderId" className="text-sm font-medium text-foreground">Order ID</Label>
                   <Input
-                    className="mobile-input"
+                    id="orderId"
+                    className="h-12 text-base"
                     placeholder="Enter your order ID"
                     value={orderId}
-                    onChange={(e) => setOrderId(e.target.value)}
+                    onChange={(e) => {
+                      setOrderId(e.target.value);
+                      setErrorMessage(null);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && trackOrder()}
                   />
                 </div>
                 <Button
                   onClick={trackOrder}
-                  disabled={loading || !orderId}
-                  className="mobile-button sm:mt-7"
+                  disabled={loading}
+                  className="w-full h-12"
                 >
-                  {loading ? "Tracking..." : "Track"}
+                  {loading ? "Tracking..." : "Track Order"}
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Error/Validation Message */}
+          {errorMessage && (
+            <Card className="mobile-card mb-6 border-destructive/50 bg-destructive/5">
+              <CardContent className="p-4">
+                <p className="text-sm text-destructive font-medium">{errorMessage}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* No results message after search */}
+          {hasSearched && !orderData && !errorMessage && !loading && (
+            <Card className="mobile-card mb-6">
+              <CardContent className="p-4 text-center">
+                <p className="text-muted-foreground">No order found. Please enter a valid order ID.</p>
+              </CardContent>
+            </Card>
+          )}
 
           {orderData && (
             <Card className="mobile-card">

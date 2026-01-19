@@ -3,16 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Package, XCircle, Eye, User, MapPin } from "lucide-react";
+import { Loader2, Package } from "lucide-react";
 import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RiderTrackingMap } from "@/components/admin/RiderTrackingMap";
+import { ActiveRidersGrid } from "@/components/manager/ActiveRidersGrid";
+import { ManagerOrdersTable } from "@/components/manager/ManagerOrdersTable";
 
 interface Order {
   id: string;
@@ -24,6 +18,7 @@ interface Order {
   confirmed_at: string | null;
   additional_charges: number;
   charges_description: string | null;
+  total_price?: number;
   profiles: {
     full_name: string;
     phone: string;
@@ -40,10 +35,7 @@ interface Order {
 const ManagerDashboard = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<Record<string, string>>({});
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,10 +46,7 @@ const ManagerDashboard = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      console.log("Manager Dashboard - Session:", session ? "Authenticated" : "Not authenticated");
-      
       if (!session) {
-        console.log("Manager Dashboard - No session, redirecting to login");
         navigate("/login");
         return;
       }
@@ -71,26 +60,22 @@ const ManagerDashboard = () => {
         .eq("user_id", session.user.id)
         .in("role", ["manager", "admin"]);
 
-      console.log("Manager Dashboard - Roles check:", { roles, rolesError, userId: session.user.id });
-
       if (rolesError) {
-        console.error("Manager Dashboard - Error checking roles:", rolesError);
+        console.error("Error checking roles:", rolesError);
         toast.error("Failed to verify manager role");
         navigate("/");
         return;
       }
 
       if (!roles || roles.length === 0) {
-        console.log("Manager Dashboard - User does not have manager role");
         toast.error("Access denied. Manager role required.");
         navigate("/");
         return;
       }
 
-      console.log("Manager Dashboard - Access granted, fetching orders");
       fetchOrders();
     } catch (error) {
-      console.error("Manager Dashboard - Auth check error:", error);
+      console.error("Auth check error:", error);
       toast.error("Authentication error");
       navigate("/");
     }
@@ -98,7 +83,6 @@ const ManagerDashboard = () => {
 
   const fetchOrders = async () => {
     try {
-      console.log("Manager Dashboard - Fetching orders...");
       setLoading(true);
       
       const { data, error } = await supabase
@@ -115,78 +99,62 @@ const ManagerDashboard = () => {
               full_name,
               phone
             )
+          ),
+          order_items (
+            id,
+            item_data,
+            approval_status
           )
         `)
         .order("created_at", { ascending: false });
 
-      console.log("Manager Dashboard - Orders fetch result:", { 
-        dataCount: data?.length, 
-        error,
-        sampleData: data?.[0] 
+      if (error) throw error;
+      
+      // Transform the data to ensure profiles is an object and calculate total price
+      const transformedData = (data || []).map(order => {
+        // Calculate total price from approved items only
+        const itemsTotal = (order.order_items || [])
+          .filter((item: any) => item.approval_status !== 'rejected')
+          .reduce((sum: number, item: any) => {
+            const itemData = item.item_data as any;
+            // Handle different field naming conventions
+            const price = parseFloat(
+              itemData?.['Price (PKR)'] || 
+              itemData?.price || 
+              itemData?.Price || 
+              0
+            );
+            const quantity = parseInt(
+              itemData?.Quantity || 
+              itemData?.quantity || 
+              1, 
+              10
+            );
+            return sum + (price * quantity);
+          }, 0);
+        
+        // Total = items total + delivery/additional charges
+        const deliveryCharges = order.additional_charges || 0;
+        const totalPrice = itemsTotal + deliveryCharges;
+        
+        return {
+          ...order,
+          profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles,
+          total_price: totalPrice
+        };
       });
-
-      if (error) {
-        console.error("Manager Dashboard - Error fetching orders:", error);
-        throw error;
-      }
       
-      // Transform the data to ensure profiles is an object, not an array
-      const transformedData = (data || []).map(order => ({
-        ...order,
-        profiles: Array.isArray(order.profiles) ? order.profiles[0] : order.profiles
-      }));
-      
-      console.log("Manager Dashboard - Transformed orders:", transformedData.length);
       setOrders(transformedData);
     } catch (error) {
-      console.error("Manager Dashboard - Catch block error:", error);
+      console.error("Error fetching orders:", error);
       toast.error("Failed to load orders");
     } finally {
       setLoading(false);
-      console.log("Manager Dashboard - Fetch orders completed");
     }
   };
 
   const handleViewDetails = (orderId: string) => {
     navigate(`/manager/orders/${orderId}`);
-  };
-
-
-  const sendFeedback = async (orderId: string) => {
-    try {
-      setUpdating(orderId);
-      
-      const { error } = await supabase
-        .from("orders")
-        .update({
-          manager_feedback: feedback[orderId] || "",
-        })
-        .eq("id", orderId);
-
-      if (error) throw error;
-
-      toast.success("Feedback sent successfully");
-      setFeedback({ ...feedback, [orderId]: "" });
-      fetchOrders();
-    } catch (error) {
-      console.error("Error sending feedback:", error);
-      toast.error("Failed to send feedback");
-    } finally {
-      setUpdating(null);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      "Pending": "bg-yellow-500",
-      "Order Confirmed": "bg-blue-500",
-      "Order Received": "bg-blue-500",
-      "Shopper Assigned": "bg-purple-500",
-      "Purchasing": "bg-orange-500",
-      "In Delivery": "bg-cyan-500",
-      "Delivered": "bg-green-500",
-    };
-    return colors[status] || "bg-gray-500";
   };
 
   if (loading) {
@@ -206,145 +174,17 @@ const ManagerDashboard = () => {
       <Header />
 
       <main className="flex-1 py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">Manager Dashboard</h1>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Orders</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Order Confirmed">Order Confirmed</SelectItem>
-                <SelectItem value="Shopper Assigned">Shopper Assigned</SelectItem>
-                <SelectItem value="Purchasing">Purchasing</SelectItem>
-                <SelectItem value="In Delivery">In Delivery</SelectItem>
-                <SelectItem value="Delivered">Delivered</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="container mx-auto px-4 space-y-8">
+          <h1 className="text-3xl font-bold">Manager Dashboard</h1>
 
-          {/* Rider Tracking Map */}
-          <div className="mb-8">
-            <RiderTrackingMap />
-          </div>
+          {/* Active Riders Grid */}
+          <ActiveRidersGrid />
 
-          {orders.filter(order => statusFilter === "all" || order.status === statusFilter).length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">No orders found</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {orders.filter(order => statusFilter === "all" || order.status === statusFilter).map((order) => {
-                const assignedRider = order.order_assignments;
-                return (
-                <Card key={order.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {new Date(order.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                      <Badge className={getStatusColor(order.status)}>
-                        {order.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium">Customer</p>
-                      <p className="text-sm text-muted-foreground">
-                        {order.profiles.full_name} - {order.profiles.phone}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-medium">Delivery Address</p>
-                      <p className="text-sm text-muted-foreground">{order.delivery_address}</p>
-                    </div>
-
-                    {assignedRider && (
-                      <div className="bg-primary/5 p-3 rounded-md border border-primary/20">
-                        <div className="flex items-center gap-2 mb-1">
-                          <User className="h-4 w-4 text-primary" />
-                          <p className="text-sm font-medium">Assigned Rider</p>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {assignedRider.profiles.full_name} - {assignedRider.profiles.phone}
-                        </p>
-                      </div>
-                    )}
-
-                    {order.additional_charges > 0 && (
-                      <div className="bg-primary/10 p-3 rounded-md">
-                        <p className="text-sm font-medium mb-1">Total Order Price</p>
-                        <p className="text-lg font-bold text-primary">PKR {order.additional_charges.toFixed(2)}</p>
-                        {order.charges_description && (
-                          <p className="text-sm text-muted-foreground mt-1">{order.charges_description}</p>
-                        )}
-                      </div>
-                    )}
-
-                    {order.manager_feedback && (
-                      <div className="bg-muted p-3 rounded-md">
-                        <p className="text-sm font-medium mb-1">Previous Feedback</p>
-                        <p className="text-sm text-muted-foreground">{order.manager_feedback}</p>
-                      </div>
-                    )}
-
-                    <div className="pt-4 border-t space-y-3">
-                      <Button
-                        onClick={() => handleViewDetails(order.id)}
-                        variant="default"
-                        className="w-full"
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Details & Approve Items
-                      </Button>
-
-                      {order.status === "Pending" && feedback[order.id] && (
-                        <div className="space-y-2">
-                          <Label htmlFor={`feedback-${order.id}`}>Order Feedback (Optional)</Label>
-                          <Textarea
-                            id={`feedback-${order.id}`}
-                            placeholder="Add feedback for the customer..."
-                            value={feedback[order.id] || ""}
-                            onChange={(e) => setFeedback({ ...feedback, [order.id]: e.target.value })}
-                            rows={3}
-                          />
-                          <Button
-                            variant="outline"
-                            onClick={() => sendFeedback(order.id)}
-                            disabled={updating === order.id}
-                            className="w-full"
-                          >
-                            {updating === order.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            ) : (
-                              <XCircle className="h-4 w-4 mr-2" />
-                            )}
-                            Send Feedback
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-
-                    {order.confirmed_at && (
-                      <div className="text-sm text-muted-foreground pt-4 border-t">
-                        Confirmed at: {new Date(order.confirmed_at).toLocaleString()}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )})}
-            </div>
-          )}
+          {/* Orders Table */}
+          <ManagerOrdersTable 
+            orders={orders} 
+            onViewDetails={handleViewDetails} 
+          />
         </div>
       </main>
 

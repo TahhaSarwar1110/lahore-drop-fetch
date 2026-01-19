@@ -393,15 +393,15 @@ const PlaceOrder = () => {
                   {/* Always show Place Order button with validation */}
                   <div className="border-t pt-5 space-y-3">
                     {orderItems.length === 0 && (
-                      <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl">
-                        <p className="text-sm text-accent-foreground">
+                      <div className="p-3 bg-muted border border-border rounded-xl">
+                        <p className="text-sm text-foreground">
                           ⚠️ Please add at least one item to your order
                         </p>
                       </div>
                     )}
                     {(!fullName || !phone || !deliveryAddress) && (
-                      <div className="p-3 bg-accent/10 border border-accent/20 rounded-xl">
-                        <p className="text-sm text-accent-foreground">
+                      <div className="p-3 bg-muted border border-border rounded-xl">
+                        <p className="text-sm text-foreground">
                           ⚠️ Please complete all required fields (Name, Phone, Delivery Address)
                         </p>
                       </div>
