@@ -430,7 +430,7 @@ const OrderDetails = () => {
                     </div>
                   )}
 
-                  {item.approval_status === "rejected" && order.status === "Pending" && (
+                  {item.approval_status === "rejected" && order.status === "Pending" && !order.confirmed_at && (
                     <div className="mt-3">
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -489,7 +489,7 @@ const OrderDetails = () => {
             ))}
           </div>
 
-          {order.status === "Pending" && (
+          {order.status === "Pending" && !order.confirmed_at && (
             <Card>
               <CardContent className="p-6">
                 {!showAddItem ? (
@@ -513,6 +513,16 @@ const OrderDetails = () => {
                     <OrderItemForm onAddItem={handleAddNewItem} />
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {order.confirmed_at && (
+            <Card className="border-muted">
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  🔒 Order confirmed. Items can no longer be modified.
+                </p>
               </CardContent>
             </Card>
           )}
