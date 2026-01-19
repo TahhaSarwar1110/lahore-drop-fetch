@@ -117,8 +117,19 @@ const ManagerDashboard = () => {
           .filter((item: any) => item.approval_status !== 'rejected')
           .reduce((sum: number, item: any) => {
             const itemData = item.item_data as any;
-            const price = parseFloat(itemData?.price || 0);
-            const quantity = parseInt(itemData?.quantity || 1, 10);
+            // Handle different field naming conventions
+            const price = parseFloat(
+              itemData?.['Price (PKR)'] || 
+              itemData?.price || 
+              itemData?.Price || 
+              0
+            );
+            const quantity = parseInt(
+              itemData?.Quantity || 
+              itemData?.quantity || 
+              1, 
+              10
+            );
             return sum + (price * quantity);
           }, 0);
         
