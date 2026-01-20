@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -36,9 +36,18 @@ import heroBg from "@/assets/pickyrider-hero-bg.jpg";
 
 const Home = () => {
   const { isAuthenticated, isRider } = useAuth();
+  const navigate = useNavigate();
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleCategoryClick = () => {
+    if (isAuthenticated) {
+      navigate("/place-order");
+    } else {
+      navigate("/signup");
+    }
   };
 
   const serviceItems = [
@@ -251,6 +260,7 @@ const Home = () => {
                   key={index}
                   className="group service-card cursor-pointer opacity-0 animate-fade-in-up border-0"
                   style={{ animationDelay: `${0.1 + index * 0.1}s` }}
+                  onClick={handleCategoryClick}
                 >
                   {item.image ? (
                     <div className="relative h-48 overflow-hidden">
