@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, Navigation, Loader2 } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
+import { Geolocation } from "@capacitor/geolocation";
+import { toast } from "sonner";
 
 // Fix for default marker icon
 const iconRetinaUrl = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png";
@@ -40,6 +43,7 @@ export const LocationPickerMap = ({
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(
     initialLat && initialLng ? { lat: initialLat, lng: initialLng } : null
   );
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
   useEffect(() => {
     if (!mapContainer.current || mapInstance.current) return;
@@ -85,29 +89,73 @@ export const LocationPickerMap = ({
     };
   }, []);
 
-  const handleUseMyLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          if (mapInstance.current) {
-            mapInstance.current.setView([latitude, longitude], 15);
-            
-            if (markerInstance.current) {
-              markerInstance.current.setLatLng([latitude, longitude]);
-            } else {
-              markerInstance.current = L.marker([latitude, longitude], { icon: defaultIcon }).addTo(mapInstance.current);
-            }
+  const updateMapWithLocation = (latitude: number, longitude: number) => {
+    if (mapInstance.current) {
+      mapInstance.current.setView([latitude, longitude], 15);
+      
+      if (markerInstance.current) {
+        markerInstance.current.setLatLng([latitude, longitude]);
+      } else {
+        markerInstance.current = L.marker([latitude, longitude], { icon: defaultIcon }).addTo(mapInstance.current);
+      }
+    }
+    
+    setSelectedLocation({ lat: latitude, lng: longitude });
+    onLocationSelect(latitude, longitude);
+  };
+
+  const handleUseMyLocation = async () => {
+    setIsLoadingLocation(true);
+    
+    try {
+      // Check if running on native platform
+      if (Capacitor.isNativePlatform()) {
+        // Request permission first
+        const permStatus = await Geolocation.checkPermissions();
+        
+        if (permStatus.location !== 'granted') {
+          const requestResult = await Geolocation.requestPermissions();
+          if (requestResult.location !== 'granted') {
+            toast.error("Location permission denied. Please enable it in your device settings.");
+            setIsLoadingLocation(false);
+            return;
           }
-          
-          setSelectedLocation({ lat: latitude, lng: longitude });
-          onLocationSelect(latitude, longitude);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
         }
-      );
+        
+        // Get current position using Capacitor Geolocation
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 10000,
+        });
+        
+        updateMapWithLocation(position.coords.latitude, position.coords.longitude);
+        toast.success("Location updated successfully!");
+      } else {
+        // Fall back to browser geolocation for web
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              updateMapWithLocation(position.coords.latitude, position.coords.longitude);
+              toast.success("Location updated successfully!");
+            },
+            (error) => {
+              console.error("Error getting location:", error);
+              toast.error("Failed to get your location. Please check your browser permissions.");
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+            }
+          );
+        } else {
+          toast.error("Geolocation is not supported by your browser.");
+        }
+      }
+    } catch (error) {
+      console.error("Error getting location:", error);
+      toast.error("Failed to get your location. Please try again.");
+    } finally {
+      setIsLoadingLocation(false);
     }
   };
 
@@ -123,9 +171,14 @@ export const LocationPickerMap = ({
           variant="outline"
           size="sm"
           onClick={handleUseMyLocation}
+          disabled={isLoadingLocation}
         >
-          <Navigation className="h-4 w-4 mr-1" />
-          Use My Location
+          {isLoadingLocation ? (
+            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+          ) : (
+            <Navigation className="h-4 w-4 mr-1" />
+          )}
+          {isLoadingLocation ? "Getting Location..." : "Use My Location"}
         </Button>
       </div>
       <div 
