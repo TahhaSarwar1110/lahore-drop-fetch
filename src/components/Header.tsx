@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import logo from "@/assets/pickyrider-logo.png";
+import logo from "@/assets/tabedar-logo.png";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NotificationBell } from "./NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
@@ -43,7 +43,7 @@ export const Header = () => {
     <header className={`${isHomePage ? "absolute" : "sticky"} top-0 left-0 right-0 z-50 w-full ${headerBg}`}>
       <div className="container mx-auto flex h-20 md:h-24 items-center justify-between px-4">
         <Link to="/" className="flex items-center py-2">
-          <img src={logo} alt="PickyRider Logo" className={`h-16 md:h-20 w-auto object-contain ${logoFilter}`} />
+          <img src={logo} alt="Tabedar Logo" className={`h-16 md:h-20 w-auto object-contain ${logoFilter}`} />
         </Link>
 
         {/* Desktop Navigation */}
