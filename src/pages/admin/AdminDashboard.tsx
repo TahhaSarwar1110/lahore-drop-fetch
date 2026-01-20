@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { OrdersTable } from "@/components/admin/OrdersTable";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { RolePermissionsManagement } from "@/components/admin/RolePermissionsManagement";
-import { RiderTrackingMap } from "@/components/admin/RiderTrackingMap";
+import { RiderTrackingGrid } from "@/components/admin/RiderTrackingGrid";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -170,7 +170,7 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="tracking">
-            <RiderTrackingMap />
+            <RiderTrackingGrid />
           </TabsContent>
 
           <TabsContent value="users">
