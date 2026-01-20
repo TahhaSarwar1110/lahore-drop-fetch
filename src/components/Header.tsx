@@ -40,9 +40,15 @@ export const Header = () => {
 
   return (
     <header className={`${isHomePage ? "absolute" : "sticky"} top-0 left-0 right-0 z-50 w-full ${headerBg}`}>
-      <div className="container mx-auto flex h-24 md:h-28 items-center justify-between px-4">
+      <div className="container mx-auto flex h-32 sm:h-36 md:h-44 lg:h-48 items-center justify-between px-4">
         <Link to="/" className="flex items-center py-2">
-          <img src={logo} alt="Tabedar Logo" className="h-24 md:h-32 w-auto object-contain" />
+          <div className="h-24 sm:h-28 md:h-36 lg:h-40 w-[280px] sm:w-[360px] md:w-[520px] lg:w-[620px] overflow-hidden">
+            <img
+              src={logo}
+              alt="Tabedar Logo"
+              className="h-full w-full object-cover object-left"
+            />
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
