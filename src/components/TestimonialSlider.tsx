@@ -16,14 +16,14 @@ const testimonials: Testimonial[] = [
     name: "Sarah Ahmed",
     location: "Dubai, UAE",
     rating: 5,
-    text: "PickyRider helped me send gifts to my family in Lahore. The photo confirmation before purchase gave me complete peace of mind. Highly recommended!",
+    text: "Tabedar.com helped me send gifts to my family in Lahore. The photo confirmation before purchase gave me complete peace of mind. Highly recommended!",
   },
   {
     id: 2,
     name: "Ahmed Khan",
     location: "London, UK",
     rating: 5,
-    text: "I've used PickyRider multiple times for sending traditional clothes to my parents. Their service is reliable, fast, and the team is very responsive on WhatsApp.",
+    text: "I've used Tabedar.com multiple times for sending traditional clothes to my parents. Their service is reliable, fast, and the team is very responsive on WhatsApp.",
   },
   {
     id: 3,
