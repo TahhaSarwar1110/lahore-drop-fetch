@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -32,13 +32,22 @@ import foodImg from "@/assets/category-food.jpg";
 import groceriesImg from "@/assets/category-grocery.jpg";
 import giftsImg from "@/assets/category-gift.jpg";
 import othersImg from "@/assets/category-others.jpg";
-import heroBg from "@/assets/pickyrider-hero-bg.jpg";
+import heroBg from "@/assets/tabedar-hero-bg.jpg";
 
 const Home = () => {
   const { isAuthenticated, isRider } = useAuth();
+  const navigate = useNavigate();
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleCategoryClick = () => {
+    if (isAuthenticated) {
+      navigate("/place-order");
+    } else {
+      navigate("/signup");
+    }
   };
 
   const serviceItems = [
@@ -251,6 +260,7 @@ const Home = () => {
                   key={index}
                   className="group service-card cursor-pointer opacity-0 animate-fade-in-up border-0"
                   style={{ animationDelay: `${0.1 + index * 0.1}s` }}
+                  onClick={handleCategoryClick}
                 >
                   {item.image ? (
                     <div className="relative h-48 overflow-hidden">
@@ -320,7 +330,7 @@ const Home = () => {
         <section className="py-20 lg:py-28 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Why Choose PickyRider?</h2>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Why Choose Tabedar?</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 We're committed to making your shopping experience safe, transparent, and convenient
               </p>
