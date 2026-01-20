@@ -110,53 +110,93 @@ export const LocationPickerMap = ({
     try {
       // Check if running on native platform
       if (Capacitor.isNativePlatform()) {
-        // Request permission first
-        const permStatus = await Geolocation.checkPermissions();
-        
-        if (permStatus.location !== 'granted') {
-          const requestResult = await Geolocation.requestPermissions();
-          if (requestResult.location !== 'granted') {
+        try {
+          // Request permission first
+          let permStatus = await Geolocation.checkPermissions();
+          console.log("Initial permission status:", permStatus);
+          
+          if (permStatus.location === 'denied') {
             toast.error("Location permission denied. Please enable it in your device settings.");
             setIsLoadingLocation(false);
             return;
           }
+          
+          if (permStatus.location === 'prompt' || permStatus.location === 'prompt-with-rationale') {
+            const requestResult = await Geolocation.requestPermissions();
+            console.log("Permission request result:", requestResult);
+            if (requestResult.location === 'denied') {
+              toast.error("Location permission denied. Please enable it in your device settings.");
+              setIsLoadingLocation(false);
+              return;
+            }
+          }
+          
+          // Get current position using Capacitor Geolocation
+          console.log("Getting current position...");
+          const position = await Geolocation.getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+          });
+          
+          console.log("Position received:", position);
+          updateMapWithLocation(position.coords.latitude, position.coords.longitude);
+          toast.success("Location updated successfully!");
+        } catch (err: any) {
+          console.error("Capacitor geolocation error:", err);
+          
+          // Provide more specific error messages
+          if (err?.message?.includes('location disabled') || err?.code === 2) {
+            toast.error("GPS is disabled. Please enable Location/GPS in your device settings.");
+          } else if (err?.message?.includes('denied') || err?.code === 1) {
+            toast.error("Location permission denied. Please enable it in your device settings.");
+          } else if (err?.code === 3 || err?.message?.includes('timeout')) {
+            toast.error("Location request timed out. Please ensure GPS is enabled and try again.");
+          } else {
+            toast.error("Failed to get location. Please check GPS is enabled and try again.");
+          }
         }
-        
-        // Get current position using Capacitor Geolocation
-        const position = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: true,
-          timeout: 10000,
-        });
-        
-        updateMapWithLocation(position.coords.latitude, position.coords.longitude);
-        toast.success("Location updated successfully!");
       } else {
         // Fall back to browser geolocation for web
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              updateMapWithLocation(position.coords.latitude, position.coords.longitude);
-              toast.success("Location updated successfully!");
-            },
-            (error) => {
-              console.error("Error getting location:", error);
-              toast.error("Failed to get your location. Please check your browser permissions.");
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-            }
-          );
-        } else {
+        if (!navigator.geolocation) {
           toast.error("Geolocation is not supported by your browser.");
+          setIsLoadingLocation(false);
+          return;
         }
+        
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            updateMapWithLocation(position.coords.latitude, position.coords.longitude);
+            toast.success("Location updated successfully!");
+            setIsLoadingLocation(false);
+          },
+          (error) => {
+            console.error("Browser geolocation error:", error);
+            if (error.code === 1) {
+              toast.error("Location permission denied. Please allow location access.");
+            } else if (error.code === 2) {
+              toast.error("Unable to determine location. Please check your GPS/network.");
+            } else if (error.code === 3) {
+              toast.error("Location request timed out. Please try again.");
+            } else {
+              toast.error("Failed to get your location.");
+            }
+            setIsLoadingLocation(false);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+          }
+        );
+        return; // Don't run finally for browser - handled in callbacks
       }
     } catch (error) {
-      console.error("Error getting location:", error);
-      toast.error("Failed to get your location. Please try again.");
-    } finally {
-      setIsLoadingLocation(false);
+      console.error("Unexpected error getting location:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     }
+    
+    setIsLoadingLocation(false);
   };
 
   return (
