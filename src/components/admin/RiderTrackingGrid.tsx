@@ -1,10 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MapPin, Users, Phone, Package, Eye } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { MapPin, Users, Eye, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { SingleRiderMap } from "@/components/map/SingleRiderMap";
 
 interface RiderData {
@@ -19,11 +28,17 @@ interface RiderData {
   currentOrderStatus?: string;
 }
 
+type SortField = "full_name" | "phone" | "assignedOrdersCount" | "currentOrderStatus" | "hasLocation";
+type SortDirection = "asc" | "desc";
+
 export const RiderTrackingGrid = () => {
   const [riders, setRiders] = useState<RiderData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRider, setSelectedRider] = useState<RiderData | null>(null);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortField, setSortField] = useState<SortField>("full_name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   useEffect(() => {
     fetchRiders();
@@ -136,6 +151,66 @@ export const RiderTrackingGrid = () => {
     setMapDialogOpen(true);
   };
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    }
+    return sortDirection === "asc" 
+      ? <ArrowUp className="h-4 w-4 ml-1" /> 
+      : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
+  const filteredAndSortedRiders = useMemo(() => {
+    let result = [...riders];
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (rider) =>
+          rider.full_name.toLowerCase().includes(query) ||
+          rider.phone.includes(query) ||
+          (rider.currentOrderStatus?.toLowerCase().includes(query))
+      );
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortField) {
+        case "full_name":
+          comparison = a.full_name.localeCompare(b.full_name);
+          break;
+        case "phone":
+          comparison = a.phone.localeCompare(b.phone);
+          break;
+        case "assignedOrdersCount":
+          comparison = a.assignedOrdersCount - b.assignedOrdersCount;
+          break;
+        case "currentOrderStatus":
+          comparison = (a.currentOrderStatus || "").localeCompare(b.currentOrderStatus || "");
+          break;
+        case "hasLocation":
+          comparison = (a.hasLocation ? 1 : 0) - (b.hasLocation ? 1 : 0);
+          break;
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+
+    return result;
+  }, [riders, searchQuery, sortField, sortDirection]);
+
   const getStatusBadgeVariant = (status?: string) => {
     if (!status) return "secondary";
     switch (status) {
@@ -167,15 +242,26 @@ export const RiderTrackingGrid = () => {
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               Rider Tracking
             </CardTitle>
-            <Badge variant="default" className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              {riders.filter((r) => r.hasLocation).length} Online
-            </Badge>
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, phone, status..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Badge variant="default" className="flex items-center gap-1 whitespace-nowrap">
+                <Users className="h-3 w-3" />
+                {riders.filter((r) => r.hasLocation).length} Online
+              </Badge>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -188,63 +274,123 @@ export const RiderTrackingGrid = () => {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {riders.map((rider) => (
-                <Card key={rider.id} className="bg-muted/30">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold text-foreground">{rider.full_name}</h3>
-                        <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {rider.phone}
-                        </p>
-                      </div>
-                      <Badge
-                        variant={rider.hasLocation ? "default" : "secondary"}
-                        className="text-xs"
-                      >
-                        {rider.hasLocation ? "Online" : "Offline"}
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground flex items-center gap-1">
-                          <Package className="h-3 w-3" />
+            <>
+              <div className="bg-card rounded-lg border border-border p-3 mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Showing <span className="font-semibold text-foreground">{filteredAndSortedRiders.length}</span> of{" "}
+                  <span className="font-semibold text-foreground">{riders.length}</span> riders
+                </p>
+              </div>
+              
+              <div className="rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 font-semibold"
+                          onClick={() => handleSort("full_name")}
+                        >
+                          Name
+                          {getSortIcon("full_name")}
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 font-semibold"
+                          onClick={() => handleSort("phone")}
+                        >
+                          Phone
+                          {getSortIcon("phone")}
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 font-semibold"
+                          onClick={() => handleSort("hasLocation")}
+                        >
+                          Status
+                          {getSortIcon("hasLocation")}
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 font-semibold"
+                          onClick={() => handleSort("assignedOrdersCount")}
+                        >
                           Assigned Orders
-                        </span>
-                        <span className="font-medium">{rider.assignedOrdersCount}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Current Status</span>
-                        <Badge variant={getStatusBadgeVariant(rider.currentOrderStatus)}>
-                          {rider.currentOrderStatus || "N/A"}
-                        </Badge>
-                      </div>
-
-                      {rider.lastUpdated && (
-                        <p className="text-xs text-muted-foreground">
-                          Last seen: {new Date(rider.lastUpdated).toLocaleTimeString()}
-                        </p>
-                      )}
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => handleViewLocation(rider)}
-                      disabled={!rider.hasLocation}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      {rider.hasLocation ? "View Live Location" : "Location Unavailable"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                          {getSortIcon("assignedOrdersCount")}
+                        </Button>
+                      </TableHead>
+                      <TableHead>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 font-semibold"
+                          onClick={() => handleSort("currentOrderStatus")}
+                        >
+                          Current Status
+                          {getSortIcon("currentOrderStatus")}
+                        </Button>
+                      </TableHead>
+                      <TableHead>Last Seen</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAndSortedRiders.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          No riders match your search criteria
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredAndSortedRiders.map((rider) => (
+                        <TableRow key={rider.id}>
+                          <TableCell className="font-medium">{rider.full_name}</TableCell>
+                          <TableCell>{rider.phone}</TableCell>
+                          <TableCell>
+                            <Badge variant={rider.hasLocation ? "default" : "secondary"}>
+                              {rider.hasLocation ? "Online" : "Offline"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{rider.assignedOrdersCount}</TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusBadgeVariant(rider.currentOrderStatus)}>
+                              {rider.currentOrderStatus || "N/A"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {rider.lastUpdated
+                              ? new Date(rider.lastUpdated).toLocaleTimeString()
+                              : "—"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewLocation(rider)}
+                              disabled={!rider.hasLocation}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View Location
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
