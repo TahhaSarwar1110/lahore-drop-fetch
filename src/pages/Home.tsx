@@ -32,7 +32,7 @@ import foodImg from "@/assets/category-food.jpg";
 import groceriesImg from "@/assets/category-grocery.jpg";
 import giftsImg from "@/assets/category-gift.jpg";
 import othersImg from "@/assets/category-others.jpg";
-import heroBg from "@/assets/pickyrider-hero-bg.jpg";
+import heroBg from "@/assets/tabedar-hero-bg.jpg";
 
 const Home = () => {
   const { isAuthenticated, isRider } = useAuth();

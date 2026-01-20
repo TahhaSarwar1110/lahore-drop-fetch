@@ -40,12 +40,12 @@ export const Header = () => {
 
   return (
     <header className={`${isHomePage ? "absolute" : "sticky"} top-0 left-0 right-0 z-50 w-full ${headerBg}`}>
-      <div className="container mx-auto flex h-20 md:h-24 items-center justify-between px-4">
+      <div className="container mx-auto flex h-36 md:h-40 items-center justify-between px-4">
         <Link to="/" className="flex items-center py-2">
           <img
             src={logo}
             alt="Tabedar Logo"
-            className="h-16 w-auto object-contain"
+            className="h-32 w-auto object-contain"
           />
         </Link>
 
