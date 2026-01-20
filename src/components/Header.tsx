@@ -37,13 +37,12 @@ export const Header = () => {
   
   // Dynamic classes based on page
   const headerBg = isHomePage ? "" : "bg-primary shadow-md";
-  const logoFilter = "brightness-0 invert"; // Always white logo on dark backgrounds
 
   return (
     <header className={`${isHomePage ? "absolute" : "sticky"} top-0 left-0 right-0 z-50 w-full ${headerBg}`}>
-      <div className="container mx-auto flex h-20 md:h-24 items-center justify-between px-4">
+      <div className="container mx-auto flex h-24 md:h-28 items-center justify-between px-4">
         <Link to="/" className="flex items-center py-2">
-          <img src={logo} alt="Tabedar Logo" className={`h-20 md:h-28 w-auto object-contain ${logoFilter}`} />
+          <img src={logo} alt="Tabedar Logo" className="h-24 md:h-32 w-auto object-contain" />
         </Link>
 
         {/* Desktop Navigation */}
