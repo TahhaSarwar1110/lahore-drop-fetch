@@ -1,22 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Capacitor } from "@capacitor/core";
+import { Geolocation } from "@capacitor/geolocation";
 
 export const LocationSharing = () => {
   const [isSharing, setIsSharing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const watchIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    let watchId: number | null = null;
-
     const startLocationSharing = async () => {
-      if (!navigator.geolocation) {
-        toast.error("Geolocation is not supported by your browser");
-        return;
-      }
-
       // Check if user is a rider
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -32,47 +28,100 @@ export const LocationSharing = () => {
         return;
       }
 
-      // Start watching position
-      watchId = navigator.geolocation.watchPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
+      const updateLocation = async (latitude: number, longitude: number) => {
+        const { error } = await supabase
+          .from("rider_locations")
+          .upsert({
+            rider_id: user.id,
+            latitude,
+            longitude,
+          }, {
+            onConflict: 'rider_id'
+          });
 
-          // Upsert location to database
-          const { error } = await supabase
-            .from("rider_locations")
-            .upsert({
-              rider_id: user.id,
-              latitude,
-              longitude,
-            }, {
-              onConflict: 'rider_id'
-            });
-
-          if (error) {
-            console.error("Error updating location:", error);
-          } else {
-            setIsSharing(true);
-            setLastUpdate(new Date());
-          }
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          toast.error("Failed to get your location");
-          setIsSharing(false);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 10000,
-          timeout: 5000,
+        if (error) {
+          console.error("Error updating location:", error);
+        } else {
+          setIsSharing(true);
+          setLastUpdate(new Date());
         }
-      );
+      };
+
+      // Check if running on native platform
+      if (Capacitor.isNativePlatform()) {
+        try {
+          // Request permission first
+          const permStatus = await Geolocation.checkPermissions();
+          
+          if (permStatus.location !== 'granted') {
+            const requestResult = await Geolocation.requestPermissions();
+            if (requestResult.location !== 'granted') {
+              toast.error("Location permission denied");
+              return;
+            }
+          }
+
+          // Start watching position using Capacitor Geolocation
+          const watchId = await Geolocation.watchPosition(
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+            },
+            (position, err) => {
+              if (err) {
+                console.error("Error getting location:", err);
+                toast.error("Failed to get your location");
+                setIsSharing(false);
+                return;
+              }
+              
+              if (position) {
+                updateLocation(position.coords.latitude, position.coords.longitude);
+              }
+            }
+          );
+          
+          watchIdRef.current = watchId;
+        } catch (error) {
+          console.error("Error starting location sharing:", error);
+          toast.error("Failed to start location sharing");
+        }
+      } else {
+        // Fall back to browser geolocation for web
+        if (!navigator.geolocation) {
+          toast.error("Geolocation is not supported by your browser");
+          return;
+        }
+
+        const watchId = navigator.geolocation.watchPosition(
+          (position) => {
+            updateLocation(position.coords.latitude, position.coords.longitude);
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            toast.error("Failed to get your location");
+            setIsSharing(false);
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 10000,
+            timeout: 5000,
+          }
+        );
+
+        watchIdRef.current = String(watchId);
+      }
     };
 
     startLocationSharing();
 
     return () => {
-      if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
+      if (watchIdRef.current !== null) {
+        if (Capacitor.isNativePlatform()) {
+          Geolocation.clearWatch({ id: watchIdRef.current });
+        } else {
+          navigator.geolocation.clearWatch(Number(watchIdRef.current));
+        }
       }
     };
   }, []);
