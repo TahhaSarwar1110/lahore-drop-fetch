@@ -320,7 +320,7 @@ const Home = () => {
         <section className="py-20 lg:py-28 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Why Choose PickyRider?</h2>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Why Choose Tabedar?</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 We're committed to making your shopping experience safe, transparent, and convenient
               </p>

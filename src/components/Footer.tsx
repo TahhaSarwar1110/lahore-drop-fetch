@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, MessageCircle, Facebook, Instagram, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/pickyrider-logo.png";
+import logo from "@/assets/tabedar-logo.png";
 
 export const Footer = () => {
   const quickLinks = [
@@ -25,7 +25,7 @@ export const Footer = () => {
             <div className="flex items-center gap-3 mb-4">
               <img 
                 src={logo} 
-                alt="PickyRider Logo" 
+                alt="Tabedar Logo" 
                 className="h-12 w-auto object-contain brightness-0 invert"
               />
             </div>
@@ -91,11 +91,11 @@ export const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="mailto:info@pickyrider.com" 
+                  href="mailto:info@tabedar.com" 
                   className="flex items-center gap-3 text-white/70 hover:text-white transition-colors text-sm"
                 >
                   <Mail className="h-5 w-5 flex-shrink-0" />
-                  <span>info@pickyrider.com</span>
+                  <span>info@tabedar.com</span>
                 </a>
               </li>
             </ul>
@@ -146,7 +146,7 @@ export const Footer = () => {
       <div className="border-t border-white/10">
         <div className="container mx-auto px-4 py-6">
           <p className="text-center text-sm text-white/50">
-            &copy; {new Date().getFullYear()} PickyRider. All rights reserved.
+            &copy; {new Date().getFullYear()} Tabedar. All rights reserved.
           </p>
         </div>
       </div>
