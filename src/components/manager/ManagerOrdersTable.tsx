@@ -1,7 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, CheckCircle, User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Eye, CheckCircle, User, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -53,32 +54,56 @@ const getStatusColor = (status: string) => {
 
 export const ManagerOrdersTable = ({ orders, onViewDetails }: ManagerOrdersTableProps) => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredOrders = orders.filter(order => 
-    statusFilter === "all" || order.status === statusFilter
-  );
+  const filteredOrders = orders.filter(order => {
+    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    const searchLower = searchQuery.toLowerCase().trim();
+    
+    if (!searchLower) return matchesStatus;
+    
+    const matchesSearch = 
+      order.id.toLowerCase().includes(searchLower) ||
+      order.profiles.full_name.toLowerCase().includes(searchLower) ||
+      order.profiles.phone.includes(searchLower) ||
+      order.delivery_address.toLowerCase().includes(searchLower) ||
+      (order.order_assignments?.profiles?.full_name?.toLowerCase().includes(searchLower) ?? false);
+    
+    return matchesStatus && matchesSearch;
+  });
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col gap-4">
           <CardTitle>All Orders</CardTitle>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Orders</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Order Confirmed">Order Confirmed</SelectItem>
-              <SelectItem value="Shopper Assigned">Shopper Assigned</SelectItem>
-              <SelectItem value="Purchasing">Purchasing</SelectItem>
-              <SelectItem value="Picked">Picked</SelectItem>
-              <SelectItem value="In Delivery">In Delivery</SelectItem>
-              <SelectItem value="Delivered">Delivered</SelectItem>
-              <SelectItem value="Cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by ID, customer, phone, address..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Orders</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Order Confirmed">Order Confirmed</SelectItem>
+                <SelectItem value="Shopper Assigned">Shopper Assigned</SelectItem>
+                <SelectItem value="Purchasing">Purchasing</SelectItem>
+                <SelectItem value="Picked">Picked</SelectItem>
+                <SelectItem value="In Delivery">In Delivery</SelectItem>
+                <SelectItem value="Delivered">Delivered</SelectItem>
+                <SelectItem value="Cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="p-0">

@@ -95,6 +95,15 @@ const Signup = () => {
           });
         }
       } else if (data.user) {
+        // Assign customer role to new user
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({ user_id: data.user.id, role: "customer" });
+        
+        if (roleError) {
+          console.error("Error assigning customer role:", roleError);
+        }
+        
         toast({
           title: "Success!",
           description: "Account created successfully! Redirecting...",
