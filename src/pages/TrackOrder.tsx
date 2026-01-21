@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Circle, Package, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
 
 interface StatusHistory {
   status: string;
@@ -52,8 +51,8 @@ interface TrackingStep {
 
 const TrackOrder = () => {
   const [searchParams] = useSearchParams();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [orderId, setOrderId] = useState(searchParams.get("orderId") || "");
+  const [resolvedOrderId, setResolvedOrderId] = useState<string | null>(null);
   const [orderData, setOrderData] = useState<OrderTrackingData | null>(null);
   const [assignment, setAssignment] = useState<OrderAssignment | null>(null);
   const [itemPickups, setItemPickups] = useState<ItemPickup[]>([]);
@@ -70,7 +69,6 @@ const TrackOrder = () => {
       if (!session) {
         navigate("/login");
       } else {
-        setIsAuthenticated(true);
         if (orderId) {
           trackOrder();
         }
@@ -87,7 +85,7 @@ const TrackOrder = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (orderId && orderData) {
+    if (resolvedOrderId && orderData) {
       const interval = setInterval(() => {
         trackOrder();
       }, 10000); // Poll every 10 seconds
@@ -101,6 +99,7 @@ const TrackOrder = () => {
     if (!orderId.trim()) {
       setErrorMessage("Please enter an order ID to track your order.");
       setOrderData(null);
+      setResolvedOrderId(null);
       setHasSearched(true);
       return;
     }
@@ -111,17 +110,17 @@ const TrackOrder = () => {
     
     // Strip # prefix if present and trim whitespace
     let trimmedId = orderId.trim();
-    if (trimmedId.startsWith('#')) {
-      trimmedId = trimmedId.substring(1);
-    }
+    if (trimmedId.startsWith("#")) trimmedId = trimmedId.slice(1);
+    const normalizedInput = trimmedId.toLowerCase();
     
     // Try exact match first, then partial match if it looks like a short ID
-    let order = null;
-    let orderError = null;
+    let order: (OrderTrackingData & { id: string }) | null = null;
+    let orderError: unknown = null;
     let matchedOrderId = trimmedId;
     
     // Check if it's a full UUID (36 chars with dashes)
-    const isFullUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmedId);
+    const isFullUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmedId);
     
     if (isFullUUID) {
       // Exact UUID match
@@ -129,23 +128,38 @@ const TrackOrder = () => {
         .from("orders")
         .select("id, status, confirmed_at, payment_status, payment_confirmed_at")
         .eq("id", trimmedId)
-        .single();
-      order = result.data;
+        .maybeSingle();
+      order = (result.data as any) || null;
       orderError = result.error;
-    } else {
-      // Partial match - search by ID starting with the entered text
+    } else if (resolvedOrderId) {
+      // If we've already resolved a short ID to a UUID, use that for polling/faster lookup
       const result = await supabase
         .from("orders")
         .select("id, status, confirmed_at, payment_status, payment_confirmed_at")
-        .ilike("id", `${trimmedId}%`)
-        .limit(1)
+        .eq("id", resolvedOrderId)
         .maybeSingle();
-      
-      if (result.data) {
-        order = result.data;
-        matchedOrderId = result.data.id;
+      order = (result.data as any) || null;
+      orderError = result.error;
+      if (order) matchedOrderId = order.id;
+    } else {
+      // Partial match against UUID prefix (e.g. fd333a1b) — do in client to avoid uuid ilike limitations
+      const result = await supabase
+        .from("orders")
+        .select("id, status, confirmed_at, payment_status, payment_confirmed_at")
+        .order("created_at", { ascending: false })
+        .limit(1000);
+
+      if (result.error) {
+        orderError = result.error;
       } else {
-        orderError = result.error || { message: "No matching order found" };
+        const rows = (result.data || []) as Array<OrderTrackingData & { id: string }>;
+        const match = rows.find((r) => r.id.toLowerCase().startsWith(normalizedInput));
+        if (match) {
+          order = match;
+          matchedOrderId = match.id;
+        } else {
+          orderError = { message: "No matching order found" };
+        }
       }
     }
 
@@ -153,12 +167,12 @@ const TrackOrder = () => {
       console.error("Error fetching order:", orderError);
       setErrorMessage("Order not found. Please check your order ID and try again.");
       setOrderData(null);
+      setResolvedOrderId(null);
       setLoading(false);
       return;
     }
-    
-    // Update the orderId to the full matched ID for subsequent queries
-    setOrderId(matchedOrderId);
+
+    setResolvedOrderId(matchedOrderId);
 
     setOrderData(order);
 
@@ -300,6 +314,7 @@ const TrackOrder = () => {
                     value={orderId}
                     onChange={(e) => {
                       setOrderId(e.target.value);
+                      setResolvedOrderId(null);
                       setErrorMessage(null);
                     }}
                     onKeyDown={(e) => e.key === "Enter" && trackOrder()}
