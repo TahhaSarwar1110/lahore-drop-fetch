@@ -464,6 +464,48 @@ export type Database = {
           },
         ]
       }
+      user_details: {
+        Row: {
+          alternative_contact: string | null
+          cnic_number: string | null
+          created_at: string | null
+          id: string
+          id_card_name: string | null
+          id_card_url: string | null
+          permanent_address: string | null
+          updated_at: string | null
+          user_id: string
+          utility_bill_name: string | null
+          utility_bill_url: string | null
+        }
+        Insert: {
+          alternative_contact?: string | null
+          cnic_number?: string | null
+          created_at?: string | null
+          id?: string
+          id_card_name?: string | null
+          id_card_url?: string | null
+          permanent_address?: string | null
+          updated_at?: string | null
+          user_id: string
+          utility_bill_name?: string | null
+          utility_bill_url?: string | null
+        }
+        Update: {
+          alternative_contact?: string | null
+          cnic_number?: string | null
+          created_at?: string | null
+          id?: string
+          id_card_name?: string | null
+          id_card_url?: string | null
+          permanent_address?: string | null
+          updated_at?: string | null
+          user_id?: string
+          utility_bill_name?: string | null
+          utility_bill_url?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
