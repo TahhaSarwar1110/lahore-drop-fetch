@@ -109,28 +109,60 @@ const TrackOrder = () => {
     setErrorMessage(null);
     setHasSearched(true);
     
-    // Fetch order data
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .select("status, confirmed_at, payment_status, payment_confirmed_at")
-      .eq("id", orderId.trim())
-      .single();
+    const trimmedId = orderId.trim();
+    
+    // Try exact match first, then partial match if it looks like a short ID
+    let order = null;
+    let orderError = null;
+    let matchedOrderId = trimmedId;
+    
+    // Check if it's a full UUID (36 chars with dashes)
+    const isFullUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmedId);
+    
+    if (isFullUUID) {
+      // Exact UUID match
+      const result = await supabase
+        .from("orders")
+        .select("id, status, confirmed_at, payment_status, payment_confirmed_at")
+        .eq("id", trimmedId)
+        .single();
+      order = result.data;
+      orderError = result.error;
+    } else {
+      // Partial match - search by ID starting with the entered text
+      const result = await supabase
+        .from("orders")
+        .select("id, status, confirmed_at, payment_status, payment_confirmed_at")
+        .ilike("id", `${trimmedId}%`)
+        .limit(1)
+        .maybeSingle();
+      
+      if (result.data) {
+        order = result.data;
+        matchedOrderId = result.data.id;
+      } else {
+        orderError = result.error || { message: "No matching order found" };
+      }
+    }
 
-    if (orderError) {
+    if (orderError || !order) {
       console.error("Error fetching order:", orderError);
       setErrorMessage("Order not found. Please check your order ID and try again.");
       setOrderData(null);
       setLoading(false);
       return;
     }
+    
+    // Update the orderId to the full matched ID for subsequent queries
+    setOrderId(matchedOrderId);
 
     setOrderData(order);
 
-    // Fetch order assignment
+    // Fetch order assignment using the full matched order ID
     const { data: assignmentData } = await supabase
       .from("order_assignments")
       .select("rider_id, assigned_at")
-      .eq("order_id", orderId)
+      .eq("order_id", matchedOrderId)
       .maybeSingle();
 
     setAssignment(assignmentData);
@@ -139,7 +171,7 @@ const TrackOrder = () => {
     const { data: items } = await supabase
       .from("order_items")
       .select("id")
-      .eq("order_id", orderId)
+      .eq("order_id", matchedOrderId)
       .eq("approval_status", "approved");
 
     setTotalItems(items?.length || 0);
@@ -161,7 +193,7 @@ const TrackOrder = () => {
     const { data: historyData } = await supabase
       .from("order_status_history")
       .select("status, timestamp")
-      .eq("order_id", orderId)
+      .eq("order_id", matchedOrderId)
       .order("timestamp", { ascending: true });
 
     setStatusHistory(historyData || []);
@@ -170,7 +202,7 @@ const TrackOrder = () => {
     const { data: attachmentData } = await supabase
       .from("order_attachments")
       .select("*")
-      .eq("order_id", orderId)
+      .eq("order_id", matchedOrderId)
       .order("created_at", { ascending: false });
 
     setAttachments(attachmentData || []);

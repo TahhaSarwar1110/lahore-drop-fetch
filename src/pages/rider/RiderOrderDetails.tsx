@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Check, Upload, Image as ImageIcon, ArrowLeft, MapPin, Navigation, Package, Info } from "lucide-react";
+import { Loader2, Check, Upload, Image as ImageIcon, ArrowLeft, Navigation, Package, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { RiderMapView } from "@/components/map/RiderMapView";
 import { CustomerContactCard } from "@/components/rider/CustomerContactCard";
 
 interface OrderItem {
@@ -316,39 +315,8 @@ const RiderOrderDetails = () => {
               </Card>
             </div>
 
-            {/* Right Column - Map & Items */}
+            {/* Right Column - Items */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Route Map */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <MapPin className="h-5 w-5 text-primary" />
-                    Route Map
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <RiderMapView
-                    locations={[
-                      ...items
-                        .filter(item => item.pickup_latitude && item.pickup_longitude)
-                        .map((item) => ({
-                          lat: item.pickup_latitude!,
-                          lng: item.pickup_longitude!,
-                          label: `Pickup: ${item.item_data?.Brand || item.item_data?.["Item Name"] || item.item_type}`,
-                          type: "pickup" as const,
-                        })),
-                      ...(order.delivery_latitude && order.delivery_longitude ? [{
-                        lat: order.delivery_latitude,
-                        lng: order.delivery_longitude,
-                        label: `Delivery: ${order.delivery_address}`,
-                        type: "delivery" as const,
-                      }] : []),
-                    ]}
-                    height="300px"
-                  />
-                </CardContent>
-              </Card>
-
               {allItemsPicked && order.status !== "Delivered" && (
                 <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
                   <CardContent className="p-4">
