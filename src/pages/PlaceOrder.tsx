@@ -52,27 +52,50 @@ const PlaceOrder = () => {
   const { calculateBundlePrice } = useBundlePricing();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkAuthAndRole = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
         navigate("/login");
-      } else {
-        setIsAuthenticated(true);
-        setUserId(session.user.id);
-        
-        // Load profile data
-        supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              setFullName(data.full_name || "");
-              setPhone(data.phone || "");
-            }
-          });
+        return;
       }
-    });
+      
+      // Check if user has customer or admin role (only these can place orders)
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id);
+      
+      const userRoles = roles?.map(r => r.role) || [];
+      const canPlaceOrder = userRoles.includes("customer") || userRoles.includes("admin");
+      
+      if (!canPlaceOrder) {
+        toast({
+          title: "Access Denied",
+          description: "Only customers can place orders.",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
+      
+      setIsAuthenticated(true);
+      setUserId(session.user.id);
+      
+      // Load profile data
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+      
+      if (profileData) {
+        setFullName(profileData.full_name || "");
+        setPhone(profileData.phone || "");
+      }
+    };
+    
+    checkAuthAndRole();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
@@ -81,7 +104,7 @@ const PlaceOrder = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   // Reset delivery location when switching away from within_city
   useEffect(() => {

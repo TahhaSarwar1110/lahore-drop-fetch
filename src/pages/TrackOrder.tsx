@@ -29,6 +29,7 @@ interface OrderTrackingData {
   confirmed_at: string | null;
   payment_status: string | null;
   payment_confirmed_at: string | null;
+  delivered_at: string | null;
 }
 
 interface OrderAssignment {
@@ -126,7 +127,7 @@ const TrackOrder = () => {
       // Exact UUID match
       const result = await supabase
         .from("orders")
-        .select("id, status, confirmed_at, payment_status, payment_confirmed_at")
+        .select("id, status, confirmed_at, payment_status, payment_confirmed_at, delivered_at")
         .eq("id", trimmedId)
         .maybeSingle();
       order = (result.data as any) || null;
@@ -135,7 +136,7 @@ const TrackOrder = () => {
       // If we've already resolved a short ID to a UUID, use that for polling/faster lookup
       const result = await supabase
         .from("orders")
-        .select("id, status, confirmed_at, payment_status, payment_confirmed_at")
+        .select("id, status, confirmed_at, payment_status, payment_confirmed_at, delivered_at")
         .eq("id", resolvedOrderId)
         .maybeSingle();
       order = (result.data as any) || null;
@@ -145,7 +146,7 @@ const TrackOrder = () => {
       // Partial match against UUID prefix (e.g. fd333a1b) — do in client to avoid uuid ilike limitations
       const result = await supabase
         .from("orders")
-        .select("id, status, confirmed_at, payment_status, payment_confirmed_at")
+        .select("id, status, confirmed_at, payment_status, payment_confirmed_at, delivered_at")
         .order("created_at", { ascending: false })
         .limit(1000);
 
@@ -278,7 +279,7 @@ const TrackOrder = () => {
         key: "delivered",
         label: isDelivered ? "Order Delivered" : "Delivery Pending",
         isCompleted: isDelivered,
-        timestamp: getHistoryTimestamp("Delivered"),
+        timestamp: orderData.delivered_at || getHistoryTimestamp("Delivered"),
       },
     ];
   };
