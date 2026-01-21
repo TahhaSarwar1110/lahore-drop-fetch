@@ -109,7 +109,11 @@ const TrackOrder = () => {
     setErrorMessage(null);
     setHasSearched(true);
     
-    const trimmedId = orderId.trim();
+    // Strip # prefix if present and trim whitespace
+    let trimmedId = orderId.trim();
+    if (trimmedId.startsWith('#')) {
+      trimmedId = trimmedId.substring(1);
+    }
     
     // Try exact match first, then partial match if it looks like a short ID
     let order = null;
