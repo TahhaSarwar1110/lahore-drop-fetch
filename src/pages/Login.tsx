@@ -128,7 +128,7 @@ const Login = () => {
         <div className="text-primary-foreground text-center space-y-6">
           <h1 className="text-5xl font-bold">Welcome Back</h1>
           <p className="text-xl opacity-90">
-            Login to continue your shopping experience with Desi Drop
+            Login to continue your shopping experience with Tabedar
           </p>
         </div>
       </div>

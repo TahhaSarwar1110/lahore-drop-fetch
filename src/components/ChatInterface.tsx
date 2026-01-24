@@ -16,14 +16,14 @@ const quickActions = [
   { icon: Package, label: "Track my order", query: "What's the status of my recent orders?" },
   { icon: DollarSign, label: "View pricing", query: "What are your pricing bundles?" },
   { icon: MapPin, label: "Delivery areas", query: "Which areas in Lahore do you deliver to?" },
-  { icon: HelpCircle, label: "How it works", query: "How does Desi Drop work?" },
+  { icon: HelpCircle, label: "How it works", query: "How does Tabedar work?" },
 ];
 
 export const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Assalam-o-Alaikum! 👋 I'm your Desi Drop AI Assistant.\n\nI can help you with:\n• Tracking your orders 📦\n• Pricing and bundles 💰\n• How our service works 🚀\n• Delivery information 🏍️\n• General questions ❓\n\nWhat would you like to know?"
+      content: "Assalam-o-Alaikum! 👋 I'm your Tabedar AI Assistant.\n\nI can help you with:\n• Tracking your orders 📦\n• Pricing and bundles 💰\n• How our service works 🚀\n• Delivery information 🏍️\n• General questions ❓\n\nWhat would you like to know?"
     }
   ]);
   const [input, setInput] = useState("");
@@ -224,7 +224,7 @@ export const ChatInterface = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask me anything about Desi Drop..."
+              placeholder="Ask me anything about Tabedar..."
               disabled={isLoading}
               className="flex-1 rounded-full"
             />
