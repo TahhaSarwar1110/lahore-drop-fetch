@@ -128,9 +128,9 @@ const Signup = () => {
       {/* Left Side - Image */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-accent items-center justify-center p-12">
         <div className="text-primary-foreground text-center space-y-6">
-          <h1 className="text-5xl font-bold">Join Desi Drop</h1>
+          <h1 className="text-5xl font-bold">Join Tabedar</h1>
           <p className="text-xl opacity-90">
-            Start ordering from Lahore's best stores, restaurants, and shops
+            Start ordering from Pakistan's best stores, restaurants, and shops
           </p>
         </div>
       </div>
@@ -140,7 +140,7 @@ const Signup = () => {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-2xl">Create Account</CardTitle>
-            <CardDescription>Sign up to start ordering with Desi Drop</CardDescription>
+            <CardDescription>Sign up to start ordering with Tabedar</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignup} className="space-y-4">

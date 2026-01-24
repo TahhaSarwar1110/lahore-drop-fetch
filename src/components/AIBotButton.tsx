@@ -23,7 +23,7 @@ export const AIBotButton = () => {
       <DialogContent className="max-w-3xl h-[700px] p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-2xl flex items-center gap-2">
-            <span className="text-3xl">🤖</span> Desi Drop AI Assistant
+            <span className="text-3xl">🤖</span> Tabedar AI Assistant
           </DialogTitle>
         </DialogHeader>
         <ChatInterface />
