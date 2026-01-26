@@ -16,33 +16,48 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
 const countryCodes = [
-  { code: "+92", country: "Pakistan", flag: "🇵🇰" },
-  { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
-  { code: "+44", country: "UK", flag: "🇬🇧" },
-  { code: "+971", country: "UAE", flag: "🇦🇪" },
-  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦" },
-  { code: "+61", country: "Australia", flag: "🇦🇺" },
-  { code: "+49", country: "Germany", flag: "🇩🇪" },
-  { code: "+33", country: "France", flag: "🇫🇷" },
-  { code: "+39", country: "Italy", flag: "🇮🇹" },
-  { code: "+86", country: "China", flag: "🇨🇳" },
-  { code: "+91", country: "India", flag: "🇮🇳" },
-  { code: "+81", country: "Japan", flag: "🇯🇵" },
-  { code: "+82", country: "South Korea", flag: "🇰🇷" },
-  { code: "+60", country: "Malaysia", flag: "🇲🇾" },
-  { code: "+65", country: "Singapore", flag: "🇸🇬" },
-  { code: "+974", country: "Qatar", flag: "🇶🇦" },
-  { code: "+973", country: "Bahrain", flag: "🇧🇭" },
-  { code: "+968", country: "Oman", flag: "🇴🇲" },
-  { code: "+965", country: "Kuwait", flag: "🇰🇼" },
+  { code: "+92", country: "Pakistan", flag: "🇵🇰", minLength: 10, maxLength: 10, placeholder: "3001234567" },
+  { code: "+1", country: "USA/Canada", flag: "🇺🇸", minLength: 10, maxLength: 10, placeholder: "2025551234" },
+  { code: "+44", country: "UK", flag: "🇬🇧", minLength: 10, maxLength: 11, placeholder: "7911123456" },
+  { code: "+971", country: "UAE", flag: "🇦🇪", minLength: 9, maxLength: 9, placeholder: "501234567" },
+  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦", minLength: 9, maxLength: 9, placeholder: "512345678" },
+  { code: "+61", country: "Australia", flag: "🇦🇺", minLength: 9, maxLength: 9, placeholder: "412345678" },
+  { code: "+49", country: "Germany", flag: "🇩🇪", minLength: 10, maxLength: 11, placeholder: "15123456789" },
+  { code: "+33", country: "France", flag: "🇫🇷", minLength: 9, maxLength: 9, placeholder: "612345678" },
+  { code: "+39", country: "Italy", flag: "🇮🇹", minLength: 9, maxLength: 10, placeholder: "3123456789" },
+  { code: "+86", country: "China", flag: "🇨🇳", minLength: 11, maxLength: 11, placeholder: "13812345678" },
+  { code: "+91", country: "India", flag: "🇮🇳", minLength: 10, maxLength: 10, placeholder: "9876543210" },
+  { code: "+81", country: "Japan", flag: "🇯🇵", minLength: 10, maxLength: 11, placeholder: "9012345678" },
+  { code: "+82", country: "South Korea", flag: "🇰🇷", minLength: 9, maxLength: 10, placeholder: "1012345678" },
+  { code: "+60", country: "Malaysia", flag: "🇲🇾", minLength: 9, maxLength: 10, placeholder: "123456789" },
+  { code: "+65", country: "Singapore", flag: "🇸🇬", minLength: 8, maxLength: 8, placeholder: "81234567" },
+  { code: "+974", country: "Qatar", flag: "🇶🇦", minLength: 8, maxLength: 8, placeholder: "33123456" },
+  { code: "+973", country: "Bahrain", flag: "🇧🇭", minLength: 8, maxLength: 8, placeholder: "36001234" },
+  { code: "+968", country: "Oman", flag: "🇴🇲", minLength: 8, maxLength: 8, placeholder: "92123456" },
+  { code: "+965", country: "Kuwait", flag: "🇰🇼", minLength: 8, maxLength: 8, placeholder: "50012345" },
 ];
 
-const signupSchema = z.object({
-  fullName: z.string().trim().min(2, "Name must be at least 2 characters"),
-  email: z.string().trim().email("Invalid email address"),
-  phone: z.string().trim().min(10, "Phone number must be at least 10 digits"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+const getPhoneValidation = (countryCode: string) => {
+  const country = countryCodes.find(c => c.code === countryCode);
+  if (!country) return { minLength: 8, maxLength: 11 };
+  return { minLength: country.minLength, maxLength: country.maxLength };
+};
+
+const createSignupSchema = (countryCode: string) => {
+  const { minLength, maxLength } = getPhoneValidation(countryCode);
+  const country = countryCodes.find(c => c.code === countryCode);
+  const countryName = country?.country || "selected country";
+  
+  return z.object({
+    fullName: z.string().trim().min(2, "Name must be at least 2 characters"),
+    email: z.string().trim().email("Invalid email address"),
+    phone: z.string().trim()
+      .min(minLength, `Phone number must be ${minLength === maxLength ? minLength : `${minLength}-${maxLength}`} digits for ${countryName}`)
+      .max(maxLength, `Phone number must be ${minLength === maxLength ? minLength : `${minLength}-${maxLength}`} digits for ${countryName}`)
+      .regex(/^\d+$/, "Phone number must contain only digits"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+  });
+};
 
 const Signup = () => {
   const [fullName, setFullName] = useState("");
@@ -59,12 +74,13 @@ const Signup = () => {
     setLoading(true);
 
     const fullPhoneNumber = `${countryCode}${phone.replace(/^0+/, '')}`;
+    const signupSchema = createSignupSchema(countryCode);
 
     try {
       const validatedData = signupSchema.parse({
         fullName,
         email,
-        phone: fullPhoneNumber,
+        phone: phone.replace(/^0+/, ''),
         password,
       });
 
@@ -75,7 +91,7 @@ const Signup = () => {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: validatedData.fullName,
-            phone: validatedData.phone,
+            phone: fullPhoneNumber,
           },
         },
       });
@@ -189,11 +205,12 @@ const Signup = () => {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="3001234567"
+                    placeholder={countryCodes.find(c => c.code === countryCode)?.placeholder || "Phone number"}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
                     required
                     className="flex-1"
+                    maxLength={countryCodes.find(c => c.code === countryCode)?.maxLength || 11}
                   />
                 </div>
               </div>
