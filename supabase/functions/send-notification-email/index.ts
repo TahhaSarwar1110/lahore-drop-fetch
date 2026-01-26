@@ -47,14 +47,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #f15717;">Tabedar Notification</h1>
+        <h1 style="color: #f15717;">Tabedaar.com Notification</h1>
         <h2>${title}</h2>
         <p>Hello ${userName},</p>
         <p>${message}</p>
         ${orderLink ? `<p><a href="${orderLink}" style="background-color: #f15717; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View Order Details</a></p>` : ''}
         <hr style="margin: 20px 0;">
         <p style="color: #666; font-size: 14px;">
-          Thank you for using Tabedar!<br>
+          Thank you for using Tabedaar.com!<br>
           If you have any questions, please contact our customer support.
         </p>
       </div>
@@ -68,9 +68,9 @@ const handler = async (req: Request): Promise<Response> => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Tabedar <onboarding@resend.dev>',
+        from: 'Tabedaar.com <onboarding@resend.dev>',
         to: [userEmail],
-        subject: `Tabedar: ${title}`,
+        subject: `Tabedaar.com: ${title}`,
         html: emailHtml,
       }),
     });
