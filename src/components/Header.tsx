@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import logo from "@/assets/tabedar-logo.png";
+import logo from "@/assets/tabedaar-logo.png";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NotificationBell } from "./NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,58 +32,52 @@ export const Header = () => {
     }
   };
 
-  // Check if we're on the home page (hero section has dark background)
-  const isHomePage = window.location.pathname === "/";
-  
-  // Dynamic classes based on page
-  const headerBg = isHomePage ? "" : "bg-primary shadow-md";
-
   return (
-    <header className={`${isHomePage ? "absolute" : "sticky"} top-0 left-0 right-0 z-50 w-full ${headerBg}`}>
+    <header className="sticky top-0 left-0 right-0 z-50 w-full bg-white shadow-md">
       <div className="container mx-auto flex h-16 md:h-20 items-center justify-between px-4">
         <Link to="/" className="flex items-center py-2">
           <img
             src={logo}
-            alt="Tabedar Logo"
+            alt="Tabedaar.com Logo"
             className="h-12 md:h-14 w-auto object-contain"
           />
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+          <Link to="/" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
             Home
           </Link>
           {isAuthenticated ? (
             <>
               {(!isRider && !isManager) || isAdmin ? (
                 <>
-                  <Link to="/place-order" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+                  <Link to="/place-order" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
                     Place Order
                   </Link>
-                  <Link to="/order-history" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+                  <Link to="/order-history" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
                     My Orders
                   </Link>
-                  <Link to="/track" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+                  <Link to="/track" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
                     Track
                   </Link>
                 </>
               ) : null}
               {isRider && (
-                <Link to="/orders" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+                <Link to="/orders" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
                   Orders
                 </Link>
               )}
-              <Link to="/contact" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+              <Link to="/contact" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
                 Contact
               </Link>
               {isAdmin && (
                 <>
-                  <Link to="/admin" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110 flex items-center gap-1">
+                  <Link to="/admin" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110 flex items-center gap-1">
                     <Shield className="h-4 w-4" />
                     Admin
                   </Link>
-                  <Link to="/admin/reports" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110 flex items-center gap-1">
+                  <Link to="/admin/reports" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110 flex items-center gap-1">
                     <BarChart3 className="h-4 w-4" />
                     Reports
                   </Link>
@@ -91,27 +85,27 @@ export const Header = () => {
               )}
               {isManager && (
                 <>
-                  <Link to="/manager" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+                  <Link to="/manager" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
                     Manager
                   </Link>
-                  <Link to="/manager/pricing" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+                  <Link to="/manager/pricing" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
                     Pricing
                   </Link>
                 </>
               )}
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white/90 hover:text-white hover:bg-white/10 transition-all duration-300 hover:scale-105">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-foreground/80 hover:text-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
             </>
           ) : (
             <>
-              <Link to="/contact" className="text-sm font-medium text-white/90 transition-all duration-300 hover:text-white hover:scale-110">
+              <Link to="/contact" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
                 Contact
               </Link>
               <Link to="/login">
-                <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-all duration-300 hover:scale-105">
+                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105">
                   Login
                 </Button>
               </Link>
@@ -122,7 +116,7 @@ export const Header = () => {
         {/* Mobile Navigation */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 transition-all duration-300 hover:scale-110">
+            <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10 transition-all duration-300 hover:scale-110">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
