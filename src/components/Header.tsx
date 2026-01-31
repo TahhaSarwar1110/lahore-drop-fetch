@@ -39,8 +39,7 @@ export const Header = () => {
           <img
             src={logo}
             alt="Tabedaar.com Logo"
-            className="h-10 md:h-12 w-auto object-contain max-w-[150px] md:max-w-[180px]"
-            style={{ display: 'block' }}
+            className="h-14 md:h-16 w-auto object-contain"
           />
         </Link>
 
