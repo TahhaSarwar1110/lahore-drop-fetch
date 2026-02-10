@@ -26,7 +26,7 @@ export const Footer = () => {
               <img 
                 src={logo} 
                 alt="Tabedaar.com Logo" 
-                className="h-12 w-auto object-contain brightness-0 invert"
+                className="h-28 md:h-36 w-auto object-contain brightness-0 invert"
               />
             </div>
             <p className="text-white/70 mb-6 text-sm leading-relaxed">
