@@ -33,7 +33,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 w-full bg-white shadow-md">
+    <header className="sticky top-0 left-0 right-0 z-50 w-full bg-primary shadow-md">
       <div className="container mx-auto flex h-16 md:h-20 items-center justify-between px-4">
         <Link to="/" className="flex items-center">
           <img
@@ -45,39 +45,39 @@ export const Header = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+          <Link to="/" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
             Home
           </Link>
           {isAuthenticated ? (
             <>
               {(!isRider && !isManager) || isAdmin ? (
                 <>
-                  <Link to="/place-order" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/place-order" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                     Place Order
                   </Link>
-                  <Link to="/order-history" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/order-history" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                     My Orders
                   </Link>
-                  <Link to="/track" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/track" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                     Track
                   </Link>
                 </>
               ) : null}
               {isRider && (
-                <Link to="/orders" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+                <Link to="/orders" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                   Orders
                 </Link>
               )}
-              <Link to="/contact" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+              <Link to="/contact" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                 Contact
               </Link>
               {isAdmin && (
                 <>
-                  <Link to="/admin" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110 flex items-center gap-1">
+                  <Link to="/admin" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110 flex items-center gap-1">
                     <Shield className="h-4 w-4" />
                     Admin
                   </Link>
-                  <Link to="/admin/reports" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110 flex items-center gap-1">
+                  <Link to="/admin/reports" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110 flex items-center gap-1">
                     <BarChart3 className="h-4 w-4" />
                     Reports
                   </Link>
@@ -85,23 +85,23 @@ export const Header = () => {
               )}
               {isManager && (
                 <>
-                  <Link to="/manager" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/manager" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                     Manager
                   </Link>
-                  <Link to="/manager/pricing" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+                  <Link to="/manager/pricing" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                     Pricing
                   </Link>
                 </>
               )}
               <NotificationBell />
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-foreground/80 hover:text-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-primary-foreground/80 hover:text-secondary hover:bg-primary-foreground/10 transition-all duration-300 hover:scale-105">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
             </>
           ) : (
             <>
-              <Link to="/contact" className="text-sm font-medium text-foreground/80 transition-all duration-300 hover:text-primary hover:scale-110">
+              <Link to="/contact" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                 Contact
               </Link>
               <Link to="/login">
@@ -116,7 +116,7 @@ export const Header = () => {
         {/* Mobile Navigation */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" className="text-foreground hover:bg-primary/10 transition-all duration-300 hover:scale-110">
+            <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary-foreground/10 transition-all duration-300 hover:scale-110">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
