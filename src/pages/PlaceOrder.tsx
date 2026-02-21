@@ -220,26 +220,26 @@ const PlaceOrder = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col tap-highlight-none overflow-x-hidden">
+    <div className="min-h-screen flex flex-col tap-highlight-none">
       <Header />
 
-      <main className="flex-1 pb-8 native-scroll overflow-x-hidden">
-        <div className="container mx-auto px-0 sm:px-4 max-w-full overflow-x-hidden">
-          <div className="grid lg:grid-cols-2 gap-0 lg:gap-8">
-            {/* Left - Image - Hidden on mobile */}
-            <div className="hidden lg:flex items-center justify-center bg-gradient-to-br from-primary to-accent rounded-lg p-12">
-              <div className="text-primary-foreground text-center space-y-6">
-                <h1 className="text-4xl font-bold">Place Your Order</h1>
-                <p className="text-lg opacity-90">
+      <main className="flex-1 native-scroll">
+        <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-10 sm:py-16">
+          <div className="grid lg:grid-cols-5 gap-6 lg:gap-10">
+            {/* Left - Gradient Panel */}
+            <div className="hidden lg:flex lg:col-span-2 items-start justify-center bg-gradient-to-br from-primary to-accent rounded-2xl p-8 sticky top-24 self-start">
+              <div className="text-primary-foreground text-center space-y-4 py-8">
+                <h1 className="text-3xl font-bold">Place Your Order</h1>
+                <p className="text-base opacity-90 leading-relaxed">
                   Tell us what you need and we'll get it delivered to your doorstep
                 </p>
               </div>
             </div>
 
             {/* Right - Form */}
-            <div className="space-y-0 sm:space-y-6 w-full max-w-full overflow-hidden">
+            <div className="lg:col-span-3 w-full max-w-full">
               <Card className="mobile-card border-0 sm:border rounded-none sm:rounded-2xl shadow-none sm:shadow-lg w-full">
-                <CardContent className="p-4 sm:p-6 space-y-5 w-full max-w-full overflow-hidden">
+                <CardContent className="p-4 sm:p-6 space-y-4 w-full max-w-full">
                   <h2 className="mobile-header">Order Details</h2>
 
                   <div className="space-y-2 w-full">
@@ -414,7 +414,7 @@ const PlaceOrder = () => {
                   )}
 
                   {/* Always show Place Order button with validation */}
-                  <div className="border-t pt-5 space-y-3">
+                  <div className="border-t pt-4 space-y-3">
                     {orderItems.length === 0 && (
                       <div className="p-3 bg-muted border border-border rounded-xl">
                         <p className="text-sm text-foreground">
@@ -431,7 +431,7 @@ const PlaceOrder = () => {
                     )}
                     <Button
                       onClick={handleSubmitOrder}
-                      className="w-full mobile-button"
+                      className="w-full h-12 sm:h-14 text-base font-semibold rounded-xl"
                       size="lg"
                       disabled={loading}
                     >
