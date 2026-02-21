@@ -15,7 +15,7 @@ export const NotificationBell = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative text-primary-foreground hover:text-secondary">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 
