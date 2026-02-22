@@ -224,8 +224,8 @@ const PlaceOrder = () => {
       <Header />
 
       <main className="flex-1 native-scroll">
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6 py-10 sm:py-16">
-          <div className="grid lg:grid-cols-5 gap-6 lg:gap-10">
+        <div className="mx-auto max-w-[1200px] px-3 sm:px-6 py-4 sm:py-16">
+          <div className="grid lg:grid-cols-5 gap-4 lg:gap-10">
             {/* Left - Gradient Panel */}
             <div className="hidden lg:flex lg:col-span-2 items-start justify-center bg-gradient-to-br from-primary to-accent rounded-2xl p-8 sticky top-24 self-start">
               <div className="text-primary-foreground text-center space-y-4 py-8">
@@ -238,24 +238,24 @@ const PlaceOrder = () => {
 
             {/* Right - Form */}
             <div className="lg:col-span-3 w-full max-w-full">
-              <Card className="mobile-card border-0 sm:border rounded-none sm:rounded-2xl shadow-none sm:shadow-lg w-full">
-                <CardContent className="p-4 sm:p-6 space-y-4 w-full max-w-full">
-                  <h2 className="mobile-header">Order Details</h2>
+              <Card className="border-0 sm:border rounded-none sm:rounded-2xl shadow-none sm:shadow-lg w-full bg-card">
+                <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4 w-full max-w-full">
+                  <h2 className="text-lg sm:text-2xl font-bold">Order Details</h2>
 
-                  <div className="space-y-2 w-full">
+                  <div className="space-y-1 w-full">
                     <label className="mobile-label">Full Name</label>
                     <Input
-                      className="mobile-input w-full"
+                      className="mobile-input"
                       placeholder="Your name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                     />
                   </div>
 
-                  <div className="space-y-2 w-full">
+                  <div className="space-y-1 w-full">
                     <label className="mobile-label">Phone Number</label>
                     <Input
-                      className="mobile-input w-full"
+                      className="mobile-input"
                       type="tel"
                       placeholder="Your phone"
                       value={phone}
@@ -263,8 +263,7 @@ const PlaceOrder = () => {
                     />
                   </div>
 
-                  {/* Delivery Type Dropdown */}
-                  <div className="space-y-2 w-full">
+                  <div className="space-y-1 w-full">
                     <label className="mobile-label">
                       Delivery Type
                       <span className="text-destructive ml-1">*</span>
@@ -284,8 +283,7 @@ const PlaceOrder = () => {
                     </Select>
                   </div>
 
-                  {/* Delivery Address - Always shown */}
-                  <div className="space-y-2 w-full">
+                  <div className="space-y-1 w-full">
                     <label className="mobile-label">
                       Delivery Address
                       <span className="text-destructive ml-1">*</span>
@@ -336,8 +334,8 @@ const PlaceOrder = () => {
                     </Collapsible>
                   )}
 
-                  <div className="border-t pt-6">
-                    <h3 className="text-xl font-semibold mb-4">Add Items</h3>
+                  <div className="border-t pt-4">
+                    <h3 className="text-base sm:text-xl font-semibold mb-3">Add Items</h3>
                     <OrderItemForm onAddItem={handleAddItem} />
                   </div>
 
@@ -414,24 +412,24 @@ const PlaceOrder = () => {
                   )}
 
                   {/* Always show Place Order button with validation */}
-                  <div className="border-t pt-4 space-y-3">
+                  <div className="border-t pt-3 space-y-2">
                     {orderItems.length === 0 && (
-                      <div className="p-3 bg-muted border border-border rounded-xl">
-                        <p className="text-sm text-foreground">
+                      <div className="p-2.5 bg-muted border border-border rounded-lg">
+                        <p className="text-xs sm:text-sm text-foreground">
                           ⚠️ Please add at least one item to your order
                         </p>
                       </div>
                     )}
                     {(!fullName || !phone || !deliveryAddress) && (
-                      <div className="p-3 bg-muted border border-border rounded-xl">
-                        <p className="text-sm text-foreground">
+                      <div className="p-2.5 bg-muted border border-border rounded-lg">
+                        <p className="text-xs sm:text-sm text-foreground">
                           ⚠️ Please complete all required fields (Name, Phone, Delivery Address)
                         </p>
                       </div>
                     )}
                     <Button
                       onClick={handleSubmitOrder}
-                      className="w-full h-12 sm:h-14 text-base font-semibold rounded-xl"
+                      className="w-full h-11 sm:h-14 text-sm sm:text-base font-semibold rounded-xl"
                       size="lg"
                       disabled={loading}
                     >
