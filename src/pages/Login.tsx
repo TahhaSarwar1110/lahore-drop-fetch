@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import logo from "@/assets/tabedaar-logo.png";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -23,7 +24,6 @@ const Login = () => {
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session) {
-        // Check user role and redirect accordingly
         const { data: roles } = await supabase
           .from("user_roles")
           .select("role")
@@ -77,7 +77,6 @@ const Login = () => {
           description: "Login successful",
         });
 
-        // Fetch roles with a timeout to prevent hanging
         try {
           const { data: roles } = await Promise.race([
             supabase
@@ -104,7 +103,6 @@ const Login = () => {
             navigate("/");
           }
         } catch {
-          // On timeout or error, just navigate to home
           navigate("/");
         }
       }
@@ -122,8 +120,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Image */}
+    <div className="min-h-screen flex flex-col lg:flex-row tap-highlight-none">
+      {/* Left Side - Gradient (desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-accent items-center justify-center p-12">
         <div className="text-primary-foreground text-center space-y-6">
           <h1 className="text-5xl font-bold">Welcome Back</h1>
@@ -133,17 +131,26 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-muted/30">
-        <Card className="w-full max-w-md">
-          <CardHeader>
+      {/* Mobile header with logo */}
+      <div className="lg:hidden bg-primary safe-area-top">
+        <div className="flex items-center justify-center py-6">
+          <Link to="/">
+            <img src={logo} alt="Tabedaar.com" className="h-20 w-auto object-contain" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Form */}
+      <div className="flex-1 flex items-start lg:items-center justify-center px-4 py-8 lg:p-8 bg-muted/30 native-scroll">
+        <Card className="w-full max-w-md mobile-card lg:rounded-2xl lg:shadow-lg">
+          <CardHeader className="px-5 pt-6 pb-2">
             <CardTitle className="text-2xl">Login</CardTitle>
             <CardDescription>Enter your credentials to access your account</CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+          <CardContent className="px-5 pb-6">
+            <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="mobile-label">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -151,11 +158,12 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="mobile-input"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="mobile-label">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -163,16 +171,17 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="mobile-input"
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full mobile-button btn-cta" disabled={loading}>
                 {loading ? "Logging in..." : "Login"}
               </Button>
 
-              <p className="text-sm text-center text-muted-foreground">
+              <p className="text-sm text-center text-muted-foreground pt-2">
                 Don't have an account?{" "}
-                <Link to="/signup" className="text-primary hover:underline">
+                <Link to="/signup" className="text-primary font-semibold hover:underline">
                   Sign up here
                 </Link>
               </p>
