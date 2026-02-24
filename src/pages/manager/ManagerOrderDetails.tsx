@@ -175,20 +175,22 @@ const ManagerOrderDetails = () => {
     return orderItems.length > 0 && orderItems.every(item => item.approval_status === 'approved');
   };
 
+  const isPaymentConfirmed = () => {
+    return order?.payment_status === 'confirmed';
+  };
+
   const canAssignRider = () => {
-    return allItemsApproved();
+    return allItemsApproved() && order?.confirmed_at && isPaymentConfirmed();
   };
 
   const canConfirmOrder = () => {
-    return allItemsApproved() && order?.order_assignments?.rider_id;
+    return allItemsApproved();
   };
 
   const handleConfirmOrder = async () => {
     if (!canConfirmOrder()) {
       if (hasRejectedItems()) {
         toast.error("Cannot confirm order with rejected items. Please ensure all items are approved.");
-      } else if (!order?.order_assignments?.rider_id) {
-        toast.error("Cannot confirm order without a rider assigned. Please assign a rider first.");
       }
       return;
     }
@@ -305,8 +307,6 @@ const ManagerOrderDetails = () => {
                   >
                     {hasRejectedItems() 
                       ? "Resolve Rejected Items First" 
-                      : !order.order_assignments?.rider_id
-                      ? "Assign Rider First"
                       : "Confirm Order"}
                   </Button>
                 )}
@@ -314,43 +314,55 @@ const ManagerOrderDetails = () => {
             </div>
           </div>
 
-          {!canConfirmOrder() && order.status === "Pending" && (
+          {!order.confirmed_at && order.status === "Pending" && !allItemsApproved() && (
             <Card className="mb-6 border-destructive bg-destructive/5">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">⚠️</span>
                   <div>
                     <h3 className="text-destructive font-semibold mb-2">Order Workflow Status</h3>
-                    {!allItemsApproved() ? (
-                      <div className="space-y-2">
-                        <p className="text-sm">
-                          <strong>Step 1:</strong> Approve all items first
-                        </p>
-                        <p className="text-sm text-muted-foreground ml-4">
-                          {hasRejectedItems() 
-                            ? "❌ This order has rejected items. All items must be approved before proceeding."
-                            : "⏳ Some items are still pending approval. Please review and approve all items."}
-                        </p>
-                      </div>
-                    ) : !order.order_assignments?.rider_id ? (
-                      <div className="space-y-2">
-                        <p className="text-sm">
-                          <strong>Step 2:</strong> Assign a rider
-                        </p>
-                        <p className="text-sm text-muted-foreground ml-4">
-                          ✅ All items approved. Please assign a rider to continue.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className="text-sm">
-                          <strong>Step 3:</strong> Confirm order
-                        </p>
-                        <p className="text-sm text-muted-foreground ml-4">
-                          ✅ All items approved and rider assigned. Ready to confirm.
-                        </p>
-                      </div>
-                    )}
+                    <div className="space-y-2">
+                      <p className="text-sm">
+                        <strong>Step 1:</strong> Approve all items first
+                      </p>
+                      <p className="text-sm text-muted-foreground ml-4">
+                        {hasRejectedItems() 
+                          ? "❌ This order has rejected items. All items must be approved before proceeding."
+                          : "⏳ Some items are still pending approval. Please review and approve all items."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {order.confirmed_at && !isPaymentConfirmed() && !order.order_assignments?.rider_id && (
+            <Card className="mb-6 border-yellow-500 bg-yellow-500/5">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">💳</span>
+                  <div>
+                    <h3 className="text-yellow-700 dark:text-yellow-400 font-semibold mb-2">Waiting for Payment</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Order is confirmed. Rider can only be assigned after payment is verified.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {order.confirmed_at && isPaymentConfirmed() && !order.order_assignments?.rider_id && (
+            <Card className="mb-6 border-green-500 bg-green-500/5">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">✅</span>
+                  <div>
+                    <h3 className="text-green-700 dark:text-green-400 font-semibold mb-2">Ready to Assign Rider</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Payment confirmed. Please assign a rider to proceed with delivery.
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -394,6 +406,21 @@ const ManagerOrderDetails = () => {
               </CardContent>
             </Card>
 
+            {/* Payment Confirmation Card - Show after order is confirmed */}
+            {order.confirmed_at && (
+              <PaymentConfirmation
+                orderId={order.id}
+                userId={order.user_id}
+                paymentStatus={order.payment_status || "pending"}
+                paymentProofUrl={order.payment_proof_url}
+                paymentProofName={order.payment_proof_name}
+                paymentSubmittedAt={order.payment_submitted_at}
+                paymentConfirmedAt={order.payment_confirmed_at}
+                assignedRiderId={order.order_assignments?.rider_id}
+                onUpdate={fetchOrderDetails}
+              />
+            )}
+
             {/* Assigned Rider Card */}
             <Card>
               <CardHeader>
@@ -413,12 +440,16 @@ const ManagerOrderDetails = () => {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {!allItemsApproved() ? (
+                    {!canAssignRider() ? (
                       <div className="text-center py-4 px-4 bg-muted rounded-lg">
                         <p className="text-sm text-muted-foreground">
-                          {hasRejectedItems() 
-                            ? "Please approve all items before assigning a rider"
-                            : "Please review and approve all items before assigning a rider"}
+                          {!allItemsApproved()
+                            ? hasRejectedItems()
+                              ? "Please approve all items before assigning a rider"
+                              : "Please review and approve all items before assigning a rider"
+                            : !order?.confirmed_at
+                            ? "Please confirm the order before assigning a rider"
+                            : "Payment must be verified before assigning a rider"}
                         </p>
                       </div>
                     ) : (
@@ -438,21 +469,6 @@ const ManagerOrderDetails = () => {
                 )}
               </CardContent>
             </Card>
-
-            {/* Payment Confirmation Card - Show after order is confirmed */}
-            {order.confirmed_at && (
-              <PaymentConfirmation
-                orderId={order.id}
-                userId={order.user_id}
-                paymentStatus={order.payment_status || "pending"}
-                paymentProofUrl={order.payment_proof_url}
-                paymentProofName={order.payment_proof_name}
-                paymentSubmittedAt={order.payment_submitted_at}
-                paymentConfirmedAt={order.payment_confirmed_at}
-                assignedRiderId={order.order_assignments?.rider_id}
-                onUpdate={fetchOrderDetails}
-              />
-            )}
 
             {/* Additional Charges Card */}
             <AdditionalCharges
