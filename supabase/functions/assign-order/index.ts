@@ -95,7 +95,7 @@ serve(async (req) => {
       });
     }
 
-    if (order.status !== 'Confirmed' && order.status !== 'Rider Assigned' && order.status !== 'Picked Up') {
+    if (order.status !== 'Order Confirmed' && order.status !== 'Confirmed' && order.status !== 'Rider Assigned' && order.status !== 'Picked Up') {
       return new Response(JSON.stringify({ 
         error: 'Cannot assign rider: order must be confirmed first.' 
       }), {
