@@ -33,13 +33,13 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 w-full bg-primary shadow-md">
+    <header className="sticky top-0 left-0 right-0 z-50 w-full bg-primary shadow-md safe-area-top">
       <div className="container mx-auto flex h-14 md:h-20 items-center justify-between px-3 md:px-4">
         <Link to="/" className="flex items-center">
           <img
             src={logo}
             alt="Tabedaar.com Logo"
-            className="h-16 md:h-36 w-auto object-contain"
+            className="h-10 md:h-14 lg:h-16 w-auto object-contain"
           />
         </Link>
 
