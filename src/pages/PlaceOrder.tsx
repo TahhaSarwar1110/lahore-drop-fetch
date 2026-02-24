@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
@@ -220,13 +219,14 @@ const PlaceOrder = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col tap-highlight-none">
+    <div className="min-h-screen flex flex-col tap-highlight-none bg-background">
       <Header />
 
       <main className="flex-1 native-scroll">
-        <div className="mx-auto max-w-[1200px] px-3 sm:px-6 py-4 sm:py-16">
-          <div className="grid lg:grid-cols-5 gap-4 lg:gap-10">
-            {/* Left - Gradient Panel */}
+        {/* Mobile: full-width native layout. Desktop: centered card layout */}
+        <div className="mx-auto max-w-[1200px] lg:px-6 lg:py-10">
+          <div className="grid lg:grid-cols-5 lg:gap-10">
+            {/* Left - Gradient Panel (desktop only) */}
             <div className="hidden lg:flex lg:col-span-2 items-start justify-center bg-gradient-to-br from-primary to-accent rounded-2xl p-8 sticky top-24 self-start">
               <div className="text-primary-foreground text-center space-y-4 py-8">
                 <h1 className="text-3xl font-bold">Place Your Order</h1>
@@ -237,12 +237,22 @@ const PlaceOrder = () => {
             </div>
 
             {/* Right - Form */}
-            <div className="lg:col-span-3 w-full max-w-full">
-              <Card className="border-0 sm:border rounded-none sm:rounded-2xl shadow-none sm:shadow-lg w-full bg-card">
-                <CardContent className="p-3 sm:p-6 space-y-3 sm:space-y-4 w-full max-w-full">
-                  <h2 className="text-lg sm:text-2xl font-bold">Order Details</h2>
+            <div className="lg:col-span-3 w-full">
+              {/* Mobile page title */}
+              <div className="lg:hidden px-4 pt-4 pb-2">
+                <h1 className="text-xl font-bold text-foreground">Place Your Order</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">Fill in the details below</p>
+              </div>
 
-                  <div className="space-y-1 w-full">
+              {/* Personal Info Section */}
+              <section className="px-4 lg:px-0 py-3">
+                <div className="mobile-card lg:border lg:rounded-2xl lg:shadow-lg p-4 lg:p-6 space-y-4">
+                  <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">1</span>
+                    Your Details
+                  </h2>
+
+                  <div className="space-y-1.5">
                     <label className="mobile-label">Full Name</label>
                     <Input
                       className="mobile-input"
@@ -252,7 +262,7 @@ const PlaceOrder = () => {
                     />
                   </div>
 
-                  <div className="space-y-1 w-full">
+                  <div className="space-y-1.5">
                     <label className="mobile-label">Phone Number</label>
                     <Input
                       className="mobile-input"
@@ -262,11 +272,20 @@ const PlaceOrder = () => {
                       onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
+                </div>
+              </section>
 
-                  <div className="space-y-1 w-full">
+              {/* Delivery Info Section */}
+              <section className="px-4 lg:px-0 py-3">
+                <div className="mobile-card lg:border lg:rounded-2xl lg:shadow-lg p-4 lg:p-6 space-y-4">
+                  <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">2</span>
+                    Delivery Info
+                  </h2>
+
+                  <div className="space-y-1.5">
                     <label className="mobile-label">
-                      Delivery Type
-                      <span className="text-destructive ml-1">*</span>
+                      Delivery Type <span className="text-destructive">*</span>
                     </label>
                     <Select
                       value={deliveryType}
@@ -283,30 +302,29 @@ const PlaceOrder = () => {
                     </Select>
                   </div>
 
-                  <div className="space-y-1 w-full">
+                  <div className="space-y-1.5">
                     <label className="mobile-label">
-                      Delivery Address
-                      <span className="text-destructive ml-1">*</span>
+                      Delivery Address <span className="text-destructive">*</span>
                     </label>
                     <Input
-                      className="mobile-input w-full"
+                      className="mobile-input"
                       placeholder="Complete delivery address"
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
                     />
                   </div>
 
-                  {/* Delivery Location Map - Only for within city, collapsible */}
+                  {/* Delivery Location Map - Only for within city */}
                   {deliveryType === "within_city" && (
                     <Collapsible open={showDeliveryMap} onOpenChange={setShowDeliveryMap}>
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-between"
+                          className="w-full justify-between h-12 rounded-xl text-sm"
                         >
                           <span className="flex items-center gap-2">
                             <MapPin className="h-4 w-4" />
-                            Select Delivery Location on Map (Optional)
+                            Select Location on Map (Optional)
                           </span>
                           {showDeliveryMap ? (
                             <ChevronUp className="h-4 w-4" />
@@ -315,129 +333,139 @@ const PlaceOrder = () => {
                           )}
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="pt-4">
+                      <CollapsibleContent className="pt-3">
                         <div className="space-y-2">
-                          <p className="text-xs text-muted-foreground mb-2">
-                            Click on the map to mark your delivery location
+                          <p className="text-xs text-muted-foreground">
+                            Tap the map to mark your delivery location
                           </p>
                           <LocationPickerMap
                             onLocationSelect={(lat, lng) => setDeliveryLocation({ lat, lng })}
                             label="Delivery Location"
                           />
                           {deliveryLocation && (
-                            <p className="text-sm text-green-600">
-                              ✓ Location selected: {deliveryLocation.lat.toFixed(4)}, {deliveryLocation.lng.toFixed(4)}
+                            <p className="text-sm text-green-600 font-medium">
+                              ✓ Location: {deliveryLocation.lat.toFixed(4)}, {deliveryLocation.lng.toFixed(4)}
                             </p>
                           )}
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
                   )}
+                </div>
+              </section>
 
-                  <div className="border-t pt-4">
-                    <h3 className="text-base sm:text-xl font-semibold mb-3">Add Items</h3>
-                    <OrderItemForm onAddItem={handleAddItem} />
-                  </div>
+              {/* Add Items Section */}
+              <section className="px-4 lg:px-0 py-3">
+                <div className="mobile-card lg:border lg:rounded-2xl lg:shadow-lg p-4 lg:p-6">
+                  <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-4">
+                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">3</span>
+                    Add Items
+                  </h2>
+                  <OrderItemForm onAddItem={handleAddItem} />
+                </div>
+              </section>
 
-                  {orderItems.length > 0 && (
-                    <div className="border-t pt-6 space-y-4">
-                      <h3 className="text-xl font-semibold">Order Summary</h3>
-                      {orderItems.map((item) => (
-                        <Card key={item.id} className="relative">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="absolute top-2 right-2"
-                            onClick={() => handleRemoveItem(item.id)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                          <CardContent className="p-4">
-                            <p className="font-semibold text-primary">{item.itemType}</p>
-                            <div className="mt-2 text-sm text-muted-foreground space-y-1">
-                              {Object.entries(item.itemData).map(([key, value]) => (
-                                <p key={key}>
-                                  <span className="font-medium">{key}:</span> {value}
-                                </p>
-                              ))}
-                              {item.imageUrl && (
-                                <p className="text-xs text-primary">📷 Image attached</p>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                      
-                      <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-                        <span className="font-semibold">Delivery Type:</span>
-                        <span>{getDeliveryTypeLabel(deliveryType)}</span>
+              {/* Order Summary Section */}
+              {orderItems.length > 0 && (
+                <section className="px-4 lg:px-0 py-3">
+                  <div className="mobile-card lg:border lg:rounded-2xl lg:shadow-lg p-4 lg:p-6 space-y-3">
+                    <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                      <span className="w-7 h-7 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-xs font-bold">✓</span>
+                      Order Summary
+                    </h2>
+
+                    {orderItems.map((item) => (
+                      <div key={item.id} className="relative bg-muted/50 rounded-xl p-3 border border-border/50">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full"
+                          onClick={() => handleRemoveItem(item.id)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                        <p className="font-semibold text-sm text-primary">{item.itemType}</p>
+                        <div className="mt-1.5 text-xs text-muted-foreground space-y-0.5 pr-8">
+                          {Object.entries(item.itemData).map(([key, value]) => (
+                            <p key={key}>
+                              <span className="font-medium text-foreground/70">{key}:</span> {value}
+                            </p>
+                          ))}
+                          {item.imageUrl && (
+                            <p className="text-xs text-primary">📷 Image attached</p>
+                          )}
+                        </div>
                       </div>
-                      
-                      <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-                        <span className="font-semibold">Total Items:</span>
-                        <span>{orderItems.length}</span>
+                    ))}
+                    
+                    {/* Summary rows */}
+                    <div className="space-y-2 pt-2">
+                      <div className="flex justify-between items-center py-2 border-b border-border/50">
+                        <span className="text-sm text-muted-foreground">Delivery Type</span>
+                        <span className="text-sm font-medium">{getDeliveryTypeLabel(deliveryType)}</span>
                       </div>
-                      
-                      <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-                        <span className="font-semibold">Items Total:</span>
-                        <span className="text-lg font-bold">
-                          PKR {calculateTotalPrice().toLocaleString()}
-                        </span>
+                      <div className="flex justify-between items-center py-2 border-b border-border/50">
+                        <span className="text-sm text-muted-foreground">Total Items</span>
+                        <span className="text-sm font-medium">{orderItems.length}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-border/50">
+                        <span className="text-sm text-muted-foreground">Items Total</span>
+                        <span className="text-sm font-bold">PKR {calculateTotalPrice().toLocaleString()}</span>
                       </div>
                       
                       {(() => {
                         const { bundle, price } = calculateBundlePrice(orderItems.length);
                         return bundle ? (
-                          <div className="flex justify-between items-center p-4 bg-accent/10 rounded-lg">
+                          <div className="flex justify-between items-center py-2 border-b border-border/50">
                             <div>
-                              <span className="font-semibold block">Delivery Charges</span>
-                              <span className="text-xs text-muted-foreground">
-                                {bundle.name} ({orderItems.length} of {bundle.items_allowed} items)
+                              <span className="text-sm text-muted-foreground block">Delivery Charges</span>
+                              <span className="text-xs text-muted-foreground/70">
+                                {bundle.name} ({orderItems.length}/{bundle.items_allowed} items)
                               </span>
                             </div>
-                            <span className="text-lg font-bold">
-                              PKR {price.toLocaleString()}
-                            </span>
+                            <span className="text-sm font-bold">PKR {price.toLocaleString()}</span>
                           </div>
                         ) : null;
                       })()}
                       
-                      <div className="flex justify-between items-center p-4 bg-primary/10 rounded-lg">
-                        <span className="font-semibold">Grand Total:</span>
-                        <span className="text-xl font-bold text-primary">
+                      <div className="flex justify-between items-center py-3 bg-primary/5 rounded-xl px-3 -mx-1">
+                        <span className="font-semibold text-sm">Grand Total</span>
+                        <span className="text-lg font-bold text-primary">
                           PKR {(calculateTotalPrice() + calculateBundlePrice(orderItems.length).price).toLocaleString()}
                         </span>
                       </div>
                     </div>
-                  )}
-
-                  {/* Always show Place Order button with validation */}
-                  <div className="border-t pt-3 space-y-2">
-                    {orderItems.length === 0 && (
-                      <div className="p-2.5 bg-muted border border-border rounded-lg">
-                        <p className="text-xs sm:text-sm text-foreground">
-                          ⚠️ Please add at least one item to your order
-                        </p>
-                      </div>
-                    )}
-                    {(!fullName || !phone || !deliveryAddress) && (
-                      <div className="p-2.5 bg-muted border border-border rounded-lg">
-                        <p className="text-xs sm:text-sm text-foreground">
-                          ⚠️ Please complete all required fields (Name, Phone, Delivery Address)
-                        </p>
-                      </div>
-                    )}
-                    <Button
-                      onClick={handleSubmitOrder}
-                      className="w-full h-11 sm:h-14 text-sm sm:text-base font-semibold rounded-xl"
-                      size="lg"
-                      disabled={loading}
-                    >
-                      {loading ? "Placing Order..." : "Submit Order"}
-                    </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </section>
+              )}
+
+              {/* Submit button section - with bottom safe area */}
+              <section className="px-4 lg:px-0 py-3 pb-6 safe-area-bottom">
+                <div className="space-y-2">
+                  {orderItems.length === 0 && (
+                    <div className="p-3 bg-muted border border-border rounded-xl">
+                      <p className="text-xs text-foreground">
+                        ⚠️ Add at least one item to your order
+                      </p>
+                    </div>
+                  )}
+                  {(!fullName || !phone || !deliveryAddress) && (
+                    <div className="p-3 bg-muted border border-border rounded-xl">
+                      <p className="text-xs text-foreground">
+                        ⚠️ Complete all required fields (Name, Phone, Address)
+                      </p>
+                    </div>
+                  )}
+                  <Button
+                    onClick={handleSubmitOrder}
+                    className="w-full mobile-button h-14 text-base bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-glow-accent"
+                    size="lg"
+                    disabled={loading}
+                  >
+                    {loading ? "Placing Order..." : "Submit Order"}
+                  </Button>
+                </div>
+              </section>
             </div>
           </div>
         </div>
