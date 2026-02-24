@@ -81,6 +81,38 @@ serve(async (req) => {
       });
     }
 
+    // Fetch order to validate status and payment
+    const { data: order, error: orderError } = await supabaseClient
+      .from('orders')
+      .select('status, payment_status')
+      .eq('id', order_id)
+      .single();
+
+    if (orderError || !order) {
+      return new Response(JSON.stringify({ error: 'Order not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (order.status !== 'Confirmed' && order.status !== 'Rider Assigned' && order.status !== 'Picked Up') {
+      return new Response(JSON.stringify({ 
+        error: 'Cannot assign rider: order must be confirmed first.' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (order.payment_status !== 'confirmed') {
+      return new Response(JSON.stringify({ 
+        error: 'Cannot assign rider: payment must be confirmed first.' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Check if order has any rejected items
     const { data: rejectedItems } = await supabaseClient
       .from('order_items')
