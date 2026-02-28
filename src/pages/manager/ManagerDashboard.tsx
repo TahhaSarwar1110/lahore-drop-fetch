@@ -118,12 +118,18 @@ const ManagerDashboard = () => {
           .reduce((sum: number, item: any) => {
             const itemData = item.item_data as any;
             // Find price field and strip non-numeric chars for robust parsing
-            const rawPrice = String(
-              itemData?.['Price (PKR)'] || 
-              itemData?.price || 
-              itemData?.Price || 
-              '0'
-            ).replace(/[^0-9.]/g, '');
+            const explicitPrice =
+              itemData?.['Expected Price (PKR)'] ??
+              itemData?.expectedPrice ??
+              itemData?.['Price (PKR)'] ??
+              itemData?.price ??
+              itemData?.Price;
+
+            const fallbackPrice = Object.entries(itemData || {}).find(([key]) =>
+              key.toLowerCase().includes('price')
+            )?.[1];
+
+            const rawPrice = String(explicitPrice ?? fallbackPrice ?? '0').replace(/[^0-9.]/g, '');
             const price = parseFloat(rawPrice) || 0;
             const rawQty = String(itemData?.Quantity || itemData?.quantity || '1').replace(/[^0-9]/g, '');
             const quantity = parseInt(rawQty, 10) || 1;
