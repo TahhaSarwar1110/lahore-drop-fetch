@@ -126,15 +126,27 @@ const OrderHistory = () => {
     return colors[status] || "bg-gray-500";
   };
 
+  const parseItemPrice = (itemData: Record<string, string>) => {
+    const directExpectedPrice = Number(String(itemData?.expectedPrice ?? "").replace(/,/g, ""));
+    if (!Number.isNaN(directExpectedPrice) && directExpectedPrice > 0) {
+      return directExpectedPrice;
+    }
+
+    const priceField = Object.entries(itemData).find(([key]) =>
+      key.toLowerCase().includes("price")
+    );
+
+    if (!priceField) return 0;
+
+    const normalizedPrice = String(priceField[1]).replace(/[^0-9.]/g, "");
+    return Number(normalizedPrice) || 0;
+  };
+
   const calculateTotalPrice = (order: Order) => {
     const itemsTotal = order.order_items
-      .filter(item => item.approval_status === 'approved')
-      .reduce((total, item) => {
-        const priceField = Object.entries(item.item_data).find(
-          ([key]) => key.toLowerCase().includes("price")
-        );
-        return total + (priceField ? parseFloat(priceField[1]) || 0 : 0);
-      }, 0);
+      .filter((item) => item.approval_status !== "rejected")
+      .reduce((total, item) => total + parseItemPrice(item.item_data), 0);
+
     const deliveryCharges = order.additional_charges || 0;
     return itemsTotal + deliveryCharges;
   };
