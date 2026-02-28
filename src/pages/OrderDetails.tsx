@@ -489,7 +489,7 @@ const OrderDetails = () => {
             ))}
           </div>
 
-          {order.status === "Pending" && !order.confirmed_at && (
+          {order.status === "Pending" && !order.confirmed_at && hasRejectedItems() && (
             <Card>
               <CardContent className="p-6">
                 {!showAddItem ? (
