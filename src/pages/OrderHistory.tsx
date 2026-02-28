@@ -32,6 +32,7 @@ interface Order {
   delivery_address: string;
   status: string;
   created_at: string;
+  additional_charges: number | null;
   order_items: {
     id: string;
     item_type: string;
@@ -90,6 +91,7 @@ const OrderHistory = () => {
         delivery_address,
         status,
         created_at,
+        additional_charges,
         order_items (
           id,
           item_type,
@@ -124,8 +126,8 @@ const OrderHistory = () => {
     return colors[status] || "bg-gray-500";
   };
 
-  const calculateTotalPrice = (items: Order["order_items"]) => {
-    return items
+  const calculateTotalPrice = (order: Order) => {
+    const itemsTotal = order.order_items
       .filter(item => item.approval_status === 'approved')
       .reduce((total, item) => {
         const priceField = Object.entries(item.item_data).find(
@@ -133,6 +135,8 @@ const OrderHistory = () => {
         );
         return total + (priceField ? parseFloat(priceField[1]) || 0 : 0);
       }, 0);
+    const deliveryCharges = order.additional_charges || 0;
+    return itemsTotal + deliveryCharges;
   };
 
   const filteredOrders = useMemo(() => {
@@ -254,7 +258,7 @@ const OrderHistory = () => {
                             {order.order_items.length}
                           </TableCell>
                           <TableCell className="text-right text-sm font-semibold text-primary">
-                            PKR {calculateTotalPrice(order.order_items).toLocaleString()}
+                            PKR {calculateTotalPrice(order).toLocaleString()}
                           </TableCell>
                           <TableCell className="text-center">
                             <Badge className={`${getStatusColor(order.status)} text-xs`}>
@@ -311,7 +315,7 @@ const OrderHistory = () => {
                         <div className="flex items-center justify-between text-sm bg-muted/50 rounded-lg px-3 py-2">
                           <span>Items: <span className="font-semibold">{order.order_items.length}</span></span>
                           <span className="font-semibold text-primary">
-                            PKR {calculateTotalPrice(order.order_items).toLocaleString()}
+                            PKR {calculateTotalPrice(order).toLocaleString()}
                           </span>
                         </div>
                         <div className="flex gap-2">
