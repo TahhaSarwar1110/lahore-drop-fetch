@@ -1,0 +1,362 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Tabedar Brand Colors */
+    --background: 240 20% 98%; /* #FAFAFC */
+    --foreground: 220 70% 17%; /* #0d1e4a */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 220 70% 17%; /* #0d1e4a */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 70% 17%;
+
+    /* Dark Navy - Primary */
+    --primary: 220 70% 17%; /* #0d1e4a */
+    --primary-foreground: 0 0% 100%;
+
+    /* Orange - Secondary/CTA */
+    --secondary: 18 90% 52%; /* #f15717 */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%; /* #6B7280 */
+
+    /* Orange - Accent/CTA */
+    --accent: 18 90% 52%; /* #f15717 */
+    --accent-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%; /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 220 70% 17%;
+
+    --radius: 1rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px -2px hsl(220 70% 17% / 0.06);
+    --shadow-md: 0 8px 24px -8px hsl(220 70% 17% / 0.1);
+    --shadow-lg: 0 16px 48px -12px hsl(220 70% 17% / 0.12);
+    --shadow-xl: 0 24px 64px -16px hsl(220 70% 17% / 0.16);
+    --shadow-primary: 0 8px 32px -8px hsl(220 70% 17% / 0.35);
+    --shadow-accent: 0 8px 32px -8px hsl(18 90% 52% / 0.35);
+    --shadow-hover: 0 20px 48px -12px hsl(220 70% 17% / 0.18);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Sidebar */
+    --sidebar-background: 240 20% 98%;
+    --sidebar-foreground: 220 70% 17%;
+    --sidebar-primary: 220 70% 17%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 20% 95%;
+    --sidebar-accent-foreground: 220 70% 17%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 220 70% 17%;
+    
+    /* Fonts */
+    --font-heading: 'Poppins', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  .dark {
+    --background: 220 70% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 220 70% 10%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 220 70% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 220 70% 25%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 18 90% 58%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 70% 15%;
+    --muted-foreground: 220 15% 65%;
+
+    --accent: 18 90% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 70% 18%;
+    --input: 220 70% 18%;
+    --ring: 220 70% 25%;
+    
+    --sidebar-background: 220 70% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 220 70% 25%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 70% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 220 70% 18%;
+    --sidebar-ring: 220 70% 25%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-semibold tracking-tight;
+  }
+}
+
+/* Mobile native app styles */
+@layer utilities {
+  /* Safe-area helpers (mainly for native WebView) */
+  .safe-area-top {
+    padding-top: 0px;
+  }
+
+  .safe-area-bottom {
+    padding-bottom: 0px;
+  }
+
+  .safe-area-left {
+    padding-left: 0px;
+  }
+
+  .safe-area-right {
+    padding-right: 0px;
+  }
+
+  .native-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  @media (max-width: 767px) {
+    .safe-area-top {
+      padding-top: max(env(safe-area-inset-top, 0px), 16px);
+    }
+
+    .safe-area-bottom {
+      padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+    }
+
+    .safe-area-left {
+      padding-left: env(safe-area-inset-left, 0px);
+    }
+
+    .safe-area-right {
+      padding-right: env(safe-area-inset-right, 0px);
+    }
+
+    .native-scroll {
+      padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+      scroll-padding-bottom: max(env(safe-area-inset-bottom, 0px), 24px);
+    }
+  }
+  
+  .tap-highlight-none {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .text-gradient {
+    @apply text-secondary;
+  }
+  
+  .bg-hero {
+    background: hsl(var(--primary));
+  }
+  
+  .bg-hero-soft {
+    background: hsl(var(--primary) / 0.05);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-md);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: var(--shadow-hover);
+  }
+  
+  .shadow-glow-primary {
+    box-shadow: var(--shadow-primary);
+  }
+  
+  .shadow-glow-accent {
+    box-shadow: var(--shadow-accent);
+  }
+}
+
+/* Component styles */
+@layer components {
+  .mobile-input {
+    @apply h-12 text-base rounded-xl border-2 border-border/50 bg-background px-4;
+    @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply transition-all duration-200;
+    @apply w-full max-w-full;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+  
+  .mobile-select {
+    @apply h-12 text-base rounded-xl border-2 border-border/50 bg-background;
+    @apply w-full max-w-full;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+  
+  .mobile-button {
+    @apply h-12 text-base font-semibold rounded-xl;
+    @apply active:scale-[0.98] transition-transform duration-100;
+    @apply w-full max-w-full;
+    box-sizing: border-box;
+  }
+  
+  .mobile-card {
+    @apply rounded-2xl border-0 shadow-lg shadow-foreground/5 bg-card;
+    @apply w-full max-w-full overflow-hidden;
+  }
+  
+  .mobile-section {
+    @apply px-4 py-4 sm:px-6;
+  }
+  
+  .mobile-header {
+    @apply text-xl sm:text-2xl font-bold;
+  }
+  
+  .mobile-label {
+    @apply text-sm font-medium text-muted-foreground mb-2 block;
+  }
+  
+  .mobile-form-container {
+    @apply w-full max-w-full overflow-hidden px-4;
+    box-sizing: border-box;
+  }
+  
+  /* Premium card with hover lift */
+  .premium-card {
+    @apply rounded-2xl bg-card border border-border/50 p-6;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-smooth);
+  }
+  
+  .premium-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+  }
+  
+  /* Service card with image */
+  .service-card {
+    @apply relative rounded-3xl overflow-hidden bg-card;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-smooth);
+  }
+  
+  .service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+  }
+  
+  /* Step icon for timeline */
+  .step-icon {
+    @apply w-16 h-16 rounded-2xl flex items-center justify-center text-white bg-secondary;
+    box-shadow: var(--shadow-accent);
+  }
+  
+  /* Trust badge */
+  .trust-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium;
+    background: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+  }
+  
+  /* CTA Button - Orange */
+  .btn-cta {
+    @apply bg-secondary text-secondary-foreground font-semibold;
+    @apply hover:opacity-90 transition-all duration-300;
+    box-shadow: var(--shadow-accent);
+  }
+  
+  .btn-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px -8px hsl(18 90% 52% / 0.45);
+  }
+  
+  /* Outlined button - Purple */
+  .btn-outline-primary {
+    @apply border-2 border-primary text-primary bg-transparent;
+    @apply hover:bg-primary/5 transition-all duration-300;
+  }
+  
+  .btn-outline-primary:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Feature card */
+  .feature-card {
+    @apply rounded-2xl bg-card border border-border/30 p-8;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: hsl(var(--primary) / 0.3);
+  }
+  
+  /* Timeline connector */
+  .timeline-line {
+    @apply absolute top-8 left-[calc(50%+40px)] right-[calc(50%-40px)] h-0.5 bg-primary;
+  }
+  
+  /* Testimonial card */
+  .testimonial-card {
+    @apply rounded-2xl bg-card border border-border/30 p-6;
+    box-shadow: var(--shadow-md);
+  }
+  
+  /* Footer dark */
+  .footer-dark {
+    background: hsl(220 26% 17%);
+    color: hsl(0 0% 98%);
+  }
+  
+  .footer-dark a {
+    @apply text-white/70 hover:text-white transition-colors;
+  }
+}

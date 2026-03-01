@@ -1,0 +1,13 @@
+project_id = "oubqyskezyagkfoorzvy"
+
+[functions.create-user]
+verify_jwt = true
+
+[functions.assign-order]
+verify_jwt = true
+
+[functions.desidrop-chat]
+verify_jwt = false
+
+[functions.send-notification-email]
+verify_jwt = true
