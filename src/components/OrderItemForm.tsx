@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,15 +22,33 @@ export interface OrderItem {
 
 interface OrderItemFormProps {
   onAddItem: (item: OrderItem) => void;
+  initialItem?: OrderItem | null;
+  submitLabel?: string;
+  onCancel?: () => void;
 }
 
-export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
+export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }: OrderItemFormProps) => {
   const [itemType, setItemType] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string>("");
   const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showPickupMap, setShowPickupMap] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (initialItem) {
+      setItemType(initialItem.itemType);
+      setFormData(initialItem.itemData || {});
+      setExistingImageUrl(initialItem.imageUrl || "");
+      setImageFile(null);
+      if (initialItem.pickupLat != null && initialItem.pickupLng != null) {
+        setPickupLocation({ lat: initialItem.pickupLat, lng: initialItem.pickupLng });
+      } else {
+        setPickupLocation(null);
+      }
+    }
+  }, [initialItem]);
 
   const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean; min?: number }[]> = {
     Cloth: [
