@@ -231,7 +231,7 @@ const PlaceOrder = () => {
             ? `Service charges (${bundle.name} - ${orderItems.length} items)`
             : "No service bundle applied",
           delivery_payment_status: deliveryType === "within_city" ? "not_required" : "pending",
-        } as any)
+        })
         .select()
         .single();
 
