@@ -332,14 +332,23 @@ const PlaceOrder = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="mobile-label">Phone Number</label>
-                    <Input
-                      className="mobile-input"
-                      type="tel"
-                      placeholder="Your phone"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
+                    <label className="mobile-label">Phone Number <span className="text-destructive">*</span></label>
+                    <div className="flex gap-2">
+                      <CountryCodeSelect
+                        value={countryCode}
+                        onValueChange={setCountryCode}
+                        countryCodes={countryCodes}
+                      />
+                      <Input
+                        className="mobile-input flex-1"
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder={countryCodes.find(c => c.code === countryCode)?.placeholder || "Phone number"}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                        maxLength={countryCodes.find(c => c.code === countryCode)?.maxLength || 11}
+                      />
+                    </div>
                   </div>
                 </div>
               </section>
