@@ -136,7 +136,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
       return;
     }
 
-    let imageUrl = "";
+    let imageUrl = existingImageUrl || "";
     if (imageFile) {
       const fileExt = imageFile.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
@@ -161,7 +161,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     }
 
     const item: OrderItem = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: initialItem?.id || Math.random().toString(36).substr(2, 9),
       itemType,
       itemData: formData,
       imageFile: imageFile || undefined,
@@ -176,12 +176,13 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     setItemType("");
     setFormData({});
     setImageFile(null);
+    setExistingImageUrl("");
     setPickupLocation(null);
     setShowPickupMap(false);
     
     toast({
-      title: "Item Added",
-      description: "Item added to your order",
+      title: initialItem ? "Item Updated" : "Item Added",
+      description: initialItem ? "Item updated in your order" : "Item added to your order",
     });
   };
 
