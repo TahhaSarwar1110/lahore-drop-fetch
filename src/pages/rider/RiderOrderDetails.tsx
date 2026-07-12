@@ -325,7 +325,17 @@ const RiderOrderDetails = () => {
 
             {/* Right Column - Items */}
             <div className="lg:col-span-2 space-y-6">
-              {allItemsPicked && order.status !== "Delivered" && (
+              {allItemsPicked && order.status !== "Delivered" && !deliveryPaymentOk && (
+                <Card className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
+                  <CardContent className="p-4">
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      <span className="font-semibold">Delivery on hold:</span> Waiting for the customer to pay the delivery charges and for the manager to verify them. You'll be notified once you can proceed.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {allItemsPicked && order.status !== "Delivered" && deliveryPaymentOk && (
                 <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
