@@ -256,7 +256,7 @@ const PlaceOrder = () => {
         description: "Your order has been successfully placed",
       });
 
-      setTimeout(() => navigate("/orders"), 1500);
+      setTimeout(() => navigate("/order-history"), 1500);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
