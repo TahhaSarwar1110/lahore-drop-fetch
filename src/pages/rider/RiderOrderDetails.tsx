@@ -204,6 +204,10 @@ const RiderOrderDetails = () => {
   };
 
   const allItemsPicked = items.length > 0 && items.every(item => item.pickup);
+  const deliveryPaymentOk =
+    !order ||
+    order.delivery_type === "within_city" ||
+    order.delivery_payment_status === "confirmed";
 
   // Helper to render item data fields
   const renderItemDetails = (itemData: any, itemType: string) => {
