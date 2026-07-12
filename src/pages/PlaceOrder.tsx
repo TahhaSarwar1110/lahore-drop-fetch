@@ -139,7 +139,9 @@ const PlaceOrder = () => {
       
       if (profileData) {
         setFullName(profileData.full_name || "");
-        setPhone(profileData.phone || "");
+        const parsed = parseStoredPhone(profileData.phone || "");
+        setCountryCode(parsed.code);
+        setPhone(parsed.local);
       }
     };
     
