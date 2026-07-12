@@ -251,7 +251,9 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
           })}
 
           <div className="space-y-2 w-full">
-            <label className="mobile-label">Attach Image (Optional)</label>
+            <label className="mobile-label">
+              Attach Image {itemType === "Cloth" ? <span className="text-destructive ml-1">*</span> : "(Optional)"}
+            </label>
             <div className="flex flex-col gap-2 w-full">
               <Input
                 type="file"
@@ -265,8 +267,15 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
                   <span className="truncate">{imageFile.name}</span>
                 </span>
               )}
+              {!imageFile && existingImageUrl && (
+                <span className="text-sm text-muted-foreground">Current image attached (upload to replace)</span>
+              )}
+              {itemType === "Cloth" && !imageFile && !existingImageUrl && (
+                <span className="text-xs text-destructive">Image is required for clothing items</span>
+              )}
             </div>
           </div>
+
 
           <div className="border-t pt-4 space-y-4 w-full">
             
