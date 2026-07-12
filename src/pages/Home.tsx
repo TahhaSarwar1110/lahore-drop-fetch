@@ -27,6 +27,7 @@ import { AIBotButton } from "@/components/AIBotButton";
 import { PricingBundles } from "@/components/PricingBundles";
 import { useAuth } from "@/hooks/useAuth";
 import { TestimonialSlider } from "@/components/TestimonialSlider";
+import { AnimatedText, AnimatedFadeIn } from "@/components/AnimatedText";
 import fashionImg from "@/assets/category-fashion.jpg";
 import foodImg from "@/assets/category-food.jpg";
 import groceriesImg from "@/assets/category-grocery.jpg";
@@ -169,62 +170,66 @@ const Home = () => {
               {/* Left side content */}
               <div className="space-y-8 text-center lg:text-left">
                 <div className="space-y-6">
-                  <h1
-                    className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] text-white opacity-0 animate-fade-in"
-                    style={{ animationDelay: "0.1s" }}
-                  >
-                    We Shop Anything from Pakistan —{" "}
-                    <span className="text-secondary">Delivered Straight to Your Loved Ones</span>
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] text-white">
+                    <AnimatedText
+                      text="We Shop Anything from Pakistan —"
+                      delay={0.2}
+                      staggerDelay={0.06}
+                    />
+                    <br className="hidden sm:block" />
+                    <AnimatedText
+                      text="Delivered Straight to Your Loved Ones"
+                      className="text-secondary"
+                      delay={0.6}
+                      staggerDelay={0.07}
+                    />
                   </h1>
-                  <p
-                    className="text-lg sm:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 opacity-0 animate-fade-in"
-                    style={{ animationDelay: "0.3s" }}
-                  >
-                    From fashion and gifts to food and groceries — we handle the shopping, verification, and delivery for you.
-                    <span className="block mt-2 font-semibold">Same-day delivery in Lahore.</span>
-                  </p>
+                  <AnimatedFadeIn delay={1.2}>
+                    <p className="text-lg sm:text-xl text-white/90 max-w-xl mx-auto lg:mx-0">
+                      From fashion and gifts to food and groceries — we handle the shopping, verification, and delivery for you.
+                      <span className="block mt-2 font-semibold">Same-day delivery in Lahore.</span>
+                    </p>
+                  </AnimatedFadeIn>
                 </div>
 
-                <div
-                  className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start opacity-0 animate-fade-in"
-                  style={{ animationDelay: "0.5s" }}
-                >
-                  {!isRider && (
-                    <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-                      <Button
-                        size="lg"
-                        className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl btn-cta"
-                      >
-                        Place Order
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                    </Link>
-                  )}
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
-                    onClick={() => scrollToSection("how-it-works")}
-                  >
-                    How It Works
-                    <ChevronDown className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
+                <AnimatedFadeIn delay={1.4}>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    {!isRider && (
+                      <Link to={isAuthenticated ? "/place-order" : "/signup"}>
+                        <Button
+                          size="lg"
+                          className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl btn-cta"
+                        >
+                          Place Order
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                      </Link>
+                    )}
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
+                      onClick={() => scrollToSection("how-it-works")}
+                    >
+                      How It Works
+                      <ChevronDown className="ml-2 h-5 w-5" />
+                    </Button>
+                  </div>
+                </AnimatedFadeIn>
 
                 {/* Trust badges */}
-                <div
-                  className="flex flex-wrap gap-4 justify-center lg:justify-start pb-8 md:pb-12 opacity-0 animate-fade-in"
-                  style={{ animationDelay: "0.7s" }}
-                >
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Verified Shoppers</span>
+                <AnimatedFadeIn delay={1.6}>
+                  <div className="flex flex-wrap gap-4 justify-center lg:justify-start pb-8 md:pb-12">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/25 hover:scale-105">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Verified Shoppers</span>
+                    </div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/25 hover:scale-105">
+                      <Zap className="h-4 w-4" />
+                      <span>Same-day Delivery</span>
+                    </div>
                   </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm">
-                    <Zap className="h-4 w-4" />
-                    <span>Same-day Delivery</span>
-                  </div>
-                </div>
+                </AnimatedFadeIn>
               </div>
 
             </div>
@@ -234,20 +239,14 @@ const Home = () => {
         {/* What We Shop Section */}
         <section className="py-20 lg:py-28 bg-background">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 opacity-0 animate-fade-in"
-                style={{ animationDelay: "0.1s" }}
-              >
+            <AnimatedFadeIn className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 What We Shop
               </h2>
-              <p
-                className="text-lg text-muted-foreground max-w-2xl mx-auto opacity-0 animate-fade-in"
-                style={{ animationDelay: "0.2s" }}
-              >
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 From everyday essentials to special gifts — we shop and deliver it all
               </p>
-            </div>
+            </AnimatedFadeIn>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 max-w-md sm:max-w-none mx-auto">
               {serviceItems.map((item, index) => (
@@ -265,15 +264,15 @@ const Home = () => {
                         loading="lazy"
                         className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent transition-opacity duration-500 group-hover:from-foreground/90" />
+                      <div className="absolute bottom-0 left-0 right-0 p-5 transform transition-transform duration-500 group-hover:translate-y-[-4px]">
                         <h3 className="font-bold text-lg text-white mb-1">{item.title}</h3>
-                        <p className="text-white/80 text-sm">{item.subtitle}</p>
+                        <p className="text-white/80 text-sm transform transition-all duration-500 opacity-90 group-hover:opacity-100">{item.subtitle}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="h-48 bg-primary/5 flex flex-col items-center justify-center p-5 text-center">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                         <item.icon className="h-7 w-7 text-primary" />
                       </div>
                       <h3 className="font-bold text-lg mb-1">{item.title}</h3>
@@ -325,22 +324,24 @@ const Home = () => {
         {/* Why Choose Us Section */}
         <section className="py-20 lg:py-28 bg-background">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
+            <AnimatedFadeIn className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Why Choose Tabedaar.com?</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 We're committed to making your shopping experience safe, transparent, and convenient
               </p>
-            </div>
+            </AnimatedFadeIn>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-16">
               {trustFeatures.map((feature, index) => (
-                <div key={index} className="feature-card text-center group">
-                  <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:shadow-glow-primary transition-all duration-300">
-                    <feature.icon className="h-8 w-8 text-primary group-hover:text-white transition-colors" />
+                <AnimatedFadeIn key={index} delay={index * 0.1}>
+                  <div className="feature-card text-center group h-full">
+                    <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:shadow-glow-primary group-hover:scale-110 transition-all duration-300">
+                      <feature.icon className="h-8 w-8 text-primary group-hover:text-white transition-colors" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-3">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </div>
-                  <h3 className="font-bold text-lg mb-3">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </div>
+                </AnimatedFadeIn>
               ))}
             </div>
 
@@ -397,21 +398,27 @@ const Home = () => {
           </div>
 
           <div className="container mx-auto px-4 relative z-10 text-center">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white">
-              Ready to Shop from Pakistan?
-            </h2>
-            <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-              Join satisfied customers who trust us for their shopping needs — worldwide delivery available!
-            </p>
-            <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-              <Button
-                size="lg"
-                className="text-lg px-10 h-14 rounded-2xl btn-cta"
-              >
-                {isAuthenticated ? "Place Your Order" : "Get Started Today"}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+            <AnimatedFadeIn>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white">
+                Ready to Shop from Pakistan?
+              </h2>
+            </AnimatedFadeIn>
+            <AnimatedFadeIn delay={0.15}>
+              <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
+                Join satisfied customers who trust us for their shopping needs — worldwide delivery available!
+              </p>
+            </AnimatedFadeIn>
+            <AnimatedFadeIn delay={0.3}>
+              <Link to={isAuthenticated ? "/place-order" : "/signup"}>
+                <Button
+                  size="lg"
+                  className="text-lg px-10 h-14 rounded-2xl btn-cta animate-pulse-soft"
+                >
+                  {isAuthenticated ? "Place Your Order" : "Get Started Today"}
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </AnimatedFadeIn>
           </div>
         </section>
       </main>
