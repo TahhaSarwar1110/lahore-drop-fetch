@@ -29,6 +29,7 @@ interface OrderItem {
 interface Order {
   id: string;
   delivery_address: string;
+  delivery_type: string;
   status: string;
   created_at: string;
   user_id: string;
@@ -41,6 +42,14 @@ interface Order {
   payment_proof_name: string | null;
   payment_submitted_at: string | null;
   payment_confirmed_at: string | null;
+  total_weight_kg: number | null;
+  delivery_charges: number;
+  delivery_charges_set_at: string | null;
+  delivery_payment_status: string;
+  delivery_payment_proof_url: string | null;
+  delivery_payment_proof_name: string | null;
+  delivery_payment_submitted_at: string | null;
+  delivery_payment_confirmed_at: string | null;
   profiles: {
     full_name: string;
     phone: string;
