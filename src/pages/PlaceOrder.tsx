@@ -210,7 +210,7 @@ const PlaceOrder = () => {
     }
 
     try {
-      orderSchema.parse({ fullName, phone, deliveryAddress });
+      buildOrderSchema(countryCode).parse({ fullName, phone, deliveryAddress });
       setLoading(true);
 
       // Calculate bundle pricing based on item count
