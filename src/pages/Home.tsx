@@ -170,26 +170,29 @@ const Home = () => {
               {/* Left side content */}
               <div className="space-y-8 text-center lg:text-left">
                 <div className="space-y-6">
-                  <h1
-                    className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] text-white opacity-0 animate-fade-in"
-                    style={{ animationDelay: "0.1s" }}
-                  >
-                    We Shop Anything from Pakistan —{" "}
-                    <span className="text-secondary">Delivered Straight to Your Loved Ones</span>
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] text-white">
+                    <AnimatedText
+                      text="We Shop Anything from Pakistan —"
+                      delay={0.2}
+                      staggerDelay={0.06}
+                    />
+                    <br className="hidden sm:block" />
+                    <AnimatedText
+                      text="Delivered Straight to Your Loved Ones"
+                      className="text-secondary"
+                      delay={0.6}
+                      staggerDelay={0.07}
+                    />
                   </h1>
-                  <p
-                    className="text-lg sm:text-xl text-white/90 max-w-xl mx-auto lg:mx-0 opacity-0 animate-fade-in"
-                    style={{ animationDelay: "0.3s" }}
-                  >
-                    From fashion and gifts to food and groceries — we handle the shopping, verification, and delivery for you.
-                    <span className="block mt-2 font-semibold">Same-day delivery in Lahore.</span>
-                  </p>
+                  <AnimatedFadeIn delay={1.2}>
+                    <p className="text-lg sm:text-xl text-white/90 max-w-xl mx-auto lg:mx-0">
+                      From fashion and gifts to food and groceries — we handle the shopping, verification, and delivery for you.
+                      <span className="block mt-2 font-semibold">Same-day delivery in Lahore.</span>
+                    </p>
+                  </AnimatedFadeIn>
                 </div>
 
-                <div
-                  className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start opacity-0 animate-fade-in"
-                  style={{ animationDelay: "0.5s" }}
-                >
+                <AnimatedFadeIn delay={1.4}>
                   {!isRider && (
                     <Link to={isAuthenticated ? "/place-order" : "/signup"}>
                       <Button
