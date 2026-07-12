@@ -31,6 +31,8 @@ interface OrderDetails {
   delivery_latitude: number | null;
   delivery_longitude: number | null;
   status: string;
+  delivery_type: string;
+  delivery_payment_status: string;
   profiles: {
     full_name: string;
     phone: string;
@@ -70,6 +72,8 @@ const RiderOrderDetails = () => {
           delivery_latitude,
           delivery_longitude,
           status,
+          delivery_type,
+          delivery_payment_status,
           profiles (
             full_name,
             phone
