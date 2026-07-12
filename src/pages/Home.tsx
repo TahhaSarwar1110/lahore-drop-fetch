@@ -239,20 +239,14 @@ const Home = () => {
         {/* What We Shop Section */}
         <section className="py-20 lg:py-28 bg-background">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 opacity-0 animate-fade-in"
-                style={{ animationDelay: "0.1s" }}
-              >
+            <AnimatedFadeIn className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 What We Shop
               </h2>
-              <p
-                className="text-lg text-muted-foreground max-w-2xl mx-auto opacity-0 animate-fade-in"
-                style={{ animationDelay: "0.2s" }}
-              >
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 From everyday essentials to special gifts — we shop and deliver it all
               </p>
-            </div>
+            </AnimatedFadeIn>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 max-w-md sm:max-w-none mx-auto">
               {serviceItems.map((item, index) => (
