@@ -258,11 +258,12 @@ const Home = () => {
                   onClick={handleCategoryClick}
                 >
                   {item.image ? (
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-56 sm:h-60 lg:h-64 overflow-hidden">
                       <img
                         src={item.image}
                         alt={item.title}
-                        className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                        className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-5">
