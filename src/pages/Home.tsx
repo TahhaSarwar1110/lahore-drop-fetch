@@ -398,21 +398,27 @@ const Home = () => {
           </div>
 
           <div className="container mx-auto px-4 relative z-10 text-center">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white">
-              Ready to Shop from Pakistan?
-            </h2>
-            <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-              Join satisfied customers who trust us for their shopping needs — worldwide delivery available!
-            </p>
-            <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-              <Button
-                size="lg"
-                className="text-lg px-10 h-14 rounded-2xl btn-cta"
-              >
-                {isAuthenticated ? "Place Your Order" : "Get Started Today"}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+            <AnimatedFadeIn>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-white">
+                Ready to Shop from Pakistan?
+              </h2>
+            </AnimatedFadeIn>
+            <AnimatedFadeIn delay={0.15}>
+              <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
+                Join satisfied customers who trust us for their shopping needs — worldwide delivery available!
+              </p>
+            </AnimatedFadeIn>
+            <AnimatedFadeIn delay={0.3}>
+              <Link to={isAuthenticated ? "/place-order" : "/signup"}>
+                <Button
+                  size="lg"
+                  className="text-lg px-10 h-14 rounded-2xl btn-cta animate-pulse-soft"
+                >
+                  {isAuthenticated ? "Place Your Order" : "Get Started Today"}
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </AnimatedFadeIn>
           </div>
         </section>
       </main>
