@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,15 +22,33 @@ export interface OrderItem {
 
 interface OrderItemFormProps {
   onAddItem: (item: OrderItem) => void;
+  initialItem?: OrderItem | null;
+  submitLabel?: string;
+  onCancel?: () => void;
 }
 
-export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
+export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }: OrderItemFormProps) => {
   const [itemType, setItemType] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [existingImageUrl, setExistingImageUrl] = useState<string>("");
   const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showPickupMap, setShowPickupMap] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (initialItem) {
+      setItemType(initialItem.itemType);
+      setFormData(initialItem.itemData || {});
+      setExistingImageUrl(initialItem.imageUrl || "");
+      setImageFile(null);
+      if (initialItem.pickupLat != null && initialItem.pickupLng != null) {
+        setPickupLocation({ lat: initialItem.pickupLat, lng: initialItem.pickupLng });
+      } else {
+        setPickupLocation(null);
+      }
+    }
+  }, [initialItem]);
 
   const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean; min?: number }[]> = {
     Cloth: [
@@ -93,7 +111,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
     if (!itemType) return false;
     const fields = itemTypeFields[itemType];
     if (!fields) return false;
-    
+
     // Only check required fields
     for (const field of fields) {
       if (field.required) {
@@ -101,6 +119,10 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
         if (!value || value.trim() === "") return false;
       }
     }
+
+    // Cloth requires an attached image
+    if (itemType === "Cloth" && !imageFile && !existingImageUrl) return false;
+
     return true;
   };
 
@@ -114,7 +136,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
       return;
     }
 
-    let imageUrl = "";
+    let imageUrl = existingImageUrl || "";
     if (imageFile) {
       const fileExt = imageFile.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
@@ -139,7 +161,7 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
     }
 
     const item: OrderItem = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: initialItem?.id || Math.random().toString(36).substr(2, 9),
       itemType,
       itemData: formData,
       imageFile: imageFile || undefined,
@@ -154,12 +176,13 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
     setItemType("");
     setFormData({});
     setImageFile(null);
+    setExistingImageUrl("");
     setPickupLocation(null);
     setShowPickupMap(false);
     
     toast({
-      title: "Item Added",
-      description: "Item added to your order",
+      title: initialItem ? "Item Updated" : "Item Added",
+      description: initialItem ? "Item updated in your order" : "Item added to your order",
     });
   };
 
@@ -183,35 +206,54 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
 
       {itemType && itemTypeFields[itemType] && (
         <>
-          {itemTypeFields[itemType].map((field) => (
-            <div key={field.label} className="space-y-2 w-full">
-              <label className="mobile-label">
-                {field.label}
-                {field.required && <span className="text-destructive ml-1">*</span>}
-              </label>
-              {field.type === "textarea" ? (
-                <Textarea
-                  className="mobile-input min-h-[100px] py-3 w-full"
-                  placeholder={field.placeholder}
-                  value={formData[field.label] || ""}
-                  onChange={(e) => handleFieldChange(field.label, e.target.value)}
-                  rows={3}
-                />
-              ) : (
-                <Input
-                  className="mobile-input w-full"
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  value={formData[field.label] || ""}
-                  onChange={(e) => handleFieldChange(field.label, e.target.value)}
-                  min={field.min}
-                />
-              )}
-            </div>
-          ))}
+          {itemTypeFields[itemType].map((field) => {
+            const isPrice = field.label.toLowerCase().includes("price");
+            const isQuantity = field.label.toLowerCase().includes("quantity");
+            return (
+              <div key={field.label} className="space-y-2 w-full">
+                <label className="mobile-label">
+                  {field.label}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
+                </label>
+                {field.type === "textarea" ? (
+                  <Textarea
+                    className="mobile-input min-h-[100px] py-3 w-full"
+                    placeholder={field.placeholder}
+                    value={formData[field.label] || ""}
+                    onChange={(e) => handleFieldChange(field.label, e.target.value)}
+                    rows={3}
+                  />
+                ) : isPrice || isQuantity ? (
+                  <Input
+                    className="mobile-input w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={field.placeholder}
+                    value={formData[field.label] || ""}
+                    onChange={(e) => {
+                      // Strip anything that's not a digit (removes '-', letters, spinners not applicable)
+                      const cleaned = e.target.value.replace(/[^0-9]/g, "");
+                      handleFieldChange(field.label, cleaned);
+                    }}
+                  />
+                ) : (
+                  <Input
+                    className="mobile-input w-full"
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    value={formData[field.label] || ""}
+                    onChange={(e) => handleFieldChange(field.label, e.target.value)}
+                    min={field.min}
+                  />
+                )}
+              </div>
+            );
+          })}
 
           <div className="space-y-2 w-full">
-            <label className="mobile-label">Attach Image (Optional)</label>
+            <label className="mobile-label">
+              Attach Image {itemType === "Cloth" ? <span className="text-destructive ml-1">*</span> : "(Optional)"}
+            </label>
             <div className="flex flex-col gap-2 w-full">
               <Input
                 type="file"
@@ -225,8 +267,15 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
                   <span className="truncate">{imageFile.name}</span>
                 </span>
               )}
+              {!imageFile && existingImageUrl && (
+                <span className="text-sm text-muted-foreground">Current image attached (upload to replace)</span>
+              )}
+              {itemType === "Cloth" && !imageFile && !existingImageUrl && (
+                <span className="text-xs text-destructive">Image is required for clothing items</span>
+              )}
             </div>
           </div>
+
 
           <div className="border-t pt-4 space-y-4 w-full">
             
@@ -275,14 +324,21 @@ export const OrderItemForm = ({ onAddItem }: OrderItemFormProps) => {
                 </p>
               </div>
             )}
-            <Button 
-              onClick={handleAddItem} 
-              className="w-full mobile-button"
-              disabled={!isFormValid()}
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Add Item to Order
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAddItem}
+                className="flex-1 mobile-button"
+                disabled={!isFormValid()}
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                {submitLabel || (initialItem ? "Update Item" : "Add Item to Order")}
+              </Button>
+              {onCancel && (
+                <Button type="button" variant="outline" onClick={onCancel} className="mobile-button">
+                  Cancel
+                </Button>
+              )}
+            </div>
           </div>
         </>
       )}

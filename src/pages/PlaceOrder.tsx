@@ -7,9 +7,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem } from "@/components/OrderItemForm";
+import { CountryCodeSelect } from "@/components/CountryCodeSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { X, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { X, MapPin, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
@@ -29,21 +30,69 @@ import {
 
 type DeliveryType = "within_city" | "out_of_city" | "out_of_country";
 
-const orderSchema = z.object({
-  fullName: z.string().trim().min(2, "Name required"),
-  phone: z.string().trim().min(10, "Phone required"),
-  deliveryAddress: z.string().trim().min(10, "Address required"),
-});
+const countryCodes = [
+  { code: "+92", country: "Pakistan", flag: "🇵🇰", minLength: 10, maxLength: 10, placeholder: "3001234567" },
+  { code: "+1", country: "USA/Canada", flag: "🇺🇸", minLength: 10, maxLength: 10, placeholder: "2025551234" },
+  { code: "+44", country: "UK", flag: "🇬🇧", minLength: 10, maxLength: 11, placeholder: "7911123456" },
+  { code: "+971", country: "UAE", flag: "🇦🇪", minLength: 9, maxLength: 9, placeholder: "501234567" },
+  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦", minLength: 9, maxLength: 9, placeholder: "512345678" },
+  { code: "+61", country: "Australia", flag: "🇦🇺", minLength: 9, maxLength: 9, placeholder: "412345678" },
+  { code: "+49", country: "Germany", flag: "🇩🇪", minLength: 10, maxLength: 11, placeholder: "15123456789" },
+  { code: "+33", country: "France", flag: "🇫🇷", minLength: 9, maxLength: 9, placeholder: "612345678" },
+  { code: "+39", country: "Italy", flag: "🇮🇹", minLength: 9, maxLength: 10, placeholder: "3123456789" },
+  { code: "+86", country: "China", flag: "🇨🇳", minLength: 11, maxLength: 11, placeholder: "13812345678" },
+  { code: "+91", country: "India", flag: "🇮🇳", minLength: 10, maxLength: 10, placeholder: "9876543210" },
+  { code: "+81", country: "Japan", flag: "🇯🇵", minLength: 10, maxLength: 11, placeholder: "9012345678" },
+  { code: "+82", country: "South Korea", flag: "🇰🇷", minLength: 9, maxLength: 10, placeholder: "1012345678" },
+  { code: "+60", country: "Malaysia", flag: "🇲🇾", minLength: 9, maxLength: 10, placeholder: "123456789" },
+  { code: "+65", country: "Singapore", flag: "🇸🇬", minLength: 8, maxLength: 8, placeholder: "81234567" },
+  { code: "+974", country: "Qatar", flag: "🇶🇦", minLength: 8, maxLength: 8, placeholder: "33123456" },
+  { code: "+973", country: "Bahrain", flag: "🇧🇭", minLength: 8, maxLength: 8, placeholder: "36001234" },
+  { code: "+968", country: "Oman", flag: "🇴🇲", minLength: 8, maxLength: 8, placeholder: "92123456" },
+  { code: "+965", country: "Kuwait", flag: "🇰🇼", minLength: 8, maxLength: 8, placeholder: "50012345" },
+];
+
+const parseStoredPhone = (stored: string): { code: string; local: string } => {
+  if (!stored) return { code: "+92", local: "" };
+  // Find longest matching country code prefix
+  const sorted = [...countryCodes].sort((a, b) => b.code.length - a.code.length);
+  for (const c of sorted) {
+    if (stored.startsWith(c.code)) {
+      return { code: c.code, local: stored.slice(c.code.length).replace(/\D/g, "") };
+    }
+  }
+  return { code: "+92", local: stored.replace(/\D/g, "") };
+};
+
+const buildOrderSchema = (countryCode: string) => {
+  const country = countryCodes.find((c) => c.code === countryCode);
+  const minLength = country?.minLength ?? 8;
+  const maxLength = country?.maxLength ?? 11;
+  const label = minLength === maxLength ? `${minLength}` : `${minLength}-${maxLength}`;
+  return z.object({
+    fullName: z.string().trim().min(2, "Name must be at least 2 characters"),
+    phone: z
+      .string()
+      .trim()
+      .min(minLength, `Phone number must be ${label} digits`)
+      .max(maxLength, `Phone number must be ${label} digits`)
+      .regex(/^\d+$/, "Phone number must contain only digits"),
+    deliveryAddress: z.string().trim().min(10, "Delivery address is required (min 10 characters)"),
+  });
+};
+
 
 const PlaceOrder = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
+  const [countryCode, setCountryCode] = useState("+92");
   const [phone, setPhone] = useState("");
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("within_city");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryLocation, setDeliveryLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [showDeliveryMap, setShowDeliveryMap] = useState(false);
   const navigate = useNavigate();
@@ -90,7 +139,9 @@ const PlaceOrder = () => {
       
       if (profileData) {
         setFullName(profileData.full_name || "");
-        setPhone(profileData.phone || "");
+        const parsed = parseStoredPhone(profileData.phone || "");
+        setCountryCode(parsed.code);
+        setPhone(parsed.local);
       }
     };
     
@@ -114,11 +165,29 @@ const PlaceOrder = () => {
   }, [deliveryType]);
 
   const handleAddItem = (item: OrderItem) => {
-    setOrderItems([...orderItems, item]);
+    setOrderItems((prev) => {
+      const existingIdx = prev.findIndex((i) => i.id === item.id);
+      if (existingIdx >= 0) {
+        const next = [...prev];
+        next[existingIdx] = item;
+        return next;
+      }
+      return [...prev, item];
+    });
+    setEditingItem(null);
   };
 
   const handleRemoveItem = (id: string) => {
     setOrderItems(orderItems.filter((item) => item.id !== id));
+    if (editingItem?.id === id) setEditingItem(null);
+  };
+
+  const handleEditItem = (item: OrderItem) => {
+    setEditingItem(item);
+    // Scroll to form
+    setTimeout(() => {
+      document.getElementById("add-items-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const calculateTotalPrice = () => {
@@ -141,7 +210,7 @@ const PlaceOrder = () => {
     }
 
     try {
-      orderSchema.parse({ fullName, phone, deliveryAddress });
+      buildOrderSchema(countryCode).parse({ fullName, phone, deliveryAddress });
       setLoading(true);
 
       // Calculate bundle pricing based on item count
@@ -187,7 +256,7 @@ const PlaceOrder = () => {
         description: "Your order has been successfully placed",
       });
 
-      setTimeout(() => navigate("/orders"), 1500);
+      setTimeout(() => navigate("/order-history"), 1500);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
@@ -263,14 +332,23 @@ const PlaceOrder = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="mobile-label">Phone Number</label>
-                    <Input
-                      className="mobile-input"
-                      type="tel"
-                      placeholder="Your phone"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
+                    <label className="mobile-label">Phone Number <span className="text-destructive">*</span></label>
+                    <div className="flex gap-2">
+                      <CountryCodeSelect
+                        value={countryCode}
+                        onValueChange={setCountryCode}
+                        countryCodes={countryCodes}
+                      />
+                      <Input
+                        className="mobile-input flex-1"
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder={countryCodes.find(c => c.code === countryCode)?.placeholder || "Phone number"}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                        maxLength={countryCodes.find(c => c.code === countryCode)?.maxLength || 11}
+                      />
+                    </div>
                   </div>
                 </div>
               </section>
@@ -355,13 +433,17 @@ const PlaceOrder = () => {
               </section>
 
               {/* Add Items Section */}
-              <section className="px-4 lg:px-0 py-3">
+              <section id="add-items-section" className="px-4 lg:px-0 py-3">
                 <div className="mobile-card lg:border lg:rounded-2xl lg:shadow-lg p-4 lg:p-6">
                   <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-4">
                     <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">3</span>
-                    Add Items
+                    {editingItem ? "Edit Item" : "Add Items"}
                   </h2>
-                  <OrderItemForm onAddItem={handleAddItem} />
+                  <OrderItemForm
+                    onAddItem={handleAddItem}
+                    initialItem={editingItem}
+                    onCancel={editingItem ? () => setEditingItem(null) : undefined}
+                  />
                 </div>
               </section>
 
@@ -376,16 +458,28 @@ const PlaceOrder = () => {
 
                     {orderItems.map((item) => (
                       <div key={item.id} className="relative bg-muted/50 rounded-xl p-3 border border-border/50">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full"
-                          onClick={() => handleRemoveItem(item.id)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 rounded-full"
+                            onClick={() => handleEditItem(item)}
+                            aria-label="Edit item"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 rounded-full"
+                            onClick={() => handleRemoveItem(item.id)}
+                            aria-label="Remove item"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                         <p className="font-semibold text-sm text-primary">{item.itemType}</p>
-                        <div className="mt-1.5 text-xs text-muted-foreground space-y-0.5 pr-8">
+                        <div className="mt-1.5 text-xs text-muted-foreground space-y-0.5 pr-16">
                           {Object.entries(item.itemData).map(([key, value]) => (
                             <p key={key}>
                               <span className="font-medium text-foreground/70">{key}:</span> {value}

@@ -219,10 +219,22 @@ const OrderDetails = () => {
     const approvedItems = getFilteredItems().filter(
       (item) => item.approval_status === 'approved'
     );
-    return approvedItems.reduce((sum, item) => {
+    const approvedTotal = approvedItems.reduce((sum, item) => {
       const itemData = item.item_data as any;
-      return sum + (Number(itemData?.expectedPrice) || 0);
+      const priceEntry = Object.entries(itemData || {}).find(([k]) =>
+        k.toLowerCase().includes("price")
+      );
+      const price = priceEntry ? parseFloat(String(priceEntry[1])) : Number(itemData?.expectedPrice);
+      return sum + (Number.isFinite(price) ? price : 0);
     }, 0);
+    const newItemsTotal = newItems.reduce((sum, item) => {
+      const priceEntry = Object.entries(item.itemData || {}).find(([k]) =>
+        k.toLowerCase().includes("price")
+      );
+      const price = priceEntry ? parseFloat(String(priceEntry[1])) : 0;
+      return sum + (Number.isFinite(price) ? price : 0);
+    }, 0);
+    return approvedTotal + newItemsTotal;
   };
 
   if (loading) {
@@ -489,13 +501,22 @@ const OrderDetails = () => {
             ))}
           </div>
 
-          {order.status === "Pending" && !order.confirmed_at && hasRejectedItems() && (
+          {order.status === "Pending" && !order.confirmed_at && order.order_items?.some((it) => it.approval_status === "rejected") && (
             <Card>
               <CardContent className="p-6">
-                {!showAddItem ? (
+                {hasRejectedItems() ? (
+                  <div className="text-center">
+                    <p className="text-destructive font-medium mb-2">
+                      Please remove all rejected items first
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      You must remove every rejected item before adding a replacement. The order total will be recalculated automatically.
+                    </p>
+                  </div>
+                ) : !showAddItem ? (
                   <div className="text-center">
                     <p className="text-muted-foreground mb-4">
-                      Need to replace a rejected item or add more items?
+                      Rejected items removed. Add a replacement item now.
                     </p>
                     <Button onClick={() => setShowAddItem(true)}>
                       <Plus className="h-4 w-4 mr-2" />
