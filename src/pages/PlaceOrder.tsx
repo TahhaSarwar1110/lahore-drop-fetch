@@ -522,7 +522,7 @@ const PlaceOrder = () => {
                         return bundle ? (
                           <div className="flex justify-between items-center py-2 border-b border-border/50">
                             <div>
-                              <span className="text-sm text-muted-foreground block">Delivery Charges</span>
+                              <span className="text-sm text-muted-foreground block">Service Charges</span>
                               <span className="text-xs text-muted-foreground/70">
                                 {bundle.name} ({orderItems.length}/{bundle.items_allowed} items)
                               </span>
@@ -531,13 +531,21 @@ const PlaceOrder = () => {
                           </div>
                         ) : null;
                       })()}
-                      
+
                       <div className="flex justify-between items-center py-3 bg-primary/5 rounded-xl px-3 -mx-1">
-                        <span className="font-semibold text-sm">Grand Total</span>
+                        <span className="font-semibold text-sm">
+                          {deliveryType === "within_city" ? "Grand Total" : "Total Payable Now"}
+                        </span>
                         <span className="text-lg font-bold text-primary">
                           PKR {(calculateTotalPrice() + calculateBundlePrice(orderItems.length).price).toLocaleString()}
                         </span>
                       </div>
+
+                      {deliveryType !== "within_city" && (
+                        <p className="text-xs text-muted-foreground italic pt-1">
+                          * Delivery charges will be billed separately after your goods are purchased and weighed.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </section>
