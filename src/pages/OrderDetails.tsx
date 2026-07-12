@@ -219,10 +219,22 @@ const OrderDetails = () => {
     const approvedItems = getFilteredItems().filter(
       (item) => item.approval_status === 'approved'
     );
-    return approvedItems.reduce((sum, item) => {
+    const approvedTotal = approvedItems.reduce((sum, item) => {
       const itemData = item.item_data as any;
-      return sum + (Number(itemData?.expectedPrice) || 0);
+      const priceEntry = Object.entries(itemData || {}).find(([k]) =>
+        k.toLowerCase().includes("price")
+      );
+      const price = priceEntry ? parseFloat(String(priceEntry[1])) : Number(itemData?.expectedPrice);
+      return sum + (Number.isFinite(price) ? price : 0);
     }, 0);
+    const newItemsTotal = newItems.reduce((sum, item) => {
+      const priceEntry = Object.entries(item.itemData || {}).find(([k]) =>
+        k.toLowerCase().includes("price")
+      );
+      const price = priceEntry ? parseFloat(String(priceEntry[1])) : 0;
+      return sum + (Number.isFinite(price) ? price : 0);
+    }, 0);
+    return approvedTotal + newItemsTotal;
   };
 
   if (loading) {
