@@ -458,16 +458,28 @@ const PlaceOrder = () => {
 
                     {orderItems.map((item) => (
                       <div key={item.id} className="relative bg-muted/50 rounded-xl p-3 border border-border/50">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full"
-                          onClick={() => handleRemoveItem(item.id)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 rounded-full"
+                            onClick={() => handleEditItem(item)}
+                            aria-label="Edit item"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 rounded-full"
+                            onClick={() => handleRemoveItem(item.id)}
+                            aria-label="Remove item"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                         <p className="font-semibold text-sm text-primary">{item.itemType}</p>
-                        <div className="mt-1.5 text-xs text-muted-foreground space-y-0.5 pr-8">
+                        <div className="mt-1.5 text-xs text-muted-foreground space-y-0.5 pr-16">
                           {Object.entries(item.itemData).map(([key, value]) => (
                             <p key={key}>
                               <span className="font-medium text-foreground/70">{key}:</span> {value}
