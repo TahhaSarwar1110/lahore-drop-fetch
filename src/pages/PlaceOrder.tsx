@@ -222,13 +222,15 @@ const PlaceOrder = () => {
         .insert({
           user_id: userId,
           delivery_address: `[${deliveryType.replace(/_/g, " ").toUpperCase()}] ${deliveryAddress}`,
+          delivery_type: deliveryType,
           delivery_latitude: deliveryLocation?.lat,
           delivery_longitude: deliveryLocation?.lng,
           status: "Pending",
           additional_charges: bundlePrice,
-          charges_description: bundle 
-            ? `Delivery charges (${bundle.name} - ${orderItems.length} items)` 
-            : "No delivery bundle applied",
+          charges_description: bundle
+            ? `Service charges (${bundle.name} - ${orderItems.length} items)`
+            : "No service bundle applied",
+          delivery_payment_status: deliveryType === "within_city" ? "not_required" : "pending",
         })
         .select()
         .single();
@@ -380,6 +382,14 @@ const PlaceOrder = () => {
                     </Select>
                   </div>
 
+                  {deliveryType !== "within_city" && (
+                    <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800 p-3">
+                      <p className="text-xs sm:text-sm text-amber-900 dark:text-amber-200">
+                        <span className="font-semibold">Note:</span> For {getDeliveryTypeLabel(deliveryType).toLowerCase()} orders, delivery charges are calculated by our manager after purchasing the goods, based on the total weight. Only service charges are billed now — you will be notified separately to pay the delivery charges before dispatch.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="space-y-1.5">
                     <label className="mobile-label">
                       Delivery Address <span className="text-destructive">*</span>
@@ -512,7 +522,7 @@ const PlaceOrder = () => {
                         return bundle ? (
                           <div className="flex justify-between items-center py-2 border-b border-border/50">
                             <div>
-                              <span className="text-sm text-muted-foreground block">Delivery Charges</span>
+                              <span className="text-sm text-muted-foreground block">Service Charges</span>
                               <span className="text-xs text-muted-foreground/70">
                                 {bundle.name} ({orderItems.length}/{bundle.items_allowed} items)
                               </span>
@@ -521,13 +531,21 @@ const PlaceOrder = () => {
                           </div>
                         ) : null;
                       })()}
-                      
+
                       <div className="flex justify-between items-center py-3 bg-primary/5 rounded-xl px-3 -mx-1">
-                        <span className="font-semibold text-sm">Grand Total</span>
+                        <span className="font-semibold text-sm">
+                          {deliveryType === "within_city" ? "Grand Total" : "Total Payable Now"}
+                        </span>
                         <span className="text-lg font-bold text-primary">
                           PKR {(calculateTotalPrice() + calculateBundlePrice(orderItems.length).price).toLocaleString()}
                         </span>
                       </div>
+
+                      {deliveryType !== "within_city" && (
+                        <p className="text-xs text-muted-foreground italic pt-1">
+                          * Delivery charges will be billed separately after your goods are purchased and weighed.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </section>

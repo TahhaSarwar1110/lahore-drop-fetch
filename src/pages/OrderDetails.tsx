@@ -19,6 +19,7 @@ import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem as FormOrderItem } from "@/components/OrderItemForm";
 import { PaymentUpload } from "@/components/customer/PaymentUpload";
+import { DeliveryPaymentUpload } from "@/components/customer/DeliveryPaymentUpload";
 import { RiderContactDialog } from "@/components/customer/RiderContactDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Trash2, Plus, Save, User } from "lucide-react";
@@ -38,6 +39,7 @@ interface OrderItem {
 interface Order {
   id: string;
   delivery_address: string;
+  delivery_type: string;
   status: string;
   created_at: string;
   confirmed_at: string | null;
@@ -45,6 +47,13 @@ interface Order {
   payment_proof_url: string | null;
   payment_submitted_at: string | null;
   payment_confirmed_at: string | null;
+  total_weight_kg: number | null;
+  delivery_charges: number;
+  delivery_charges_set_at: string | null;
+  delivery_payment_status: string;
+  delivery_payment_proof_url: string | null;
+  delivery_payment_submitted_at: string | null;
+  delivery_payment_confirmed_at: string | null;
   order_items: OrderItem[];
   order_assignments?: {
     rider_id: string;
@@ -88,6 +97,7 @@ const OrderDetails = () => {
       .select(`
         id,
         delivery_address,
+        delivery_type,
         status,
         created_at,
         confirmed_at,
@@ -95,6 +105,13 @@ const OrderDetails = () => {
         payment_proof_url,
         payment_submitted_at,
         payment_confirmed_at,
+        total_weight_kg,
+        delivery_charges,
+        delivery_charges_set_at,
+        delivery_payment_status,
+        delivery_payment_proof_url,
+        delivery_payment_submitted_at,
+        delivery_payment_confirmed_at,
         order_items (
           id,
           item_type,
@@ -367,6 +384,37 @@ const OrderDetails = () => {
                 }}
               />
             </div>
+          )}
+
+          {/* Delivery Charges (out-of-city/country only, after manager has set them) */}
+          {order.delivery_type && order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
+            <div className="mb-6">
+              <DeliveryPaymentUpload
+                orderId={order.id}
+                totalWeightKg={order.total_weight_kg}
+                deliveryCharges={Number(order.delivery_charges || 0)}
+                deliveryPaymentStatus={order.delivery_payment_status || "pending"}
+                deliveryPaymentProofUrl={order.delivery_payment_proof_url}
+                deliveryPaymentSubmittedAt={order.delivery_payment_submitted_at}
+                deliveryPaymentConfirmedAt={order.delivery_payment_confirmed_at}
+                onUpdate={() => {
+                  supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user && orderId) loadOrder(orderId, user.id);
+                  });
+                }}
+              />
+            </div>
+          )}
+
+          {/* Awaiting-charges notice */}
+          {order.delivery_type && order.delivery_type !== "within_city" && !order.delivery_charges_set_at && order.confirmed_at && (
+            <Card className="mb-6 border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800">
+              <CardContent className="p-4">
+                <p className="text-sm text-amber-900 dark:text-amber-200">
+                  <span className="font-semibold">Delivery charges pending:</span> Once we purchase and weigh your goods, our manager will share the delivery charges here. You'll then be prompted to pay before dispatch.
+                </p>
+              </CardContent>
+            </Card>
           )}
 
           {hasChanges && (

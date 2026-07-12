@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
 import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
 import { PaymentConfirmation } from "@/components/manager/PaymentConfirmation";
+import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput";
+import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
 
 interface OrderItem {
@@ -27,6 +29,7 @@ interface OrderItem {
 interface Order {
   id: string;
   delivery_address: string;
+  delivery_type: string;
   status: string;
   created_at: string;
   user_id: string;
@@ -39,6 +42,14 @@ interface Order {
   payment_proof_name: string | null;
   payment_submitted_at: string | null;
   payment_confirmed_at: string | null;
+  total_weight_kg: number | null;
+  delivery_charges: number;
+  delivery_charges_set_at: string | null;
+  delivery_payment_status: string;
+  delivery_payment_proof_url: string | null;
+  delivery_payment_proof_name: string | null;
+  delivery_payment_submitted_at: string | null;
+  delivery_payment_confirmed_at: string | null;
   profiles: {
     full_name: string;
     phone: string;
@@ -416,6 +427,35 @@ const ManagerOrderDetails = () => {
                 paymentProofName={order.payment_proof_name}
                 paymentSubmittedAt={order.payment_submitted_at}
                 paymentConfirmedAt={order.payment_confirmed_at}
+                assignedRiderId={order.order_assignments?.rider_id}
+                onUpdate={fetchOrderDetails}
+              />
+            )}
+
+            {/* Delivery Charges (out-of-city / out-of-country only) */}
+            {order.confirmed_at && order.delivery_type !== "within_city" && order.payment_status === "confirmed" && (
+              <DeliveryChargesInput
+                orderId={order.id}
+                userId={order.user_id}
+                deliveryType={order.delivery_type}
+                totalWeightKg={order.total_weight_kg}
+                deliveryCharges={Number(order.delivery_charges || 0)}
+                deliveryChargesSetAt={order.delivery_charges_set_at}
+                deliveryPaymentStatus={order.delivery_payment_status || "pending"}
+                onUpdate={fetchOrderDetails}
+              />
+            )}
+
+            {/* Delivery Payment verification */}
+            {order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
+              <DeliveryPaymentConfirmation
+                orderId={order.id}
+                userId={order.user_id}
+                deliveryPaymentStatus={order.delivery_payment_status || "pending"}
+                deliveryPaymentProofUrl={order.delivery_payment_proof_url}
+                deliveryPaymentProofName={order.delivery_payment_proof_name}
+                deliveryPaymentSubmittedAt={order.delivery_payment_submitted_at}
+                deliveryPaymentConfirmedAt={order.delivery_payment_confirmed_at}
                 assignedRiderId={order.order_assignments?.rider_id}
                 onUpdate={fetchOrderDetails}
               />

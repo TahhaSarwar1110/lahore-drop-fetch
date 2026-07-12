@@ -265,10 +265,20 @@ export type Database = {
           created_at: string | null
           delivered_at: string | null
           delivery_address: string
+          delivery_charges: number
+          delivery_charges_set_at: string | null
+          delivery_charges_set_by: string | null
           delivery_latitude: number | null
           delivery_longitude: number | null
+          delivery_payment_confirmed_at: string | null
+          delivery_payment_confirmed_by: string | null
+          delivery_payment_proof_name: string | null
+          delivery_payment_proof_url: string | null
+          delivery_payment_status: string
+          delivery_payment_submitted_at: string | null
           delivery_proof_name: string | null
           delivery_proof_url: string | null
+          delivery_type: string
           id: string
           manager_feedback: string | null
           payment_confirmed_at: string | null
@@ -278,6 +288,7 @@ export type Database = {
           payment_status: string | null
           payment_submitted_at: string | null
           status: string
+          total_weight_kg: number | null
           user_id: string
         }
         Insert: {
@@ -288,10 +299,20 @@ export type Database = {
           created_at?: string | null
           delivered_at?: string | null
           delivery_address: string
+          delivery_charges?: number
+          delivery_charges_set_at?: string | null
+          delivery_charges_set_by?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          delivery_payment_confirmed_at?: string | null
+          delivery_payment_confirmed_by?: string | null
+          delivery_payment_proof_name?: string | null
+          delivery_payment_proof_url?: string | null
+          delivery_payment_status?: string
+          delivery_payment_submitted_at?: string | null
           delivery_proof_name?: string | null
           delivery_proof_url?: string | null
+          delivery_type?: string
           id?: string
           manager_feedback?: string | null
           payment_confirmed_at?: string | null
@@ -301,6 +322,7 @@ export type Database = {
           payment_status?: string | null
           payment_submitted_at?: string | null
           status?: string
+          total_weight_kg?: number | null
           user_id: string
         }
         Update: {
@@ -311,10 +333,20 @@ export type Database = {
           created_at?: string | null
           delivered_at?: string | null
           delivery_address?: string
+          delivery_charges?: number
+          delivery_charges_set_at?: string | null
+          delivery_charges_set_by?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          delivery_payment_confirmed_at?: string | null
+          delivery_payment_confirmed_by?: string | null
+          delivery_payment_proof_name?: string | null
+          delivery_payment_proof_url?: string | null
+          delivery_payment_status?: string
+          delivery_payment_submitted_at?: string | null
           delivery_proof_name?: string | null
           delivery_proof_url?: string | null
+          delivery_type?: string
           id?: string
           manager_feedback?: string | null
           payment_confirmed_at?: string | null
@@ -324,6 +356,7 @@ export type Database = {
           payment_status?: string | null
           payment_submitted_at?: string | null
           status?: string
+          total_weight_kg?: number | null
           user_id?: string
         }
         Relationships: [
