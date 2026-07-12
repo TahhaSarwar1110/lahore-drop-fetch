@@ -7,9 +7,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem } from "@/components/OrderItemForm";
+import { CountryCodeSelect } from "@/components/CountryCodeSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { X, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { X, MapPin, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
@@ -29,11 +30,57 @@ import {
 
 type DeliveryType = "within_city" | "out_of_city" | "out_of_country";
 
-const orderSchema = z.object({
-  fullName: z.string().trim().min(2, "Name required"),
-  phone: z.string().trim().min(10, "Phone required"),
-  deliveryAddress: z.string().trim().min(10, "Address required"),
-});
+const countryCodes = [
+  { code: "+92", country: "Pakistan", flag: "🇵🇰", minLength: 10, maxLength: 10, placeholder: "3001234567" },
+  { code: "+1", country: "USA/Canada", flag: "🇺🇸", minLength: 10, maxLength: 10, placeholder: "2025551234" },
+  { code: "+44", country: "UK", flag: "🇬🇧", minLength: 10, maxLength: 11, placeholder: "7911123456" },
+  { code: "+971", country: "UAE", flag: "🇦🇪", minLength: 9, maxLength: 9, placeholder: "501234567" },
+  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦", minLength: 9, maxLength: 9, placeholder: "512345678" },
+  { code: "+61", country: "Australia", flag: "🇦🇺", minLength: 9, maxLength: 9, placeholder: "412345678" },
+  { code: "+49", country: "Germany", flag: "🇩🇪", minLength: 10, maxLength: 11, placeholder: "15123456789" },
+  { code: "+33", country: "France", flag: "🇫🇷", minLength: 9, maxLength: 9, placeholder: "612345678" },
+  { code: "+39", country: "Italy", flag: "🇮🇹", minLength: 9, maxLength: 10, placeholder: "3123456789" },
+  { code: "+86", country: "China", flag: "🇨🇳", minLength: 11, maxLength: 11, placeholder: "13812345678" },
+  { code: "+91", country: "India", flag: "🇮🇳", minLength: 10, maxLength: 10, placeholder: "9876543210" },
+  { code: "+81", country: "Japan", flag: "🇯🇵", minLength: 10, maxLength: 11, placeholder: "9012345678" },
+  { code: "+82", country: "South Korea", flag: "🇰🇷", minLength: 9, maxLength: 10, placeholder: "1012345678" },
+  { code: "+60", country: "Malaysia", flag: "🇲🇾", minLength: 9, maxLength: 10, placeholder: "123456789" },
+  { code: "+65", country: "Singapore", flag: "🇸🇬", minLength: 8, maxLength: 8, placeholder: "81234567" },
+  { code: "+974", country: "Qatar", flag: "🇶🇦", minLength: 8, maxLength: 8, placeholder: "33123456" },
+  { code: "+973", country: "Bahrain", flag: "🇧🇭", minLength: 8, maxLength: 8, placeholder: "36001234" },
+  { code: "+968", country: "Oman", flag: "🇴🇲", minLength: 8, maxLength: 8, placeholder: "92123456" },
+  { code: "+965", country: "Kuwait", flag: "🇰🇼", minLength: 8, maxLength: 8, placeholder: "50012345" },
+];
+
+const parseStoredPhone = (stored: string): { code: string; local: string } => {
+  if (!stored) return { code: "+92", local: "" };
+  // Find longest matching country code prefix
+  const sorted = [...countryCodes].sort((a, b) => b.code.length - a.code.length);
+  for (const c of sorted) {
+    if (stored.startsWith(c.code)) {
+      return { code: c.code, local: stored.slice(c.code.length).replace(/\D/g, "") };
+    }
+  }
+  return { code: "+92", local: stored.replace(/\D/g, "") };
+};
+
+const buildOrderSchema = (countryCode: string) => {
+  const country = countryCodes.find((c) => c.code === countryCode);
+  const minLength = country?.minLength ?? 8;
+  const maxLength = country?.maxLength ?? 11;
+  const label = minLength === maxLength ? `${minLength}` : `${minLength}-${maxLength}`;
+  return z.object({
+    fullName: z.string().trim().min(2, "Name must be at least 2 characters"),
+    phone: z
+      .string()
+      .trim()
+      .min(minLength, `Phone number must be ${label} digits`)
+      .max(maxLength, `Phone number must be ${label} digits`)
+      .regex(/^\d+$/, "Phone number must contain only digits"),
+    deliveryAddress: z.string().trim().min(10, "Delivery address is required (min 10 characters)"),
+  });
+};
+
 
 const PlaceOrder = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
