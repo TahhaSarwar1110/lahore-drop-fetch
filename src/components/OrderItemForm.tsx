@@ -324,14 +324,21 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
                 </p>
               </div>
             )}
-            <Button 
-              onClick={handleAddItem} 
-              className="w-full mobile-button"
-              disabled={!isFormValid()}
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Add Item to Order
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAddItem}
+                className="flex-1 mobile-button"
+                disabled={!isFormValid()}
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                {submitLabel || (initialItem ? "Update Item" : "Add Item to Order")}
+              </Button>
+              {onCancel && (
+                <Button type="button" variant="outline" onClick={onCancel} className="mobile-button">
+                  Cancel
+                </Button>
+              )}
+            </div>
           </div>
         </>
       )}
