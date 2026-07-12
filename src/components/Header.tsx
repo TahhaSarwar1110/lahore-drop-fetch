@@ -34,12 +34,12 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 w-full bg-primary shadow-md safe-area-top">
-      <div className="container mx-auto flex h-16 md:h-24 items-center justify-between px-3 md:px-4">
+      <div className="container mx-auto flex h-20 md:h-28 lg:h-32 items-center justify-between px-3 md:px-4">
         <Link to="/" className="flex items-center">
           <img
             src={logo}
             alt="Tabedaar.com Logo"
-            className="h-12 md:h-20 lg:h-24 w-auto object-contain"
+            className="h-14 md:h-24 lg:h-28 w-auto object-contain"
           />
         </Link>
 
