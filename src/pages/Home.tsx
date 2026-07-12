@@ -324,22 +324,24 @@ const Home = () => {
         {/* Why Choose Us Section */}
         <section className="py-20 lg:py-28 bg-background">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
+            <AnimatedFadeIn className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Why Choose Tabedaar.com?</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 We're committed to making your shopping experience safe, transparent, and convenient
               </p>
-            </div>
+            </AnimatedFadeIn>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-16">
               {trustFeatures.map((feature, index) => (
-                <div key={index} className="feature-card text-center group">
-                  <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:shadow-glow-primary transition-all duration-300">
-                    <feature.icon className="h-8 w-8 text-primary group-hover:text-white transition-colors" />
+                <AnimatedFadeIn key={index} delay={index * 0.1}>
+                  <div className="feature-card text-center group h-full">
+                    <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:shadow-glow-primary group-hover:scale-110 transition-all duration-300">
+                      <feature.icon className="h-8 w-8 text-primary group-hover:text-white transition-colors" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-3">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </div>
-                  <h3 className="font-bold text-lg mb-3">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
-                </div>
+                </AnimatedFadeIn>
               ))}
             </div>
 
