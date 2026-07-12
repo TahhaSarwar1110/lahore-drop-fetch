@@ -489,13 +489,22 @@ const OrderDetails = () => {
             ))}
           </div>
 
-          {order.status === "Pending" && !order.confirmed_at && hasRejectedItems() && (
+          {order.status === "Pending" && !order.confirmed_at && order.order_items?.some((it) => it.approval_status === "rejected") && (
             <Card>
               <CardContent className="p-6">
-                {!showAddItem ? (
+                {hasRejectedItems() ? (
+                  <div className="text-center">
+                    <p className="text-destructive font-medium mb-2">
+                      Please remove all rejected items first
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      You must remove every rejected item before adding a replacement. The order total will be recalculated automatically.
+                    </p>
+                  </div>
+                ) : !showAddItem ? (
                   <div className="text-center">
                     <p className="text-muted-foreground mb-4">
-                      Need to replace a rejected item or add more items?
+                      Rejected items removed. Add a replacement item now.
                     </p>
                     <Button onClick={() => setShowAddItem(true)}>
                       <Plus className="h-4 w-4 mr-2" />
