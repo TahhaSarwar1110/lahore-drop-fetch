@@ -433,13 +433,17 @@ const PlaceOrder = () => {
               </section>
 
               {/* Add Items Section */}
-              <section className="px-4 lg:px-0 py-3">
+              <section id="add-items-section" className="px-4 lg:px-0 py-3">
                 <div className="mobile-card lg:border lg:rounded-2xl lg:shadow-lg p-4 lg:p-6">
                   <h2 className="text-base font-semibold text-foreground flex items-center gap-2 mb-4">
                     <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">3</span>
-                    Add Items
+                    {editingItem ? "Edit Item" : "Add Items"}
                   </h2>
-                  <OrderItemForm onAddItem={handleAddItem} />
+                  <OrderItemForm
+                    onAddItem={handleAddItem}
+                    initialItem={editingItem}
+                    onCancel={editingItem ? () => setEditingItem(null) : undefined}
+                  />
                 </div>
               </section>
 
