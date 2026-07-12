@@ -206,32 +206,49 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
 
       {itemType && itemTypeFields[itemType] && (
         <>
-          {itemTypeFields[itemType].map((field) => (
-            <div key={field.label} className="space-y-2 w-full">
-              <label className="mobile-label">
-                {field.label}
-                {field.required && <span className="text-destructive ml-1">*</span>}
-              </label>
-              {field.type === "textarea" ? (
-                <Textarea
-                  className="mobile-input min-h-[100px] py-3 w-full"
-                  placeholder={field.placeholder}
-                  value={formData[field.label] || ""}
-                  onChange={(e) => handleFieldChange(field.label, e.target.value)}
-                  rows={3}
-                />
-              ) : (
-                <Input
-                  className="mobile-input w-full"
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  value={formData[field.label] || ""}
-                  onChange={(e) => handleFieldChange(field.label, e.target.value)}
-                  min={field.min}
-                />
-              )}
-            </div>
-          ))}
+          {itemTypeFields[itemType].map((field) => {
+            const isPrice = field.label.toLowerCase().includes("price");
+            const isQuantity = field.label.toLowerCase().includes("quantity");
+            return (
+              <div key={field.label} className="space-y-2 w-full">
+                <label className="mobile-label">
+                  {field.label}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
+                </label>
+                {field.type === "textarea" ? (
+                  <Textarea
+                    className="mobile-input min-h-[100px] py-3 w-full"
+                    placeholder={field.placeholder}
+                    value={formData[field.label] || ""}
+                    onChange={(e) => handleFieldChange(field.label, e.target.value)}
+                    rows={3}
+                  />
+                ) : isPrice || isQuantity ? (
+                  <Input
+                    className="mobile-input w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={field.placeholder}
+                    value={formData[field.label] || ""}
+                    onChange={(e) => {
+                      // Strip anything that's not a digit (removes '-', letters, spinners not applicable)
+                      const cleaned = e.target.value.replace(/[^0-9]/g, "");
+                      handleFieldChange(field.label, cleaned);
+                    }}
+                  />
+                ) : (
+                  <Input
+                    className="mobile-input w-full"
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    value={formData[field.label] || ""}
+                    onChange={(e) => handleFieldChange(field.label, e.target.value)}
+                    min={field.min}
+                  />
+                )}
+              </div>
+            );
+          })}
 
           <div className="space-y-2 w-full">
             <label className="mobile-label">Attach Image (Optional)</label>
