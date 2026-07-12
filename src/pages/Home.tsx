@@ -27,6 +27,7 @@ import { AIBotButton } from "@/components/AIBotButton";
 import { PricingBundles } from "@/components/PricingBundles";
 import { useAuth } from "@/hooks/useAuth";
 import { TestimonialSlider } from "@/components/TestimonialSlider";
+import { AnimatedText, AnimatedFadeIn } from "@/components/AnimatedText";
 import fashionImg from "@/assets/category-fashion.jpg";
 import foodImg from "@/assets/category-food.jpg";
 import groceriesImg from "@/assets/category-grocery.jpg";
