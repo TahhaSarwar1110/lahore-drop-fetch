@@ -86,11 +86,13 @@ const PlaceOrder = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
+  const [countryCode, setCountryCode] = useState("+92");
   const [phone, setPhone] = useState("");
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("within_city");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryLocation, setDeliveryLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [showDeliveryMap, setShowDeliveryMap] = useState(false);
   const navigate = useNavigate();
