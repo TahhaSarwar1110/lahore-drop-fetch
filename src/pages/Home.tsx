@@ -193,42 +193,43 @@ const Home = () => {
                 </div>
 
                 <AnimatedFadeIn delay={1.4}>
-                  {!isRider && (
-                    <Link to={isAuthenticated ? "/place-order" : "/signup"}>
-                      <Button
-                        size="lg"
-                        className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl btn-cta"
-                      >
-                        Place Order
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                    </Link>
-                  )}
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
-                    onClick={() => scrollToSection("how-it-works")}
-                  >
-                    How It Works
-                    <ChevronDown className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    {!isRider && (
+                      <Link to={isAuthenticated ? "/place-order" : "/signup"}>
+                        <Button
+                          size="lg"
+                          className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl btn-cta"
+                        >
+                          Place Order
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                      </Link>
+                    )}
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full sm:w-auto text-lg px-8 h-14 rounded-2xl bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
+                      onClick={() => scrollToSection("how-it-works")}
+                    >
+                      How It Works
+                      <ChevronDown className="ml-2 h-5 w-5" />
+                    </Button>
+                  </div>
+                </AnimatedFadeIn>
 
                 {/* Trust badges */}
-                <div
-                  className="flex flex-wrap gap-4 justify-center lg:justify-start pb-8 md:pb-12 opacity-0 animate-fade-in"
-                  style={{ animationDelay: "0.7s" }}
-                >
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Verified Shoppers</span>
+                <AnimatedFadeIn delay={1.6}>
+                  <div className="flex flex-wrap gap-4 justify-center lg:justify-start pb-8 md:pb-12">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/25 hover:scale-105">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Verified Shoppers</span>
+                    </div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/25 hover:scale-105">
+                      <Zap className="h-4 w-4" />
+                      <span>Same-day Delivery</span>
+                    </div>
                   </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm">
-                    <Zap className="h-4 w-4" />
-                    <span>Same-day Delivery</span>
-                  </div>
-                </div>
+                </AnimatedFadeIn>
               </div>
 
             </div>
