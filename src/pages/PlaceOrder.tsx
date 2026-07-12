@@ -222,14 +222,16 @@ const PlaceOrder = () => {
         .insert({
           user_id: userId,
           delivery_address: `[${deliveryType.replace(/_/g, " ").toUpperCase()}] ${deliveryAddress}`,
+          delivery_type: deliveryType,
           delivery_latitude: deliveryLocation?.lat,
           delivery_longitude: deliveryLocation?.lng,
           status: "Pending",
           additional_charges: bundlePrice,
-          charges_description: bundle 
-            ? `Delivery charges (${bundle.name} - ${orderItems.length} items)` 
-            : "No delivery bundle applied",
-        })
+          charges_description: bundle
+            ? `Service charges (${bundle.name} - ${orderItems.length} items)`
+            : "No service bundle applied",
+          delivery_payment_status: deliveryType === "within_city" ? "not_required" : "pending",
+        } as any)
         .select()
         .single();
 
