@@ -19,6 +19,7 @@ import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem as FormOrderItem } from "@/components/OrderItemForm";
 import { PaymentUpload } from "@/components/customer/PaymentUpload";
+import { DeliveryPaymentUpload } from "@/components/customer/DeliveryPaymentUpload";
 import { RiderContactDialog } from "@/components/customer/RiderContactDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Trash2, Plus, Save, User } from "lucide-react";
