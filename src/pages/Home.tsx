@@ -270,15 +270,15 @@ const Home = () => {
                         loading="lazy"
                         className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent transition-opacity duration-500 group-hover:from-foreground/90" />
+                      <div className="absolute bottom-0 left-0 right-0 p-5 transform transition-transform duration-500 group-hover:translate-y-[-4px]">
                         <h3 className="font-bold text-lg text-white mb-1">{item.title}</h3>
-                        <p className="text-white/80 text-sm">{item.subtitle}</p>
+                        <p className="text-white/80 text-sm transform transition-all duration-500 opacity-90 group-hover:opacity-100">{item.subtitle}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="h-48 bg-primary/5 flex flex-col items-center justify-center p-5 text-center">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                         <item.icon className="h-7 w-7 text-primary" />
                       </div>
                       <h3 className="font-bold text-lg mb-1">{item.title}</h3>
