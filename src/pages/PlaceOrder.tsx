@@ -165,11 +165,29 @@ const PlaceOrder = () => {
   }, [deliveryType]);
 
   const handleAddItem = (item: OrderItem) => {
-    setOrderItems([...orderItems, item]);
+    setOrderItems((prev) => {
+      const existingIdx = prev.findIndex((i) => i.id === item.id);
+      if (existingIdx >= 0) {
+        const next = [...prev];
+        next[existingIdx] = item;
+        return next;
+      }
+      return [...prev, item];
+    });
+    setEditingItem(null);
   };
 
   const handleRemoveItem = (id: string) => {
     setOrderItems(orderItems.filter((item) => item.id !== id));
+    if (editingItem?.id === id) setEditingItem(null);
+  };
+
+  const handleEditItem = (item: OrderItem) => {
+    setEditingItem(item);
+    // Scroll to form
+    setTimeout(() => {
+      document.getElementById("add-items-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const calculateTotalPrice = () => {
