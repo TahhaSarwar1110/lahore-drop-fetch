@@ -432,6 +432,35 @@ const ManagerOrderDetails = () => {
               />
             )}
 
+            {/* Delivery Charges (out-of-city / out-of-country only) */}
+            {order.confirmed_at && order.delivery_type !== "within_city" && order.payment_status === "confirmed" && (
+              <DeliveryChargesInput
+                orderId={order.id}
+                userId={order.user_id}
+                deliveryType={order.delivery_type}
+                totalWeightKg={order.total_weight_kg}
+                deliveryCharges={Number(order.delivery_charges || 0)}
+                deliveryChargesSetAt={order.delivery_charges_set_at}
+                deliveryPaymentStatus={order.delivery_payment_status || "pending"}
+                onUpdate={fetchOrderDetails}
+              />
+            )}
+
+            {/* Delivery Payment verification */}
+            {order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
+              <DeliveryPaymentConfirmation
+                orderId={order.id}
+                userId={order.user_id}
+                deliveryPaymentStatus={order.delivery_payment_status || "pending"}
+                deliveryPaymentProofUrl={order.delivery_payment_proof_url}
+                deliveryPaymentProofName={order.delivery_payment_proof_name}
+                deliveryPaymentSubmittedAt={order.delivery_payment_submitted_at}
+                deliveryPaymentConfirmedAt={order.delivery_payment_confirmed_at}
+                assignedRiderId={order.order_assignments?.rider_id}
+                onUpdate={fetchOrderDetails}
+              />
+            )}
+
             {/* Assigned Rider Card */}
             <Card>
               <CardHeader>
