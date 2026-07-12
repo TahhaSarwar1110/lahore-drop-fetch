@@ -111,7 +111,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     if (!itemType) return false;
     const fields = itemTypeFields[itemType];
     if (!fields) return false;
-    
+
     // Only check required fields
     for (const field of fields) {
       if (field.required) {
@@ -119,6 +119,10 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
         if (!value || value.trim() === "") return false;
       }
     }
+
+    // Cloth requires an attached image
+    if (itemType === "Cloth" && !imageFile && !existingImageUrl) return false;
+
     return true;
   };
 
