@@ -382,6 +382,14 @@ const PlaceOrder = () => {
                     </Select>
                   </div>
 
+                  {deliveryType !== "within_city" && (
+                    <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800 p-3">
+                      <p className="text-xs sm:text-sm text-amber-900 dark:text-amber-200">
+                        <span className="font-semibold">Note:</span> For {getDeliveryTypeLabel(deliveryType).toLowerCase()} orders, delivery charges are calculated by our manager after purchasing the goods, based on the total weight. Only service charges are billed now — you will be notified separately to pay the delivery charges before dispatch.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="space-y-1.5">
                     <label className="mobile-label">
                       Delivery Address <span className="text-destructive">*</span>
