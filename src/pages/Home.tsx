@@ -213,7 +213,7 @@ const Home = () => {
 
                 {/* Trust badges */}
                 <div
-                  className="flex flex-wrap gap-4 justify-center lg:justify-start opacity-0 animate-fade-in"
+                  className="flex flex-wrap gap-4 justify-center lg:justify-start pb-8 md:pb-12 opacity-0 animate-fade-in"
                   style={{ animationDelay: "0.7s" }}
                 >
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/15 text-white backdrop-blur-sm">
