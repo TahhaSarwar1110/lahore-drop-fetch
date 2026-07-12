@@ -386,6 +386,37 @@ const OrderDetails = () => {
             </div>
           )}
 
+          {/* Delivery Charges (out-of-city/country only, after manager has set them) */}
+          {order.delivery_type && order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
+            <div className="mb-6">
+              <DeliveryPaymentUpload
+                orderId={order.id}
+                totalWeightKg={order.total_weight_kg}
+                deliveryCharges={Number(order.delivery_charges || 0)}
+                deliveryPaymentStatus={order.delivery_payment_status || "pending"}
+                deliveryPaymentProofUrl={order.delivery_payment_proof_url}
+                deliveryPaymentSubmittedAt={order.delivery_payment_submitted_at}
+                deliveryPaymentConfirmedAt={order.delivery_payment_confirmed_at}
+                onUpdate={() => {
+                  supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user && orderId) loadOrder(orderId, user.id);
+                  });
+                }}
+              />
+            </div>
+          )}
+
+          {/* Awaiting-charges notice */}
+          {order.delivery_type && order.delivery_type !== "within_city" && !order.delivery_charges_set_at && order.confirmed_at && (
+            <Card className="mb-6 border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-800">
+              <CardContent className="p-4">
+                <p className="text-sm text-amber-900 dark:text-amber-200">
+                  <span className="font-semibold">Delivery charges pending:</span> Once we purchase and weigh your goods, our manager will share the delivery charges here. You'll then be prompted to pay before dispatch.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {hasChanges && (
             <Card className="mb-6 border-primary">
               <CardContent className="p-4">
