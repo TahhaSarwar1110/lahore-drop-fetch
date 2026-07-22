@@ -1,86 +1,63 @@
+# QA Fix Plan — Tabedaar.com
 
-## Overview
+I've grouped the 18 issues into 4 phases so we can ship and QA one area at a time without regressions. Each phase is a self-contained batch — you approve, I build, we test, then move on.
 
-Today the delivery type (`within_city` / `out_of_city` / `out_of_country`) is only prepended into `delivery_address` string, and the delivery charge flow is identical for all types. We'll formalize it and add a second payment stage (delivery payment) that is required only for out-of-city / out-of-country orders.
+---
 
-## Data model (migration)
+## Phase 1 — Global & Foundational (3 issues)
 
-Add columns on `public.orders`:
+Low-risk, app-wide fixes. Landing these first prevents rework in later phases.
 
-- `delivery_type text default 'within_city'` — one of `within_city | out_of_city | out_of_country`
-- `total_weight_kg numeric(10,2)` — set by manager
-- `delivery_charges numeric(10,2) default 0` — set by manager (3rd-party delivery cost)
-- `delivery_charges_set_at timestamptz` / `delivery_charges_set_by uuid`
-- `delivery_payment_status text default 'not_required'` — one of `not_required | pending | submitted | confirmed`
-- `delivery_payment_proof_url text`, `delivery_payment_proof_name text`
-- `delivery_payment_submitted_at`, `delivery_payment_confirmed_at`, `delivery_payment_confirmed_by uuid`
+1. **Password show/hide toggle** — reusable `<PasswordInput>` with eye icon; swap into Login, Signup, and any admin/manager password fields.
+2. **Logo consistency** — audit `Header` vs `Footer` logo asset + sizing tokens; standardise on the same source file and aspect ratio.
+3. **Sticky notifications bug** — investigate the toast + realtime `useNotifications` flow. Give order toasts an auto-dismiss timeout and de-dupe on the same `notification.id` so they don't stack forever.
 
-Backfill `delivery_type` from the existing `[OUT OF CITY]` / `[OUT OF COUNTRY]` prefix in `delivery_address`, then strip the prefix (best-effort — safe UPDATE with regex).
+---
 
-For out-of-city/country orders, `delivery_payment_status` starts at `pending` (or moves to pending when manager sets charges).
+## Phase 2 — Admin Dashboard (6 issues)
 
-Notifications: reuse existing `notifications` table + `type` values (`delivery_charges_set`, `delivery_payment_submitted`, `delivery_payment_confirmed`).
+Biggest cluster; needs the most regression care.
 
-## Place Order screen (`src/pages/PlaceOrder.tsx`)
+4. **Responsiveness + status filter break** — fix the `OrdersTable` / filter row overflow on small widths; wrap in horizontal scroll container.
+5. **Logout bar break on Orders / Tracking / Permissions / Users tabs** — root cause is likely a layout container inside `Tabs` shrinking the header; contain to `Header` only.
+6. **Order list scroll** — add virtualised/native scroll wrapper with a max-height on the orders table body.
+7. **Rider assignment blocker** — trace the current failure in `AssignOrderDialog` (approved-items gate + edge function status check) and unblock the happy path.
+8. **"Shopper Assigned" must be dynamic** — remove "Shopper Assigned" from the manual `OrderStatusSelect` options; it is only set automatically by the assign-order edge function.
+9. **Pickup location visibility for Admin** — surface the customer's pinned pickup coords/address on `AdminOrderDetails` (map preview + copyable address).
 
-- Persist `delivery_type` in its own column (stop encoding it in the address string).
-- When `deliveryType !== 'within_city'`, show a highlighted **disclaimer card** near the delivery-type selector: "Delivery charges will be calculated and shared by the manager after purchase, based on the weight of your items. You'll be notified to pay them before delivery."
-- Order-summary section: keep showing bundle-based **service charges** exactly as today. Do **not** add any delivery-cost line here for out-of-city orders (label the row "Service Charges" instead of "Total"). Show a small note under the total: "Delivery charges billed separately."
+---
 
-## Manager Order Details (`src/pages/manager/ManagerOrderDetails.tsx` + new component)
+## Phase 3 — Manager & Approval Flow (5 issues)
 
-For `delivery_type !== 'within_city'`:
+10. **Manager ↔ Admin assignment parity** — reuse the same `AssignOrderDialog` component (already used by Admin) in the Manager flow instead of the current custom `AssignRider` page logic.
+11. **"Rider already assigned" vs "approve details first" mismatch** — single source of truth: derive assignment/approval state from `order_assignments` + `order_items.status`, not stale local props. Fix both entry points (list badge + detail page CTA).
+12. **Missing "Save" on item approval** — add an explicit **Save Changes** button on `OrderItemApproval` that commits pending approve/reject changes; remove the misleading toast.
+13. **Mobile ↔ Web approval sync** — the mobile approval writes are likely not updating `order_items.status` in a way the web query reads. Align both platforms to the same mutation + realtime refresh.
+14. **Pickup address visibility for Manager** — same treatment as #9 on `ManagerOrderDetails`.
 
-- Add a new card `DeliveryChargesInput` between `AdditionalCharges` and `PaymentConfirmation` for the initial service payment (order remains as-is — items approved → confirm → service payment).
-- After service payment is confirmed, show a **new** `DeliveryChargesInput` card allowing manager to input:
-  - `total_weight_kg` (numeric, required)
-  - `delivery_charges` (numeric PKR, required)
-  - Save button → writes to `orders`, sets `delivery_payment_status='pending'`, creates a customer notification (`delivery_charges_set`) + email with the weight and amount, and shows a read-only summary afterwards. Manager can edit while `delivery_payment_status ∈ {pending, submitted}`.
-- Add a second `DeliveryPaymentConfirmation` card (parallel to existing `PaymentConfirmation`) that shows the customer's uploaded delivery-payment proof and lets manager confirm/reject it. On confirm: set `delivery_payment_status='confirmed'`, notify customer, and notify assigned rider (if any) via `notifications`.
-- Rider assignment gating (`canAssignRider`) stays keyed on the initial service payment, so managers can still assign a rider before delivery-payment is collected. That rider just won't be allowed to mark delivered until delivery payment is confirmed (or the order is within-city).
+---
 
-## Customer Order Details (`src/pages/OrderDetails.tsx`)
+## Phase 4 — Customer Flow (3 issues)
 
-For out-of-city/country orders:
+15. **Map delivery-address picker bug** — debug `LocationPickerMap`: reverse-geocode + write back to the address field on marker drop; validate on submit.
+16. **Item weight field** — add optional `weight_kg` + `weight_unit` inputs to `OrderItemForm`, persist to `order_items`, show in item cards on Manager / Rider / Order details.
+17. **Customer notifications end-to-end** — ensure a `notifications` row + email is created for: payment received/rejected, every status transition, delivery-charge request, delivery payment confirmed, and final delivery (with proof URL link). Centralise in an `order-events` edge function.
 
-- New "Delivery Charges" section that appears once manager sets weight & charges. Shows weight, charge amount, and the current `delivery_payment_status`.
-- When `delivery_payment_status === 'pending'`: show a `DeliveryPaymentUpload` component (mirrors existing `PaymentUpload`) — upload screenshot proof to `payment-proofs` bucket, submits and moves status to `submitted`.
-- When `submitted`: show "Waiting for manager verification".
-- When `confirmed`: show green confirmation.
+---
 
-## Rider (`src/pages/rider/RiderOrderDetails.tsx` + rider "mark delivered" flow)
+## Suggested Order of Delivery
 
-- Add a gating check: rider can only mark an order as **Delivered** (and upload the delivery receipt attachment) when:
-  - `delivery_type === 'within_city'`, OR
-  - `delivery_payment_status === 'confirmed'`.
-- If gated, show a disabled state with helper text: "Waiting for customer to pay delivery charges and manager to verify."
-- Notification to rider on delivery-payment confirmation (already handled server-side by the manager action above).
+`Phase 1 → Phase 2 → Phase 3 → Phase 4`
 
-## Notifications
+Reasoning: Phase 1's password + notifications work touches components used everywhere. Phase 2 unblocks Admin QA. Phase 3 depends on Phase 2's assignment fixes. Phase 4 is mostly additive and safe to land last.
 
-Reuse `notificationHelper.createNotification` + `sendNotificationEmail`. New events:
+---
 
-- `delivery_charges_set` → customer
-- `delivery_payment_submitted` → managers of the order (best-effort: notify `confirmed_by` if present)
-- `delivery_payment_confirmed` → customer + assigned rider
+## Technical Notes (for reference)
 
-## Files touched
+- No schema changes needed for Phase 1–2. Phase 3 may add a `notes` column to `order_items` if approval requires reasons. Phase 4 adds `weight_kg`, `weight_unit` to `order_items`.
+- Notification hardening will use `toast.dismiss(id)` + `duration` in Sonner and a `Set<string>` guard in `useNotifications` to prevent duplicate realtime toasts.
+- Assignment parity will consolidate on `AssignOrderDialog` + the existing `assign-order` edge function; the Manager page becomes a thin wrapper.
+- Pickup location visibility reuses `SingleRiderMap` styling with a static pin.
 
-- **Migration** (new): add columns + backfill.
-- `src/pages/PlaceOrder.tsx` — disclaimer, store `delivery_type` column, summary label tweak.
-- `src/pages/OrderDetails.tsx` — delivery-charges section + upload component.
-- `src/pages/manager/ManagerOrderDetails.tsx` — wire new cards.
-- New: `src/components/manager/DeliveryChargesInput.tsx`
-- New: `src/components/manager/DeliveryPaymentConfirmation.tsx`
-- New: `src/components/customer/DeliveryPaymentUpload.tsx`
-- `src/pages/rider/RiderOrderDetails.tsx` (and/or delivered-action component) — gate "Mark Delivered".
-- Types will regenerate from Supabase; no manual edit of `src/integrations/supabase/types.ts`.
-
-## Out of scope / non-changes
-
-- Bundle service pricing logic (`useBundlePricing`) — unchanged.
-- Existing service `PaymentConfirmation` / `PaymentUpload` flow — unchanged.
-- Admin/reports screens — unchanged (they read `delivery_address` which stays populated).
-- No change to rider assignment flow.
-
-Confirm and I'll implement.
+Shall I start with **Phase 1**?
