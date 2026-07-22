@@ -45,6 +45,7 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
   const [selectedRider, setSelectedRider] = useState<string>(currentRiderId || "");
   const [sortKey, setSortKey] = useState<SortKey>('activeOrders');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (open) {
