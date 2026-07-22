@@ -165,9 +165,8 @@ const Login = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="password" className="mobile-label">Password</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
