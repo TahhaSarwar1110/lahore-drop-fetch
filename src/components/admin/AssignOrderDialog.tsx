@@ -256,6 +256,18 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
           </DialogDescription>
         </DialogHeader>
         
+        <div className="pt-2 pb-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, phone, or city..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
         <div className="py-4 flex-1 min-h-0 overflow-hidden">
           {fetchingRiders ? (
             <div className="flex items-center justify-center py-8">
