@@ -80,7 +80,22 @@ export const LocationPickerMap = ({
 
     mapInstance.current = map;
 
+    // Fix leaflet rendering when the map is initialized inside a hidden/
+    // collapsible container (tiles render as grey until size is recalculated).
+    const invalidate = () => map.invalidateSize();
+    const t1 = setTimeout(invalidate, 100);
+    const t2 = setTimeout(invalidate, 400);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && mapContainer.current) {
+      resizeObserver = new ResizeObserver(() => invalidate());
+      resizeObserver.observe(mapContainer.current);
+    }
+
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      resizeObserver?.disconnect();
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;

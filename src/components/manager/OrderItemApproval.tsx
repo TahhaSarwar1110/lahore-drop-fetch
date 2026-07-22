@@ -145,24 +145,12 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
           orderId: orderData.order_id,
         });
 
-        // Send email notification
-        const { data: customerProfile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", order.user_id)
-          .single();
-
-        const { data: { user: customerUser } } = await supabase.auth.admin.getUserById(order.user_id);
-        
-        if (customerUser?.email && customerProfile) {
-          await sendNotificationEmail(
-            customerUser.email,
-            customerProfile.full_name,
-            notificationTitle,
-            notificationMessage,
-            `${window.location.origin}/order-details?orderId=${orderData.order_id}`
-          );
-        }
+        await sendNotificationEmail({
+          userId: order.user_id,
+          title: notificationTitle,
+          message: notificationMessage,
+          orderLink: `${window.location.origin}/order-details?orderId=${orderData.order_id}`,
+        });
       }
 
       toast.success("All changes saved successfully");

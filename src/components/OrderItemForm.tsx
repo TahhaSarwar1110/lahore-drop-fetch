@@ -57,6 +57,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
       { label: "Brand", type: "text", placeholder: "Brand name (optional)" },
       { label: "Quantity", type: "number", placeholder: "1 (optional)", min: 1 },
       { label: "Expected Price (PKR)", type: "number", placeholder: "Expected price", required: true, min: 0 },
+      { label: "Approx. Weight (kg)", type: "number", placeholder: "e.g. 0.5 (optional)", min: 0 },
       { label: "Special Instructions", type: "textarea", placeholder: "Any specific requirements (optional)" },
     ],
     Food: [
@@ -71,6 +72,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
       { label: "Item Description", type: "text", placeholder: "What you need", required: true },
       { label: "Quantity", type: "number", placeholder: "1 (optional)", min: 1 },
       { label: "Price (PKR)", type: "number", placeholder: "Expected price", required: true, min: 0 },
+      { label: "Approx. Weight (kg)", type: "number", placeholder: "e.g. 2 (optional)", min: 0 },
       { label: "Instructions", type: "textarea", placeholder: "Any specific requirements (optional)" },
     ],
     Gifts: [
@@ -78,12 +80,14 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
       { label: "Gift Description", type: "text", placeholder: "Flowers, Cake, etc.", required: true },
       { label: "Quantity", type: "number", placeholder: "1 (optional)", min: 1 },
       { label: "Price (PKR)", type: "number", placeholder: "Expected price", required: true, min: 0 },
+      { label: "Approx. Weight (kg)", type: "number", placeholder: "e.g. 1 (optional)", min: 0 },
       { label: "Instructions", type: "textarea", placeholder: "Message on card, etc. (optional)" },
     ],
     Others: [
       { label: "Shop/Location Name", type: "text", placeholder: "Where to get it from", required: true },
       { label: "Description", type: "textarea", placeholder: "Describe what you need", required: true },
       { label: "Price (PKR)", type: "number", placeholder: "Expected price", required: true, min: 0 },
+      { label: "Approx. Weight (kg)", type: "number", placeholder: "e.g. 1 (optional)", min: 0 },
       { label: "Instructions", type: "textarea", placeholder: "Any specific requirements (optional)" },
     ],
   };

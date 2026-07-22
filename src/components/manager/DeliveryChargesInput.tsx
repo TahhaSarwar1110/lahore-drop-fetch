@@ -85,23 +85,14 @@ export const DeliveryChargesInput = ({
         orderId,
       });
 
-      // Best-effort email
+      // Best-effort email (edge function resolves recipient server-side)
       try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", userId)
-          .single();
-        // We don't have direct user email access from client; skip email if not available.
-        if (profile) {
-          await sendNotificationEmail(
-            "",
-            profile.full_name,
-            "Delivery Charges Available",
-            `Delivery charges for your order #${orderId.slice(0, 8)} are PKR ${c.toLocaleString()} for ${w} kg. Please log in and pay to proceed.`,
-            `${window.location.origin}/order-details?orderId=${orderId}`
-          );
-        }
+        await sendNotificationEmail({
+          userId,
+          title: "Delivery Charges Available",
+          message: `Delivery charges for your order #${orderId.slice(0, 8)} are PKR ${c.toLocaleString()} for ${w} kg. Please log in and pay to proceed.`,
+          orderLink: `${window.location.origin}/order-details?orderId=${orderId}`,
+        });
       } catch (e) {
         console.warn("Skipping delivery-charges email:", e);
       }

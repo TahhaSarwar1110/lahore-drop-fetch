@@ -231,24 +231,12 @@ const ManagerOrderDetails = () => {
           orderId: orderId,
         });
 
-        // Send email notification
-        const { data: customerProfile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", order.user_id)
-          .single();
-
-        const { data: { user: customerUser } } = await supabase.auth.admin.getUserById(order.user_id);
-        
-        if (customerUser?.email && customerProfile) {
-          await sendNotificationEmail(
-            customerUser.email,
-            customerProfile.full_name,
-            "Order Confirmed",
-            `Your order has been confirmed by the manager. You can now track its progress.`,
-            `${window.location.origin}/order-details?orderId=${orderId}`
-          );
-        }
+        await sendNotificationEmail({
+          userId: order.user_id,
+          title: "Order Confirmed",
+          message: `Your order has been confirmed by the manager. You can now track its progress.`,
+          orderLink: `${window.location.origin}/order-details?orderId=${orderId}`,
+        });
       }
 
       toast.success("Order confirmed successfully!");
