@@ -27,25 +27,27 @@ export const createNotification = async (params: CreateNotificationParams) => {
   }
 };
 
+interface SendNotificationEmailParams {
+  userId: string;
+  title: string;
+  message: string;
+  orderLink?: string;
+}
+
+/**
+ * Sends a notification email by delegating recipient lookup to the edge function.
+ * The edge function uses the service role to fetch the user's email server-side,
+ * so this works from any authenticated session (customer / rider / manager / admin).
+ */
 export const sendNotificationEmail = async (
-  userEmail: string,
-  userName: string,
-  title: string,
-  message: string,
-  orderLink?: string
+  params: SendNotificationEmailParams
 ) => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
     const { error } = await supabase.functions.invoke("send-notification-email", {
-      body: {
-        userEmail,
-        userName,
-        title,
-        message,
-        orderLink,
-      },
+      body: params,
     });
 
     if (error) throw error;
