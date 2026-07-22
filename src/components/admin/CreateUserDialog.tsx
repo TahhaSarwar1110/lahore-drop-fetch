@@ -297,9 +297,8 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password <span className="text-destructive">*</span></Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
