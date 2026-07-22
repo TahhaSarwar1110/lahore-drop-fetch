@@ -112,23 +112,26 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="orders" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="orders" className="gap-2">
-              <Package className="h-4 w-4" />
-              Orders
-            </TabsTrigger>
-            <TabsTrigger value="tracking" className="gap-2">
-              <MapPin className="h-4 w-4" />
-              Rider Tracking
-            </TabsTrigger>
-            <TabsTrigger value="users" className="gap-2">
-              <Users className="h-4 w-4" />
-              User Management
-            </TabsTrigger>
-            <TabsTrigger value="permissions" className="gap-2">
-              Role Permissions
-            </TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-max min-w-full sm:w-auto">
+              <TabsTrigger value="orders" className="gap-2 whitespace-nowrap">
+                <Package className="h-4 w-4" />
+                Orders
+              </TabsTrigger>
+              <TabsTrigger value="tracking" className="gap-2 whitespace-nowrap">
+                <MapPin className="h-4 w-4" />
+                Rider Tracking
+              </TabsTrigger>
+              <TabsTrigger value="users" className="gap-2 whitespace-nowrap">
+                <Users className="h-4 w-4" />
+                User Management
+              </TabsTrigger>
+              <TabsTrigger value="permissions" className="gap-2 whitespace-nowrap">
+                Role Permissions
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
 
           <TabsContent value="orders" className="space-y-6">
             <div className="flex flex-col sm:flex-row gap-4">

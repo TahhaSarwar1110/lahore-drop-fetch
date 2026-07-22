@@ -16,7 +16,11 @@ interface OrderItem {
   item_type: string;
   item_data: any;
   image_url: string | null;
+  pickup_address?: string | null;
+  pickup_latitude?: number | null;
+  pickup_longitude?: number | null;
 }
+
 
 interface StatusHistory {
   id: string;
@@ -202,7 +206,7 @@ const AdminOrderDetails = () => {
               <div className="space-y-4">
                 {order.order_items.map((item, index) => (
                   <div key={item.id} className="border border-border rounded-lg p-4 bg-accent/50">
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-3 gap-4">
                       <div>
                         <Badge variant="outline" className="mb-2">
                           {item.item_type}
@@ -210,18 +214,26 @@ const AdminOrderDetails = () => {
                         <h4 className="font-semibold">Item #{index + 1}</h4>
                       </div>
                       {item.image_url && (
-                        <a
-                          href={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/order-images/${item.image_url}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline flex items-center gap-1"
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            const { data, error } = await supabase.storage
+                              .from("order-images")
+                              .createSignedUrl(item.image_url as string, 60 * 10);
+                            if (error || !data?.signedUrl) {
+                              toast.error("Failed to load image");
+                              return;
+                            }
+                            window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+                          }}
                         >
-                          <ImageIcon className="h-4 w-4" />
+                          <ImageIcon className="h-4 w-4 mr-1" />
                           View Image
-                        </a>
+                        </Button>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                       {Object.entries(item.item_data).map(([key, value]) => (
                         <div key={key}>
                           <span className="text-muted-foreground capitalize">
@@ -231,8 +243,31 @@ const AdminOrderDetails = () => {
                         </div>
                       ))}
                     </div>
+
+                    {(item.pickup_address || (item.pickup_latitude != null && item.pickup_longitude != null)) && (
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <p className="text-sm font-medium flex items-center gap-1 mb-1">
+                          <MapPin className="h-4 w-4 text-primary" />
+                          Pickup Location
+                        </p>
+                        {item.pickup_address && (
+                          <p className="text-sm text-foreground">{item.pickup_address}</p>
+                        )}
+                        {item.pickup_latitude != null && item.pickup_longitude != null && (
+                          <a
+                            href={`https://www.google.com/maps?q=${item.pickup_latitude},${item.pickup_longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Open pinned location in Maps ({item.pickup_latitude.toFixed(5)}, {item.pickup_longitude.toFixed(5)})
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
+
               </div>
             </CardContent>
           </Card>

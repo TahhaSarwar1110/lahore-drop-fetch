@@ -236,7 +236,7 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
           {currentRiderId ? 'Reassign' : 'Assign Rider'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] max-h-[85vh]">
+      <DialogContent className="w-[95vw] sm:max-w-[800px] max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Assign Order to Rider</DialogTitle>
           <DialogDescription>
@@ -244,7 +244,7 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4">
+        <div className="py-4 flex-1 min-h-0 overflow-hidden">
           {fetchingRiders ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -255,7 +255,9 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
               No riders available. Create a user with the "Rider" role first.
             </p>
           ) : (
-            <ScrollArea className="h-[400px]">
+            <ScrollArea className="h-[400px] w-full">
+              <div className="min-w-[720px]">
+
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -318,9 +320,11 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </ScrollArea>
           )}
         </div>
+
 
         <DialogFooter>
           <Button 

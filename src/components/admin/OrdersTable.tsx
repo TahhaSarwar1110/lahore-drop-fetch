@@ -89,7 +89,9 @@ export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
 
   return (
     <div className="rounded-md border border-border bg-card">
-      <Table>
+      <div className="max-h-[70vh] overflow-auto">
+        <Table className="min-w-[900px]">
+
         <TableHeader>
           <TableRow className="hover:bg-transparent border-border">
             <TableHead className="text-card-foreground">Order ID</TableHead>
@@ -154,7 +156,10 @@ export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
             ))
           )}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
+
+
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
