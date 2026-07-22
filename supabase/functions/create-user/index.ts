@@ -46,15 +46,32 @@ serve(async (req) => {
       });
     }
 
-    const { email, password, full_name, phone, role } = await req.json();
+    const body = await req.json();
 
-    // Validate input
-    if (!email || !password || !full_name || !phone || !role) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+    // Server-side input validation (defense in depth — never trust the client)
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const allowedRoles = ['admin', 'manager', 'rider', 'customer'];
+    const errors: string[] = [];
+
+    const email = typeof body.email === 'string' ? body.email.trim() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
+    const full_name = typeof body.full_name === 'string' ? body.full_name.trim() : '';
+    const phone = typeof body.phone === 'string' ? body.phone.trim() : '';
+    const role = typeof body.role === 'string' ? body.role.trim() : '';
+
+    if (!email || !emailRe.test(email) || email.length > 254) errors.push('Invalid email');
+    if (!password || password.length < 8 || password.length > 128) errors.push('Password must be 8-128 chars');
+    if (!full_name || full_name.length < 2 || full_name.length > 100) errors.push('Full name must be 2-100 chars');
+    if (!phone || phone.length < 7 || phone.length > 20 || !/^[+\d\s()-]+$/.test(phone)) errors.push('Invalid phone');
+    if (!allowedRoles.includes(role)) errors.push('Invalid role');
+
+    if (errors.length) {
+      return new Response(JSON.stringify({ error: 'Validation failed', details: errors }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     console.log('Creating user with email:', email);
 

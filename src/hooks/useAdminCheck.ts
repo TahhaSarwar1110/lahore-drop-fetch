@@ -11,33 +11,23 @@ export const useAdminCheck = () => {
   useEffect(() => {
     const checkAdminRole = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session?.user) {
           toast.error("Please log in to access this page");
           navigate("/login");
           return;
         }
 
-        const { data: roles, error } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .maybeSingle();
+        // Authoritative server-side verification via edge function.
+        // RLS on user_roles is the real security boundary; this gives us a
+        // server-verified answer for UI routing (defense in depth).
+        const { data, error } = await supabase.functions.invoke("verify-admin");
 
-        if (error) {
-          console.error("Error checking admin role:", error);
+        if (error || !data?.isAdmin) {
           setIsAdmin(false);
-          toast.error("Access denied");
-          navigate("/");
-          return;
-        }
-
-        if (!roles) {
           toast.error("You don't have admin access");
           navigate("/");
-          setIsAdmin(false);
           return;
         }
 
