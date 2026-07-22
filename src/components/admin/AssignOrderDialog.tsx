@@ -308,40 +308,48 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedRiders.map((rider) => (
-                    <TableRow
-                      key={rider.id}
-                      className={`cursor-pointer transition-colors ${
-                        selectedRider === rider.id 
-                          ? 'bg-primary/10 hover:bg-primary/15' 
-                          : 'hover:bg-muted/50'
-                      }`}
-                      onClick={() => setSelectedRider(rider.id)}
-                    >
-                      <TableCell>
-                        {selectedRider === rider.id && (
-                          <CheckCircle className="h-4 w-4 text-primary" />
-                        )}
+                  {sortedRiders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                        No riders match your search.
                       </TableCell>
-                      <TableCell className="font-medium">{rider.full_name}</TableCell>
-                      <TableCell className="text-muted-foreground">{rider.phone}</TableCell>
-                      <TableCell>{rider.city}</TableCell>
-                      <TableCell>
-                        <span className={rider.activeOrders > 0 ? 'text-orange-600 font-semibold' : ''}>
-                          {rider.activeOrders}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-green-600">{rider.completedOrders}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-yellow-600 font-medium">
-                          ⭐ {rider.rating?.toFixed(1)}
-                        </span>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(rider.currentStatus)}</TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    sortedRiders.map((rider) => (
+                      <TableRow
+                        key={rider.id}
+                        className={`cursor-pointer transition-colors ${
+                          selectedRider === rider.id 
+                            ? 'bg-primary/10 hover:bg-primary/15' 
+                            : 'hover:bg-muted/50'
+                        }`}
+                        onClick={() => setSelectedRider(rider.id)}
+                      >
+                        <TableCell>
+                          {selectedRider === rider.id && (
+                            <CheckCircle className="h-4 w-4 text-primary" />
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">{rider.full_name}</TableCell>
+                        <TableCell className="text-muted-foreground">{rider.phone}</TableCell>
+                        <TableCell>{rider.city}</TableCell>
+                        <TableCell>
+                          <span className={rider.activeOrders > 0 ? 'text-orange-600 font-semibold' : ''}>
+                            {rider.activeOrders}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-green-600">{rider.completedOrders}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-yellow-600 font-medium">
+                            ⭐ {rider.rating?.toFixed(1)}
+                          </span>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(rider.currentStatus)}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
               </div>
