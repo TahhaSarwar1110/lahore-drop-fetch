@@ -10,8 +10,10 @@ const corsHeaders = {
 };
 
 interface NotificationEmailRequest {
-  userEmail: string;
-  userName: string;
+  userId?: string;
+  // Legacy fields kept for backwards compatibility
+  userEmail?: string;
+  userName?: string;
   title: string;
   message: string;
   orderLink?: string;
@@ -41,7 +43,39 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const { userEmail, userName, title, message, orderLink }: NotificationEmailRequest = await req.json();
+    const body: NotificationEmailRequest = await req.json();
+    const { title, message, orderLink } = body;
+
+    // Resolve recipient email + name server-side using service role
+    let userEmail = body.userEmail;
+    let userName = body.userName || "";
+
+    if (body.userId) {
+      const { data: recipient, error: recipientError } =
+        await supabaseAdmin.auth.admin.getUserById(body.userId);
+      if (recipientError || !recipient?.user?.email) {
+        console.error('Failed to look up recipient:', recipientError);
+        return new Response(
+          JSON.stringify({ error: 'Recipient not found' }),
+          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+      userEmail = recipient.user.email;
+
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('full_name')
+        .eq('id', body.userId)
+        .maybeSingle();
+      userName = profile?.full_name || userName || "Customer";
+    }
+
+    if (!userEmail) {
+      return new Response(
+        JSON.stringify({ error: 'Missing recipient' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
 
     console.log('Sending notification email to:', userEmail);
 
@@ -49,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #f15717;">Tabedaar.com Notification</h1>
         <h2>${title}</h2>
-        <p>Hello ${userName},</p>
+        <p>Hello ${userName || 'Customer'},</p>
         <p>${message}</p>
         ${orderLink ? `<p><a href="${orderLink}" style="background-color: #f15717; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">View Order Details</a></p>` : ''}
         <hr style="margin: 20px 0;">
@@ -60,7 +94,6 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Send email using Resend API
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -81,24 +114,17 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailData = await emailResponse.json();
-
     console.log("Email sent successfully:", emailData);
 
     return new Response(JSON.stringify({ success: true, emailData }), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
     console.error("Error in send-notification-email function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };
