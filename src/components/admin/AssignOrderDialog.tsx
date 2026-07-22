@@ -144,7 +144,17 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
     }
   };
 
-  const sortedRiders = [...riders].sort((a, b) => {
+  const filteredRiders = riders.filter(rider => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      rider.full_name?.toLowerCase().includes(q) ||
+      rider.phone?.toLowerCase().includes(q) ||
+      rider.city?.toLowerCase().includes(q)
+    );
+  });
+
+  const sortedRiders = [...filteredRiders].sort((a, b) => {
     let aValue: any = a[sortKey];
     let bValue: any = b[sortKey];
 
