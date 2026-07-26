@@ -142,16 +142,32 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
 
     let imageUrl = existingImageUrl || "";
     if (imageFile) {
-      const fileExt = imageFile.name.split(".").pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const { error: uploadError, data } = await supabase.storage
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Not signed in",
+          description: "Please sign in again to attach images",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const fileExt = imageFile.name.split(".").pop()?.toLowerCase() || "jpg";
+      // Storage policy requires the first folder to be the uploader's user id
+      const filePath = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
         .from("order-images")
-        .upload(fileName, imageFile);
+        .upload(filePath, imageFile, {
+          contentType: imageFile.type || undefined,
+          upsert: false,
+        });
 
       if (uploadError) {
+        console.error("Order image upload failed:", uploadError);
         toast({
           title: "Upload Failed",
-          description: "Failed to upload image",
+          description: uploadError.message || "Failed to upload image",
           variant: "destructive",
         });
         return;
@@ -159,10 +175,11 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
 
       const { data: { publicUrl } } = supabase.storage
         .from("order-images")
-        .getPublicUrl(fileName);
-      
+        .getPublicUrl(filePath);
+
       imageUrl = publicUrl;
     }
+
 
     const item: OrderItem = {
       id: initialItem?.id || Math.random().toString(36).substr(2, 9),
