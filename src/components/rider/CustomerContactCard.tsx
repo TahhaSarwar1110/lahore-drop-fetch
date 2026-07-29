@@ -47,14 +47,12 @@ export const CustomerContactCard = ({ customerName, customerPhone }: CustomerCon
             <Phone className="h-4 w-4 mr-2" />
             Call
           </Button>
-          <Button
+          <WhatsAppButton
+            phone={customerPhone}
+            label="WhatsApp"
             variant="outline"
             className="flex-1 border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
-            onClick={handleWhatsApp}
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            WhatsApp
-          </Button>
+          />
         </div>
       </CardContent>
     </Card>

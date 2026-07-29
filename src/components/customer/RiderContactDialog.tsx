@@ -59,18 +59,12 @@ export const RiderContactDialog = ({
               <Phone className="h-4 w-4 mr-2" />
               Call Rider
             </Button>
-            <Button
+            <WhatsAppButton
+              phone={riderPhone}
+              label="WhatsApp"
               variant="outline"
               className="flex-1"
-              onClick={() =>
-                window.open(
-                  `https://wa.me/${riderPhone.replace(/[^0-9]/g, "")}`,
-                  "_blank"
-                )
-              }
-            >
-              WhatsApp
-            </Button>
+            />
           </div>
         </div>
       </DialogContent>
