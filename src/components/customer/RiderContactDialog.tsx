@@ -6,6 +6,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Phone, User } from "lucide-react";
 
 interface RiderContactDialogProps {

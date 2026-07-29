@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Phone, MessageCircle, User } from "lucide-react";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { Phone, User } from "lucide-react";
 
 interface CustomerContactCardProps {
   customerName: string;
