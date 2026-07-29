@@ -13,11 +13,6 @@ export const CustomerContactCard = ({ customerName, customerPhone }: CustomerCon
     window.open(`tel:${customerPhone}`, "_self");
   };
 
-  const handleWhatsApp = () => {
-    const cleanPhone = customerPhone.replace(/[^0-9]/g, "");
-    window.open(`https://wa.me/${cleanPhone}`, "_blank");
-  };
-
   return (
     <Card>
       <CardHeader className="pb-3">
