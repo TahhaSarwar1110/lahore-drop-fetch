@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Phone, MessageCircle, User } from "lucide-react";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { Phone, User } from "lucide-react";
 
 interface CustomerContactCardProps {
   customerName: string;
@@ -10,11 +11,6 @@ interface CustomerContactCardProps {
 export const CustomerContactCard = ({ customerName, customerPhone }: CustomerContactCardProps) => {
   const handleCall = () => {
     window.open(`tel:${customerPhone}`, "_self");
-  };
-
-  const handleWhatsApp = () => {
-    const cleanPhone = customerPhone.replace(/[^0-9]/g, "");
-    window.open(`https://wa.me/${cleanPhone}`, "_blank");
   };
 
   return (
@@ -46,14 +42,12 @@ export const CustomerContactCard = ({ customerName, customerPhone }: CustomerCon
             <Phone className="h-4 w-4 mr-2" />
             Call
           </Button>
-          <Button
+          <WhatsAppButton
+            phone={customerPhone}
+            label="WhatsApp"
             variant="outline"
             className="flex-1 border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
-            onClick={handleWhatsApp}
-          >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            WhatsApp
-          </Button>
+          />
         </div>
       </CardContent>
     </Card>
