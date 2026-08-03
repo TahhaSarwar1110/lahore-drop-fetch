@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Shield, Menu, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import logo from "@/assets/tabedaar-logo.png";
+import logo from "@/assets/tabedaar-logo-header.png";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NotificationBell } from "./NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,11 +35,11 @@ export const Header = () => {
   return (
     <header className="sticky top-0 left-0 right-0 z-50 w-full bg-primary shadow-md safe-area-top">
       <div className="container mx-auto flex h-20 md:h-28 lg:h-32 items-center justify-between px-3 md:px-4">
-        <Link to="/" className="flex items-center">
+        <Link to="/" className="flex min-w-0 items-center" aria-label="Tabedaar.com home">
           <img
             src={logo}
             alt="Tabedaar.com Logo"
-            className="h-14 md:h-24 lg:h-28 w-auto object-contain"
+            className="h-auto w-40 max-w-[55vw] object-contain sm:w-48 md:w-56 lg:w-64"
           />
         </Link>
 
