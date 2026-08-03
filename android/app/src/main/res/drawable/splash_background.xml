@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@android:color/white" />
-    <item
-        android:gravity="center"
-        android:width="280dp"
-        android:height="280dp">
+    <!-- Brand navy base so the splash never flashes white -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#0B1A3D" />
+        </shape>
+    </item>
+    <!-- Full-bleed branded splash artwork (density + orientation specific) -->
+    <item>
         <bitmap
             android:src="@drawable/splash"
-            android:gravity="center"
-            android:scaleType="fitCenter" />
+            android:gravity="fill" />
     </item>
 </layer-list>
