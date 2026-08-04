@@ -1,13 +1,33 @@
+import { Capacitor } from "@capacitor/core";
+
 /**
- * Builds a WhatsApp click-to-chat (`wa.me`) URL.
+ * Builds a WhatsApp click-to-chat URL.
+ *
+ * - Web: `https://wa.me/<number>` — WhatsApp redirects this to `api.whatsapp.com`,
+ *   which sends `X-Frame-Options`/CSP headers. That means it MUST be opened as a
+ *   top-level navigation (a real anchor with `target="_blank"`), never inside an
+ *   iframe — otherwise the browser reports `ERR_BLOCKED_BY_RESPONSE`.
+ * - Native (Capacitor iOS/Android): the `whatsapp://` deep link opens the installed app directly.
+ *
  * @param phone E.164 phone number (e.g., "+923001234567" or "923001234567")
  * @param message Optional pre-filled message (URL-encoded automatically)
- * @returns Safe `https://wa.me/...` URL
  */
 export const buildWhatsAppUrl = (phone: string, message?: string): string => {
-  // Remove everything except digits. wa.me expects the number WITH country code but WITHOUT the leading +.
-  const cleanPhone = phone.replace(/\D/g, "");
+  // Remove everything except digits. WhatsApp expects the number WITH country code but WITHOUT the leading +.
+  let cleanPhone = phone.replace(/\D/g, "");
+
+  // Normalize local Pakistani numbers (03xxxxxxxxx -> 923xxxxxxxxx)
+  if (cleanPhone.startsWith("0")) {
+    cleanPhone = `92${cleanPhone.slice(1)}`;
+  }
+
+  const isNative = Capacitor?.isNativePlatform?.() ?? false;
+
+  if (isNative) {
+    const base = `whatsapp://send?phone=${cleanPhone}`;
+    return message ? `${base}&text=${encodeURIComponent(message)}` : base;
+  }
+
   const base = `https://wa.me/${cleanPhone}`;
-  if (!message) return base;
-  return `${base}?text=${encodeURIComponent(message)}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 };

@@ -17,19 +17,20 @@ export const WhatsAppButton = ({
   variant = "outline",
   className,
 }: WhatsAppButtonProps) => {
-  const handleClick = () => {
-    window.open(buildWhatsAppUrl(phone, message), "_blank", "noopener,noreferrer");
-  };
-
+  // Rendered as a real anchor (not window.open) so the browser performs a
+  // top-level navigation. WhatsApp blocks framed loads (ERR_BLOCKED_BY_RESPONSE),
+  // which is what happens when window.open is called inside an embedded preview.
   return (
-    <Button
-      variant={variant}
-      className={className}
-      onClick={handleClick}
-      aria-label={`Chat on WhatsApp with ${phone}`}
-    >
-      <MessageCircle className="h-4 w-4 mr-2" />
-      {label}
+    <Button variant={variant} className={className} asChild>
+      <a
+        href={buildWhatsAppUrl(phone, message)}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Chat on WhatsApp with ${phone}`}
+      >
+        <MessageCircle className="h-4 w-4 mr-2" />
+        {label}
+      </a>
     </Button>
   );
 };
