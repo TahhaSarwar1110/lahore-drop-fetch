@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
+import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -150,6 +151,11 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
           title: notificationTitle,
           message: notificationMessage,
           orderLink: `${window.location.origin}/order-details?orderId=${orderData.order_id}`,
+        });
+
+        await sendWhatsAppNotification({
+          userId: order.user_id,
+          message: `Tabedaar.com: ${notificationTitle} for order #${orderData.order_id.slice(0, 8)}. ${notificationMessage}`,
         });
       }
 
