@@ -15,6 +15,7 @@ import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 import { useAuth } from "@/hooks/useAuth";
+import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 import {
   Select,
   SelectContent,
@@ -252,6 +253,16 @@ const PlaceOrder = () => {
         .insert(itemsToInsert);
 
       if (itemsError) throw itemsError;
+
+      const shortId = orderData.id.slice(0, 8);
+      await sendWhatsAppNotification({
+        userId: userId,
+        message: `Tabedaar.com: Thank you ${fullName}! Your order #${shortId} has been placed with ${orderItems.length} item(s). Our team will review it shortly.`,
+      });
+      await sendWhatsAppNotification({
+        role: "manager",
+        message: `Tabedaar.com: New order #${shortId} placed by ${fullName} (${countryCode}${phone}) with ${orderItems.length} item(s). Please review it.`,
+      });
 
       toast({
         title: "Order Placed!",

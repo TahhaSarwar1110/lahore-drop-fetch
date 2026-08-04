@@ -14,6 +14,7 @@ import { PaymentConfirmation } from "@/components/manager/PaymentConfirmation";
 import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput";
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
+import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 
 interface OrderItem {
   id: string;
@@ -236,6 +237,11 @@ const ManagerOrderDetails = () => {
           title: "Order Confirmed",
           message: `Your order has been confirmed by the manager. You can now track its progress.`,
           orderLink: `${window.location.origin}/order-details?orderId=${orderId}`,
+        });
+
+        await sendWhatsAppNotification({
+          userId: order.user_id,
+          message: `Tabedaar.com: Your order #${orderId.slice(0, 8)} has been confirmed by our manager. You can track its progress in the app.`,
         });
       }
 
