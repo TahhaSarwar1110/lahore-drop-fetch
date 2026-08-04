@@ -68,7 +68,19 @@ export const PaymentConfirmation = ({
           type: "payment_confirmed_rider",
           orderId,
         });
+
+        await sendWhatsAppNotification({
+          userId: assignedRiderId,
+          message: `Tabedaar.com: Payment for order #${orderId.slice(0, 8)} is confirmed. You can start the pickup and delivery now.`,
+        });
       }
+
+      await sendWhatsAppNotification({
+        userId,
+        message: `Tabedaar.com: Your payment for order #${orderId.slice(0, 8)} has been confirmed. Your order is now being processed.`,
+      });
+
+
 
       toast.success("Payment confirmed successfully!");
       onUpdate();
