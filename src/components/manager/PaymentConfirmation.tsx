@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, Clock, CreditCard, ExternalLink, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { createNotification } from "@/utils/notificationHelper";
+import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 
 interface PaymentConfirmationProps {
   orderId: string;
