@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, MessageCircle, Facebook, Instagram, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BUSINESS_WHATSAPP_NUMBER, BUSINESS_PHONE_DISPLAY, buildWhatsAppUrl } from "@/utils/whatsapp";
 import logo from "@/assets/tabedaar-logo.png";
 
 export const Footer = () => {
@@ -35,7 +36,7 @@ export const Footer = () => {
             
             {/* WhatsApp CTA */}
             <a 
-              href="https://wa.me/923001234567" 
+              href={buildWhatsAppUrl(BUSINESS_WHATSAPP_NUMBER)} 
               target="_blank" 
               rel="noopener noreferrer"
             >
@@ -82,11 +83,11 @@ export const Footer = () => {
               </li>
               <li>
                 <a 
-                  href="tel:+923001234567" 
+                  href={`tel:+${BUSINESS_WHATSAPP_NUMBER}`} 
                   className="flex items-center gap-3 text-white/70 hover:text-white transition-colors text-sm"
                 >
                   <Phone className="h-5 w-5 flex-shrink-0" />
-                  <span>+92 300 1234567</span>
+                  <span>{BUSINESS_PHONE_DISPLAY}</span>
                 </a>
               </li>
               <li>
