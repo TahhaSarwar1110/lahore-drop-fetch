@@ -207,7 +207,9 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const results = await Promise.all(unique.map((to) => sendMessage(to, body)));
+    const results = await Promise.all(
+      unique.map((to) => sendMessage(to, body, supabaseAdmin)),
+    );
 
     return new Response(
       JSON.stringify({ success: results.some((r) => r.ok), results }),
