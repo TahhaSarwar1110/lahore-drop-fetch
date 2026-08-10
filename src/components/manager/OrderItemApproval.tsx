@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
