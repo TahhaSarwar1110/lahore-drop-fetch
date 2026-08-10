@@ -7,6 +7,7 @@ import { Loader2, CheckCircle, Clock, CreditCard, ExternalLink, Upload } from "l
 import { toast } from "sonner";
 import { createNotification } from "@/utils/notificationHelper";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 
 interface PaymentConfirmationProps {
   orderId: string;
