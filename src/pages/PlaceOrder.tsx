@@ -16,6 +16,7 @@ import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 import { useAuth } from "@/hooks/useAuth";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 import {
   Select,
   SelectContent,
