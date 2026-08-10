@@ -77,17 +77,42 @@ const templatePayload = (to: string, body: WhatsAppRequest) => ({
   },
 });
 
-const sendMessage = async (to: string, body: WhatsAppRequest) => {
-  // Business-initiated messages need an approved template. Try the template
-  // first; if it is missing/unapproved, fall back to plain text (which only
-  // delivers inside the 24h customer service window).
+/** True only when the recipient messaged us within the last 24 hours. */
+const hasOpenServiceWindow = async (
+  supabase: any,
+  to: string,
+): Promise<boolean> => {
+  const { data } = await supabase
+    .from("whatsapp_contacts")
+    .select("last_inbound_at")
+    .eq("phone", to)
+    .maybeSingle();
+
+  if (!data?.last_inbound_at) return false;
+  const last = new Date(data.last_inbound_at).getTime();
+  return Number.isFinite(last) && Date.now() - last < 24 * 60 * 60 * 1000;
+};
+
+const sendMessage = async (to: string, body: WhatsAppRequest, supabase: any) => {
+  // Business-initiated messages MUST use an approved template. Plain text is
+  // only allowed when we have evidence of an open 24h customer service window.
   if (body.templateName) {
     const attempt = await post(templatePayload(to, body));
     if (attempt.ok) return { to, ok: true, channel: "template", data: attempt.data };
     console.error(
-      `WhatsApp template "${body.templateName}" failed, falling back to text:`,
+      `WhatsApp template "${body.templateName}" failed:`,
       JSON.stringify(attempt.data),
     );
+  }
+
+  const windowOpen = await hasOpenServiceWindow(supabase, to);
+  if (!windowOpen) {
+    console.error(
+      `Skipping free-form WhatsApp text to recipient: no open 24h service window${
+        body.templateName ? " and template delivery failed" : " and no template provided"
+      }`,
+    );
+    return { to, ok: false, error: "no_approved_template_delivery" };
   }
 
   const fallback = await post(textPayload(to, body.message));
@@ -97,6 +122,7 @@ const sendMessage = async (to: string, body: WhatsAppRequest) => {
   }
   return { to, ok: true, channel: "text", data: fallback.data };
 };
+
 
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
