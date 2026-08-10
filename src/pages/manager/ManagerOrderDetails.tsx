@@ -15,6 +15,7 @@ import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput"
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 
 interface OrderItem {
   id: string;
