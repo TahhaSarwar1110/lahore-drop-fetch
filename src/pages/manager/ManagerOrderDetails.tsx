@@ -15,6 +15,7 @@ import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput"
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 
 interface OrderItem {
   id: string;
@@ -241,6 +242,9 @@ const ManagerOrderDetails = () => {
 
         await sendWhatsAppNotification({
           userId: order.user_id,
+          templateName: WHATSAPP_TEMPLATES.orderConfirmed.name,
+          templateLanguage: WHATSAPP_TEMPLATES.orderConfirmed.language,
+          templateParams: [orderId.slice(0, 8)],
           message: `Tabedaar.com: Your order #${orderId.slice(0, 8)} has been confirmed by our manager. You can track its progress in the app.`,
         });
       }

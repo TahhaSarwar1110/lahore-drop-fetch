@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -153,8 +154,24 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
           orderLink: `${window.location.origin}/order-details?orderId=${orderData.order_id}`,
         });
 
+        const itemLabel =
+          itemData.description || itemData["Item Description"] || item.item_type;
+        const approved = item.approval_status === "approved";
+        const tpl = approved
+          ? WHATSAPP_TEMPLATES.itemApproved
+          : WHATSAPP_TEMPLATES.itemRejected;
+
         await sendWhatsAppNotification({
           userId: order.user_id,
+          templateName: tpl.name,
+          templateLanguage: tpl.language,
+          templateParams: approved
+            ? [orderData.order_id.slice(0, 8), itemLabel]
+            : [
+                orderData.order_id.slice(0, 8),
+                itemLabel,
+                item.manager_feedback || "Please contact support for details",
+              ],
           message: `Tabedaar.com: ${notificationTitle} for order #${orderData.order_id.slice(0, 8)}. ${notificationMessage}`,
         });
       }

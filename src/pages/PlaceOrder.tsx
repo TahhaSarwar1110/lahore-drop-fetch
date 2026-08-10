@@ -16,6 +16,7 @@ import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 import { useAuth } from "@/hooks/useAuth";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 import {
   Select,
   SelectContent,
@@ -257,10 +258,16 @@ const PlaceOrder = () => {
       const shortId = orderData.id.slice(0, 8);
       await sendWhatsAppNotification({
         userId: userId,
+        templateName: WHATSAPP_TEMPLATES.orderReceived.name,
+        templateLanguage: WHATSAPP_TEMPLATES.orderReceived.language,
+        templateParams: [fullName, shortId, String(orderItems.length)],
         message: `Tabedaar.com: Thank you ${fullName}! Your order #${shortId} has been placed with ${orderItems.length} item(s). Our team will review it shortly.`,
       });
       await sendWhatsAppNotification({
         role: "manager",
+        templateName: WHATSAPP_TEMPLATES.newOrderManager.name,
+        templateLanguage: WHATSAPP_TEMPLATES.newOrderManager.language,
+        templateParams: [shortId, fullName, String(orderItems.length)],
         message: `Tabedaar.com: New order #${shortId} placed by ${fullName} (${countryCode}${phone}) with ${orderItems.length} item(s). Please review it.`,
       });
 

@@ -7,6 +7,7 @@ import { Loader2, CheckCircle, Clock, CreditCard, ExternalLink, Upload } from "l
 import { toast } from "sonner";
 import { createNotification } from "@/utils/notificationHelper";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 
 interface PaymentConfirmationProps {
   orderId: string;
@@ -71,12 +72,18 @@ export const PaymentConfirmation = ({
 
         await sendWhatsAppNotification({
           userId: assignedRiderId,
+          templateName: WHATSAPP_TEMPLATES.riderPickupReady.name,
+          templateLanguage: WHATSAPP_TEMPLATES.riderPickupReady.language,
+          templateParams: [orderId.slice(0, 8)],
           message: `Tabedaar.com: Payment for order #${orderId.slice(0, 8)} is confirmed. You can start the pickup and delivery now.`,
         });
       }
 
       await sendWhatsAppNotification({
         userId,
+        templateName: WHATSAPP_TEMPLATES.paymentConfirmed.name,
+        templateLanguage: WHATSAPP_TEMPLATES.paymentConfirmed.language,
+        templateParams: [orderId.slice(0, 8)],
         message: `Tabedaar.com: Your payment for order #${orderId.slice(0, 8)} has been confirmed. Your order is now being processed.`,
       });
 

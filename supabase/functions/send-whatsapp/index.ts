@@ -33,35 +33,7 @@ const normalizePhone = (raw: string): string | null => {
   return digits;
 };
 
-const sendMessage = async (to: string, body: WhatsAppRequest) => {
-  const payload = body.templateName
-    ? {
-        messaging_product: "whatsapp",
-        to,
-        type: "template",
-        template: {
-          name: body.templateName,
-          language: { code: body.templateLanguage || "en_US" },
-          components: body.templateParams?.length
-            ? [
-                {
-                  type: "body",
-                  parameters: body.templateParams.map((text) => ({
-                    type: "text",
-                    text,
-                  })),
-                },
-              ]
-            : undefined,
-        },
-      }
-    : {
-        messaging_product: "whatsapp",
-        to,
-        type: "text",
-        text: { preview_url: false, body: body.message },
-      };
-
+const post = async (payload: unknown) => {
   const res = await fetch(
     `https://graph.facebook.com/v20.0/${WHATSAPP_PHONE_NUMBER_ID}/messages`,
     {
@@ -73,13 +45,57 @@ const sendMessage = async (to: string, body: WhatsAppRequest) => {
       body: JSON.stringify(payload),
     },
   );
-
   const data = await res.json();
-  if (!res.ok) {
-    console.error("WhatsApp API error:", JSON.stringify(data));
-    return { to, ok: false, error: data };
+  return { ok: res.ok, data };
+};
+
+const textPayload = (to: string, message: string) => ({
+  messaging_product: "whatsapp",
+  to,
+  type: "text",
+  text: { preview_url: false, body: message },
+});
+
+const templatePayload = (to: string, body: WhatsAppRequest) => ({
+  messaging_product: "whatsapp",
+  to,
+  type: "template",
+  template: {
+    name: body.templateName,
+    language: { code: body.templateLanguage || "en" },
+    components: body.templateParams?.length
+      ? [
+          {
+            type: "body",
+            parameters: body.templateParams.map((text) => ({
+              type: "text",
+              text,
+            })),
+          },
+        ]
+      : undefined,
+  },
+});
+
+const sendMessage = async (to: string, body: WhatsAppRequest) => {
+  // Business-initiated messages need an approved template. Try the template
+  // first; if it is missing/unapproved, fall back to plain text (which only
+  // delivers inside the 24h customer service window).
+  if (body.templateName) {
+    const attempt = await post(templatePayload(to, body));
+    if (attempt.ok) return { to, ok: true, channel: "template", data: attempt.data };
+    console.error(
+      `WhatsApp template "${body.templateName}" failed, falling back to text:`,
+      JSON.stringify(attempt.data),
+    );
   }
-  return { to, ok: true, data };
+
+  const fallback = await post(textPayload(to, body.message));
+  if (!fallback.ok) {
+    console.error("WhatsApp API error:", JSON.stringify(fallback.data));
+    return { to, ok: false, error: fallback.data };
+  }
+  return { to, ok: true, channel: "text", data: fallback.data };
 };
 
 serve(async (req: Request): Promise<Response> => {
