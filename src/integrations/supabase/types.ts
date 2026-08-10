@@ -560,6 +560,42 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_contacts: {
+        Row: {
+          created_at: string
+          last_inbound_at: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          last_inbound_at?: string
+          phone: string
+        }
+        Update: {
+          created_at?: string
+          last_inbound_at?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      whatsapp_events: {
+        Row: {
+          created_at: string
+          event_id: string
+          event_type: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          event_type: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          event_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
