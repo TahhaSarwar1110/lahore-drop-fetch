@@ -78,12 +78,11 @@ export const DeliveryChargesInput = ({
 
       if (error) throw error;
 
-      await createNotification({
-        userId,
-        title: "Delivery Charges Available",
-        message: `Delivery charges for your order #${orderId.slice(0, 8)} are PKR ${c.toLocaleString()} for ${w} kg. Please pay to proceed with delivery.`,
-        type: "delivery_charges_set",
-        orderId,
+      await triggerNotification({
+        event_type: "delivery_payment_requested",
+        order_id: orderId,
+        amount: c,
+        note: `${w} kg`,
       });
 
       // Best-effort email (edge function resolves recipient server-side)

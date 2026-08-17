@@ -140,12 +140,12 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
           ? `Your item "${itemData.description || itemData["Item Description"] || item.item_type}" has been approved.`
           : `Your item "${itemData.description || itemData["Item Description"] || item.item_type}" has been rejected. ${item.manager_feedback ? `Reason: ${item.manager_feedback}` : 'Please contact support for more details.'}`;
 
-        await createNotification({
-          userId: order.user_id,
-          title: notificationTitle,
-          message: notificationMessage,
-          type: item.approval_status === 'approved' ? 'item_approved' : 'item_rejected',
-          orderId: orderData.order_id,
+        await triggerNotification({
+          event_type: item.approval_status === 'approved' ? 'item_approved' : 'item_rejected',
+          order_id: orderData.order_id,
+          event_version: item.id,
+          item_name: itemData.description || itemData["Item Description"] || item.item_type,
+          note: item.manager_feedback || undefined,
         });
 
         await sendNotificationEmail({
