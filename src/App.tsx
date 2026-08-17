@@ -26,6 +26,9 @@ import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import ManagerOrderDetails from "./pages/manager/ManagerOrderDetails";
 import { PricingManagement } from "./pages/manager/PricingManagement";
 import AssignRider from "./pages/manager/AssignRider";
+import Notifications from "./pages/Notifications";
+import NotificationSettings from "./pages/NotificationSettings";
+import { PushOptInBanner } from "./components/notifications/PushOptInBanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
