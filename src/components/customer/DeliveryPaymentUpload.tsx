@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Upload, CheckCircle, Clock, Truck } from "lucide-react";
 import { toast } from "sonner";
-import { createNotification } from "@/utils/notificationHelper";
+import { triggerNotification } from "@/utils/notify";
 
 interface Props {
   orderId: string;
