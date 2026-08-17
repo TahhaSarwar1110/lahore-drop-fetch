@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { triggerNotification } from "@/utils/notify";
 import { toast } from "sonner";
 import { Loader2, Check, Upload, Image as ImageIcon, ArrowLeft, Navigation, Package, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -192,6 +193,8 @@ const RiderOrderDetails = () => {
         .eq("id", orderId);
 
       if (updateError) throw updateError;
+
+      await triggerNotification({ event_type: "order_delivered", order_id: orderId });
 
       toast.success("Order marked as delivered successfully!");
       navigate("/orders");
