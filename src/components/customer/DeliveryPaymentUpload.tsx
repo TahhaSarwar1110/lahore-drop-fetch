@@ -69,22 +69,11 @@ export const DeliveryPaymentUpload = ({
         .eq("id", orderId);
       if (updErr) throw updErr;
 
-      const { data: managers } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .in("role", ["manager", "admin"]);
+      await triggerNotification({
+        event_type: "delivery_payment_submitted",
+        order_id: orderId,
+      });
 
-      if (managers) {
-        for (const m of managers) {
-          await createNotification({
-            userId: m.user_id,
-            title: "Delivery Payment Submitted",
-            message: `Customer submitted delivery payment proof for order #${orderId.slice(0, 8)}. Please verify.`,
-            type: "delivery_payment_submitted",
-            orderId,
-          });
-        }
-      }
 
       toast.success("Delivery payment proof uploaded");
       setSelectedFile(null);
