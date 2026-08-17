@@ -13,7 +13,8 @@ import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
 import { PaymentConfirmation } from "@/components/manager/PaymentConfirmation";
 import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput";
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
-import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
+import { sendNotificationEmail } from "@/utils/notificationHelper";
+import { triggerNotification } from "@/utils/notify";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 
@@ -225,12 +226,9 @@ const ManagerOrderDetails = () => {
 
       // Create notification for customer
       if (order) {
-        await createNotification({
-          userId: order.user_id,
-          title: "Order Confirmed",
-          message: `Your order has been confirmed by the manager. You can now track its progress.`,
-          type: "order_confirmed",
-          orderId: orderId,
+        await triggerNotification({
+          event_type: "order_confirmed",
+          order_id: orderId,
         });
 
         await sendNotificationEmail({

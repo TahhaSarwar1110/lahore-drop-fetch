@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Truck, CheckCircle, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
+import { sendNotificationEmail } from "@/utils/notificationHelper";
+import { triggerNotification } from "@/utils/notify";
 
 interface DeliveryChargesInputProps {
   orderId: string;
@@ -77,12 +78,11 @@ export const DeliveryChargesInput = ({
 
       if (error) throw error;
 
-      await createNotification({
-        userId,
-        title: "Delivery Charges Available",
-        message: `Delivery charges for your order #${orderId.slice(0, 8)} are PKR ${c.toLocaleString()} for ${w} kg. Please pay to proceed with delivery.`,
-        type: "delivery_charges_set",
-        orderId,
+      await triggerNotification({
+        event_type: "delivery_payment_requested",
+        order_id: orderId,
+        amount: c,
+        note: `${w} kg`,
       });
 
       // Best-effort email (edge function resolves recipient server-side)

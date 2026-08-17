@@ -52,12 +52,90 @@ export type Database = {
           },
         ]
       }
+      notification_deliveries: {
+        Row: {
+          channel: string
+          created_at: string
+          dedupe_key: string | null
+          error: string | null
+          event_type: string | null
+          id: string
+          notification_id: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          dedupe_key?: string | null
+          error?: string | null
+          event_type?: string | null
+          id?: string
+          notification_id?: string | null
+          status: string
+          user_id?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          dedupe_key?: string | null
+          error?: string | null
+          event_type?: string | null
+          id?: string
+          notification_id?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          categories: Json
+          created_at: string
+          in_app_enabled: boolean
+          push_enabled: boolean
+          updated_at: string
+          user_id: string
+          whatsapp_enabled: boolean
+        }
+        Insert: {
+          categories?: Json
+          created_at?: string
+          in_app_enabled?: boolean
+          push_enabled?: boolean
+          updated_at?: string
+          user_id: string
+          whatsapp_enabled?: boolean
+        }
+        Update: {
+          categories?: Json
+          created_at?: string
+          in_app_enabled?: boolean
+          push_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+          whatsapp_enabled?: boolean
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
+          dedupe_key: string | null
+          event_type: string | null
           id: string
           is_read: boolean | null
+          link_url: string | null
           message: string
+          metadata: Json
           order_id: string | null
           title: string
           type: string
@@ -65,9 +143,13 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          dedupe_key?: string | null
+          event_type?: string | null
           id?: string
           is_read?: boolean | null
+          link_url?: string | null
           message: string
+          metadata?: Json
           order_id?: string | null
           title: string
           type: string
@@ -75,9 +157,13 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          dedupe_key?: string | null
+          event_type?: string | null
           id?: string
           is_read?: boolean | null
+          link_url?: string | null
           message?: string
+          metadata?: Json
           order_id?: string | null
           title?: string
           type?: string
@@ -441,6 +527,48 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string | null
+          created_at: string
+          device_label: string | null
+          endpoint: string
+          id: string
+          last_seen_at: string
+          p256dh: string | null
+          platform: string
+          revoked_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth?: string | null
+          created_at?: string
+          device_label?: string | null
+          endpoint: string
+          id?: string
+          last_seen_at?: string
+          p256dh?: string | null
+          platform: string
+          revoked_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auth?: string | null
+          created_at?: string
+          device_label?: string | null
+          endpoint?: string
+          id?: string
+          last_seen_at?: string
+          p256dh?: string | null
+          platform?: string
+          revoked_at?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

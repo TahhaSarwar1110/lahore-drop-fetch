@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { triggerNotification } from "@/utils/notify";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowUpDown, CheckCircle, Loader2, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -234,6 +235,8 @@ const AssignRider = () => {
       if (data.error) {
         throw new Error(data.error);
       }
+
+      await triggerNotification({ event_type: "rider_assigned", order_id: orderId, event_version: selectedRider });
 
       toast.success("Order assigned successfully!");
       navigate(`/manager/orders/${orderId}`);

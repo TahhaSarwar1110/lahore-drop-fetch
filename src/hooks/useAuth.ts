@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { cleanupPushOnLogout } from "@/hooks/usePushNotifications";
 
 interface AuthState {
   user: User | null;
@@ -77,6 +78,8 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
+    // Revoke this device's push subscription before the session goes away.
+    await cleanupPushOnLogout();
     const { error } = await supabase.auth.signOut();
     if (!error) {
       setAuthState({

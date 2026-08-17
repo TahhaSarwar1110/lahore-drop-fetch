@@ -26,6 +26,9 @@ import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import ManagerOrderDetails from "./pages/manager/ManagerOrderDetails";
 import { PricingManagement } from "./pages/manager/PricingManagement";
 import AssignRider from "./pages/manager/AssignRider";
+import Notifications from "./pages/Notifications";
+import NotificationSettings from "./pages/NotificationSettings";
+import { PushOptInBanner } from "./components/notifications/PushOptInBanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +50,9 @@ const App = () => (
           <Route path="/rider/order/:orderId" element={<RiderOrderDetails />} />
           <Route path="/track" element={<TrackOrder />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/settings/notifications" element={<NotificationSettings />} />
+
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/orders/:orderId" element={<AdminOrderDetails />} />
           <Route path="/admin/reports" element={<BusinessOverview />} />
@@ -63,6 +69,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <PushOptInBanner />
       </TooltipProvider>
     </BrowserRouter>
   </QueryClientProvider>

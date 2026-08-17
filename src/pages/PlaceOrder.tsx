@@ -16,6 +16,7 @@ import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 import { useAuth } from "@/hooks/useAuth";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
+import { triggerNotification } from "@/utils/notify";
 import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 import {
   Select,
@@ -256,6 +257,7 @@ const PlaceOrder = () => {
       if (itemsError) throw itemsError;
 
       const shortId = orderData.id.slice(0, 8);
+      await triggerNotification({ event_type: "order_placed", order_id: orderData.id });
       await sendWhatsAppNotification({
         userId: userId,
         templateName: WHATSAPP_TEMPLATES.orderReceived.name,

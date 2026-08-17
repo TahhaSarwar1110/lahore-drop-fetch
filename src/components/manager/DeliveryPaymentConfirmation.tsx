@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, Clock, Truck, ExternalLink, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { createNotification } from "@/utils/notificationHelper";
+import { triggerNotification } from "@/utils/notify";
 
 interface Props {
   orderId: string;
@@ -49,23 +49,11 @@ export const DeliveryPaymentConfirmation = ({
 
       if (error) throw error;
 
-      await createNotification({
-        userId,
-        title: "Delivery Payment Confirmed",
-        message: `Your delivery payment for order #${orderId.slice(0, 8)} has been confirmed. Your order will now be delivered.`,
-        type: "delivery_payment_confirmed",
-        orderId,
+      await triggerNotification({
+        event_type: "delivery_payment_confirmed",
+        order_id: orderId,
       });
 
-      if (assignedRiderId) {
-        await createNotification({
-          userId: assignedRiderId,
-          title: "Delivery Payment Received",
-          message: `Delivery payment for order #${orderId.slice(0, 8)} is confirmed. You can now proceed to mark this order as delivered.`,
-          type: "delivery_payment_confirmed_rider",
-          orderId,
-        });
-      }
 
       toast.success("Delivery payment confirmed");
       onUpdate();
