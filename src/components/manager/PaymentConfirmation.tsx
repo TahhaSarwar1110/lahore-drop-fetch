@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, CheckCircle, Clock, CreditCard, ExternalLink, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { createNotification } from "@/utils/notificationHelper";
+import { triggerNotification } from "@/utils/notify";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 

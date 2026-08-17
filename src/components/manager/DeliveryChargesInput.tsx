@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Truck, CheckCircle, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
+import { sendNotificationEmail } from "@/utils/notificationHelper";
+import { triggerNotification } from "@/utils/notify";
 
 interface DeliveryChargesInputProps {
   orderId: string;

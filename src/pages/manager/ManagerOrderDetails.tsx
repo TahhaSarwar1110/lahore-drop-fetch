@@ -13,7 +13,8 @@ import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
 import { PaymentConfirmation } from "@/components/manager/PaymentConfirmation";
 import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput";
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
-import { createNotification, sendNotificationEmail } from "@/utils/notificationHelper";
+import { sendNotificationEmail } from "@/utils/notificationHelper";
+import { triggerNotification } from "@/utils/notify";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 
