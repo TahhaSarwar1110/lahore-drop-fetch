@@ -74,23 +74,9 @@ export const PaymentUpload = ({
 
       if (updateError) throw updateError;
 
-      // Notify managers about payment submission
-      const { data: managers } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .in("role", ["manager", "admin"]);
+      // Server resolves manager/admin recipients, de-duplicates and fans out to push
+      await triggerNotification({ event_type: "payment_submitted", order_id: orderId });
 
-      if (managers) {
-        for (const manager of managers) {
-          await createNotification({
-            userId: manager.user_id,
-            title: "Payment Submitted",
-            message: `Customer has submitted payment proof for order #${orderId.slice(0, 8)}. Please verify and confirm.`,
-            type: "payment_submitted",
-            orderId,
-          });
-        }
-      }
 
       toast.success("Payment proof uploaded successfully!");
       setSelectedFile(null);
