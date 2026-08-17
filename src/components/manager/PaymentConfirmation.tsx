@@ -52,23 +52,11 @@ export const PaymentConfirmation = ({
       if (error) throw error;
 
       // Notify customer
-      await createNotification({
-        userId,
-        title: "Payment Confirmed",
-        message: `Your payment for order #${orderId.slice(0, 8)} has been confirmed. Your order is now being processed.`,
-        type: "payment_confirmed",
-        orderId,
-      });
+      // One event -> customer + assigned rider, idempotent, in-app + push
+      await triggerNotification({ event_type: "payment_confirmed", order_id: orderId });
 
-      // Notify assigned rider if exists
       if (assignedRiderId) {
-        await createNotification({
-          userId: assignedRiderId,
-          title: "Payment Received - Ready for Pickup",
-          message: `Payment for order #${orderId.slice(0, 8)} has been confirmed. You can now start the pickup and delivery process.`,
-          type: "payment_confirmed_rider",
-          orderId,
-        });
+
 
         await sendWhatsAppNotification({
           userId: assignedRiderId,
