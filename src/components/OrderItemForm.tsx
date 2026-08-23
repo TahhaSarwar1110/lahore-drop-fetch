@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Plus, Upload, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Upload, MapPin, ChevronDown, ChevronUp, Camera, Image as ImageIcon, Eye, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Capacitor } from "@capacitor/core";
+import { Camera as CapCamera, CameraResultType, CameraSource } from "@capacitor/camera";
 
 export interface OrderItem {
   id: string;
@@ -31,10 +34,34 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
   const [itemType, setItemType] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string>("");
+  const [viewImageOpen, setViewImageOpen] = useState(false);
   const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showPickupMap, setShowPickupMap] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const isNative = Capacitor.isNativePlatform();
+  const previewSrc = localPreviewUrl || existingImageUrl || "";
+
+  const resetFields = () => {
+    setFormData({});
+    setImageFile(null);
+    setLocalPreviewUrl(null);
+    setExistingImageUrl("");
+    setPickupLocation(null);
+    setShowPickupMap(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  };
+
+  const handleItemTypeChange = (value: string) => {
+    if (value === itemType) return;
+    setItemType(value);
+    resetFields();
+  };
 
   useEffect(() => {
     if (initialItem) {
@@ -42,6 +69,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
       setFormData(initialItem.itemData || {});
       setExistingImageUrl(initialItem.imageUrl || "");
       setImageFile(null);
+      setLocalPreviewUrl(null);
       if (initialItem.pickupLat != null && initialItem.pickupLng != null) {
         setPickupLocation({ lat: initialItem.pickupLat, lng: initialItem.pickupLng });
       } else {
@@ -49,6 +77,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
       }
     }
   }, [initialItem]);
+
 
   const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean; min?: number }[]> = {
     Cloth: [
