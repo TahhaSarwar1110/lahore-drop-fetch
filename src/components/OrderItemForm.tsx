@@ -278,7 +278,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     <div className="space-y-5 w-full max-w-full overflow-hidden">
       <div className="space-y-2 w-full">
         <label className="mobile-label">Item Type</label>
-        <Select value={itemType} onValueChange={setItemType}>
+        <Select value={itemType} onValueChange={handleItemTypeChange}>
           <SelectTrigger className="mobile-input w-full">
             <SelectValue placeholder="Select item type" />
           </SelectTrigger>
