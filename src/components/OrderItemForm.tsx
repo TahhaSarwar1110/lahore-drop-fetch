@@ -1,14 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Plus, Upload, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Upload, MapPin, ChevronDown, ChevronUp, Camera, Image as ImageIcon, Eye, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Capacitor } from "@capacitor/core";
+import { Camera as CapCamera, CameraResultType, CameraSource } from "@capacitor/camera";
 
 export interface OrderItem {
   id: string;
@@ -31,10 +34,34 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
   const [itemType, setItemType] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string>("");
+  const [viewImageOpen, setViewImageOpen] = useState(false);
   const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showPickupMap, setShowPickupMap] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const isNative = Capacitor.isNativePlatform();
+  const previewSrc = localPreviewUrl || existingImageUrl || "";
+
+  const resetFields = () => {
+    setFormData({});
+    setImageFile(null);
+    setLocalPreviewUrl(null);
+    setExistingImageUrl("");
+    setPickupLocation(null);
+    setShowPickupMap(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  };
+
+  const handleItemTypeChange = (value: string) => {
+    if (value === itemType) return;
+    setItemType(value);
+    resetFields();
+  };
 
   useEffect(() => {
     if (initialItem) {
@@ -42,6 +69,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
       setFormData(initialItem.itemData || {});
       setExistingImageUrl(initialItem.imageUrl || "");
       setImageFile(null);
+      setLocalPreviewUrl(null);
       if (initialItem.pickupLat != null && initialItem.pickupLng != null) {
         setPickupLocation({ lat: initialItem.pickupLat, lng: initialItem.pickupLng });
       } else {
@@ -49,6 +77,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
       }
     }
   }, [initialItem]);
+
 
   const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean; min?: number }[]> = {
     Cloth: [
@@ -96,20 +125,61 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     setFormData({ ...formData, [label]: value });
   };
 
+  const setSelectedFile = (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+    setImageFile(file);
+    setLocalPreviewUrl(URL.createObjectURL(file));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Image must be less than 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
-      setImageFile(file);
+      setSelectedFile(e.target.files[0]);
     }
   };
+
+  const nativePick = async (source: CameraSource) => {
+    try {
+      const image = await CapCamera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source,
+      });
+      if (image.dataUrl) {
+        const blob = await (await fetch(image.dataUrl)).blob();
+        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: "image/jpeg" });
+        setSelectedFile(file);
+      }
+    } catch (error) {
+      console.error("Image pick error:", error);
+    }
+  };
+
+  const handleTakePhoto = () => {
+    if (isNative) return nativePick(CameraSource.Camera);
+    cameraInputRef.current?.click();
+  };
+
+  const handleChooseFromGallery = () => {
+    if (isNative) return nativePick(CameraSource.Photos);
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setLocalPreviewUrl(null);
+    setExistingImageUrl("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  };
+
 
   const isFormValid = () => {
     if (!itemType) return false;
@@ -195,11 +265,8 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     
     // Reset form
     setItemType("");
-    setFormData({});
-    setImageFile(null);
-    setExistingImageUrl("");
-    setPickupLocation(null);
-    setShowPickupMap(false);
+    resetFields();
+
     
     toast({
       title: initialItem ? "Item Updated" : "Item Added",
@@ -211,7 +278,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     <div className="space-y-5 w-full max-w-full overflow-hidden">
       <div className="space-y-2 w-full">
         <label className="mobile-label">Item Type</label>
-        <Select value={itemType} onValueChange={setItemType}>
+        <Select value={itemType} onValueChange={handleItemTypeChange}>
           <SelectTrigger className="mobile-input w-full">
             <SelectValue placeholder="Select item type" />
           </SelectTrigger>
@@ -276,26 +343,73 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
               Attach Image {itemType === "Cloth" ? <span className="text-destructive ml-1">*</span> : "(Optional)"}
             </label>
             <div className="flex flex-col gap-2 w-full">
-              <Input
+              <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="mobile-input w-full file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary/10 file:text-primary"
+                className="hidden"
               />
-              {imageFile && (
-                <span className="text-sm text-muted-foreground flex items-center">
-                  <Upload className="h-4 w-4 mr-1 shrink-0" />
-                  <span className="truncate">{imageFile.name}</span>
-                </span>
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+
+              <div className="flex gap-2 w-full">
+                <Button type="button" variant="outline" onClick={handleTakePhoto} className="flex-1 h-12 rounded-xl">
+                  <Camera className="h-4 w-4 mr-2" />
+                  Take Photo
+                </Button>
+                <Button type="button" variant="outline" onClick={handleChooseFromGallery} className="flex-1 h-12 rounded-xl">
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Gallery
+                </Button>
+              </div>
+
+              {previewSrc && (
+                <div className="rounded-xl border border-border p-2 space-y-2">
+                  <img
+                    src={previewSrc}
+                    alt="Attached item image preview"
+                    className="w-full max-h-40 object-contain rounded-lg"
+                  />
+                  {imageFile && (
+                    <span className="text-sm text-muted-foreground flex items-center">
+                      <Upload className="h-4 w-4 mr-1 shrink-0" />
+                      <span className="truncate">{imageFile.name}</span>
+                    </span>
+                  )}
+                  <div className="flex gap-2">
+                    <Button type="button" variant="secondary" size="sm" className="flex-1" onClick={() => setViewImageOpen(true)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                    <Button type="button" variant="destructive" size="sm" className="flex-1" onClick={handleRemoveImage}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove
+                    </Button>
+                  </div>
+                </div>
               )}
-              {!imageFile && existingImageUrl && (
-                <span className="text-sm text-muted-foreground">Current image attached (upload to replace)</span>
-              )}
-              {itemType === "Cloth" && !imageFile && !existingImageUrl && (
+
+              {itemType === "Cloth" && !previewSrc && (
                 <span className="text-xs text-destructive">Image is required for clothing items</span>
               )}
             </div>
+
+            <Dialog open={viewImageOpen} onOpenChange={setViewImageOpen}>
+              <DialogContent className="max-w-lg">
+                {previewSrc && (
+                  <img src={previewSrc} alt="Attached item image" className="w-full max-h-[70vh] object-contain rounded-lg" />
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
+
 
 
           <div className="border-t pt-4 space-y-4 w-full">
