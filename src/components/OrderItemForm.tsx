@@ -265,11 +265,8 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     
     // Reset form
     setItemType("");
-    setFormData({});
-    setImageFile(null);
-    setExistingImageUrl("");
-    setPickupLocation(null);
-    setShowPickupMap(false);
+    resetFields();
+
     
     toast({
       title: initialItem ? "Item Updated" : "Item Added",
