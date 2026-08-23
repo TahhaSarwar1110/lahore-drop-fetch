@@ -125,20 +125,61 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     setFormData({ ...formData, [label]: value });
   };
 
+  const setSelectedFile = (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+    setImageFile(file);
+    setLocalPreviewUrl(URL.createObjectURL(file));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Image must be less than 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
-      setImageFile(file);
+      setSelectedFile(e.target.files[0]);
     }
   };
+
+  const nativePick = async (source: CameraSource) => {
+    try {
+      const image = await CapCamera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source,
+      });
+      if (image.dataUrl) {
+        const blob = await (await fetch(image.dataUrl)).blob();
+        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: "image/jpeg" });
+        setSelectedFile(file);
+      }
+    } catch (error) {
+      console.error("Image pick error:", error);
+    }
+  };
+
+  const handleTakePhoto = () => {
+    if (isNative) return nativePick(CameraSource.Camera);
+    cameraInputRef.current?.click();
+  };
+
+  const handleChooseFromGallery = () => {
+    if (isNative) return nativePick(CameraSource.Photos);
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setLocalPreviewUrl(null);
+    setExistingImageUrl("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  };
+
 
   const isFormValid = () => {
     if (!itemType) return false;
