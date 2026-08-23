@@ -343,26 +343,73 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
               Attach Image {itemType === "Cloth" ? <span className="text-destructive ml-1">*</span> : "(Optional)"}
             </label>
             <div className="flex flex-col gap-2 w-full">
-              <Input
+              <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="mobile-input w-full file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary/10 file:text-primary"
+                className="hidden"
               />
-              {imageFile && (
-                <span className="text-sm text-muted-foreground flex items-center">
-                  <Upload className="h-4 w-4 mr-1 shrink-0" />
-                  <span className="truncate">{imageFile.name}</span>
-                </span>
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+
+              <div className="flex gap-2 w-full">
+                <Button type="button" variant="outline" onClick={handleTakePhoto} className="flex-1 h-12 rounded-xl">
+                  <Camera className="h-4 w-4 mr-2" />
+                  Take Photo
+                </Button>
+                <Button type="button" variant="outline" onClick={handleChooseFromGallery} className="flex-1 h-12 rounded-xl">
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Gallery
+                </Button>
+              </div>
+
+              {previewSrc && (
+                <div className="rounded-xl border border-border p-2 space-y-2">
+                  <img
+                    src={previewSrc}
+                    alt="Attached item image preview"
+                    className="w-full max-h-40 object-contain rounded-lg"
+                  />
+                  {imageFile && (
+                    <span className="text-sm text-muted-foreground flex items-center">
+                      <Upload className="h-4 w-4 mr-1 shrink-0" />
+                      <span className="truncate">{imageFile.name}</span>
+                    </span>
+                  )}
+                  <div className="flex gap-2">
+                    <Button type="button" variant="secondary" size="sm" className="flex-1" onClick={() => setViewImageOpen(true)}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                    <Button type="button" variant="destructive" size="sm" className="flex-1" onClick={handleRemoveImage}>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove
+                    </Button>
+                  </div>
+                </div>
               )}
-              {!imageFile && existingImageUrl && (
-                <span className="text-sm text-muted-foreground">Current image attached (upload to replace)</span>
-              )}
-              {itemType === "Cloth" && !imageFile && !existingImageUrl && (
+
+              {itemType === "Cloth" && !previewSrc && (
                 <span className="text-xs text-destructive">Image is required for clothing items</span>
               )}
             </div>
+
+            <Dialog open={viewImageOpen} onOpenChange={setViewImageOpen}>
+              <DialogContent className="max-w-lg">
+                {previewSrc && (
+                  <img src={previewSrc} alt="Attached item image" className="w-full max-h-[70vh] object-contain rounded-lg" />
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
+
 
 
           <div className="border-t pt-4 space-y-4 w-full">
