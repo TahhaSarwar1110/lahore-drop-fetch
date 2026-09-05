@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "95346303601",
+    "project_id": "tabedaar-3e681",
+    "storage_bucket": "tabedaar-3e681.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95346303601:android:0c4438ebfe92cad0f1b1d0",
+        "android_client_info": {
+          "package_name": "app.lovable.dc8528808d134e6b95c8cce4660ffa8d"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABP__Buv6E5omoiwqt0yjyp8TNYvkIFcU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
