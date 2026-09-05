@@ -186,7 +186,15 @@ const getFcmAccessToken = async (): Promise<{ token: string; projectId: string }
   const now = Math.floor(Date.now() / 1000);
   if (cachedFcm && cachedFcm.exp - 60 > now) return cachedFcm;
   try {
-    const sa = JSON.parse(FCM_SERVICE_ACCOUNT_JSON);
+    const rawSa = FCM_SERVICE_ACCOUNT_JSON.trim().replace(/^['"]|['"]$/g, "");
+    if (!rawSa.startsWith("{")) {
+      log("fcm_credentials_invalid", {
+        hint: "FCM_SERVICE_ACCOUNT_JSON must be the full service account JSON file contents, not just the private key",
+      });
+      return null;
+    }
+    const sa = JSON.parse(rawSa);
+
     const header = b64url(new TextEncoder().encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
     const claims = b64url(new TextEncoder().encode(JSON.stringify({
       iss: sa.client_email,
