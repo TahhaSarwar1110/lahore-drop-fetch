@@ -56,12 +56,19 @@ const textPayload = (to: string, message: string) => ({
   text: { preview_url: false, body: message },
 });
 
+/**
+ * Allows remapping a template name without a code change, e.g. set secret
+ * WHATSAPP_TEMPLATE_TABEDAAR_ORDER_RECEIVED=order_received_v2
+ */
+const resolveTemplateName = (name: string): string =>
+  Deno.env.get(`WHATSAPP_TEMPLATE_${name.toUpperCase()}`) || name;
+
 const templatePayload = (to: string, body: WhatsAppRequest) => ({
   messaging_product: "whatsapp",
   to,
   type: "template",
   template: {
-    name: body.templateName,
+    name: resolveTemplateName(body.templateName as string),
     language: { code: body.templateLanguage || "en" },
     components: body.templateParams?.length
       ? [
@@ -96,11 +103,13 @@ const hasOpenServiceWindow = async (
 const sendMessage = async (to: string, body: WhatsAppRequest, supabase: any) => {
   // Business-initiated messages MUST use an approved template. Plain text is
   // only allowed when we have evidence of an open 24h customer service window.
+  let lastTemplateError: unknown = null;
   if (body.templateName) {
     const attempt = await post(templatePayload(to, body));
     if (attempt.ok) return { to, ok: true, channel: "template", data: attempt.data };
+    lastTemplateError = attempt.data;
     console.error(
-      `WhatsApp template "${body.templateName}" failed:`,
+      `WhatsApp template "${resolveTemplateName(body.templateName)}" failed:`,
       JSON.stringify(attempt.data),
     );
   }
@@ -112,7 +121,12 @@ const sendMessage = async (to: string, body: WhatsAppRequest, supabase: any) => 
         body.templateName ? " and template delivery failed" : " and no template provided"
       }`,
     );
-    return { to, ok: false, error: "no_approved_template_delivery" };
+    return {
+      to,
+      ok: false,
+      error: "no_approved_template_delivery",
+      details: lastTemplateError,
+    };
   }
 
   const fallback = await post(textPayload(to, body.message));
