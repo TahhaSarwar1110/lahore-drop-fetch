@@ -260,6 +260,7 @@ const PlaceOrder = () => {
       await triggerNotification({ event_type: "order_placed", order_id: orderData.id });
       await sendWhatsAppNotification({
         userId: userId,
+        phone: `${countryCode}${phone}`,
         templateName: WHATSAPP_TEMPLATES.orderReceived.name,
         templateLanguage: WHATSAPP_TEMPLATES.orderReceived.language,
         templateParams: [fullName, shortId, String(orderItems.length)],
