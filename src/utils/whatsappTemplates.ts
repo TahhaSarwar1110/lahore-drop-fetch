@@ -9,7 +9,7 @@
  * If a template name changes in WhatsApp Manager, change it here only.
  */
 export const WHATSAPP_TEMPLATES = {
-  orderReceived: { name: "tabedaar_order_received", language: "en" },
+  orderReceived: { name: "order", language: "en" },
   newOrderManager: { name: "tabedaar_new_order_manager", language: "en" },
   itemApproved: { name: "tabedaar_item_approved", language: "en" },
   itemRejected: { name: "tabedaar_item_rejected", language: "en" },
