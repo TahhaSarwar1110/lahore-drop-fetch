@@ -439,7 +439,7 @@ serve(async (req) => {
               JSON.stringify(payload),
             );
           } else {
-            if (!fcm) {
+            if (!fcmReady) {
               log("native_push_skipped_no_credentials", { platform: s.platform });
               await admin.from("notification_deliveries").insert({
                 notification_id: target.id,
@@ -447,16 +447,17 @@ serve(async (req) => {
                 channel,
                 status: "skipped",
                 event_type: body.event_type,
-                error: "FCM credentials not configured",
+                error: "FCM connector not configured",
               });
               continue;
             }
             const res = await fetch(
-              `https://fcm.googleapis.com/v1/projects/${fcm.projectId}/messages:send`,
+              `${GATEWAY_URL}/v1/projects/_/messages:send`,
               {
                 method: "POST",
                 headers: {
-                  Authorization: `Bearer ${fcm.token}`,
+                  Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                  "X-Connection-Api-Key": FIREBASE_MESSAGING_API_KEY,
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
@@ -474,13 +475,14 @@ serve(async (req) => {
             );
             if (!res.ok) {
               const status = res.status;
+              const errorBody = await res.text();
               if (status === 404 || status === 400) {
                 await admin.from("push_subscriptions")
                   .update({ revoked_at: new Date().toISOString() })
                   .eq("id", s.id);
-                log("invalid_token_revoked", { platform: s.platform, status });
+                log("invalid_token_revoked", { platform: s.platform, status, body: errorBody.slice(0, 200) });
               }
-              throw new Error(`FCM responded ${status}`);
+              throw new Error(`FCM gateway responded ${status}: ${errorBody.slice(0, 200)}`);
             }
           }
           pushSent++;
