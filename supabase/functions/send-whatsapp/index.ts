@@ -105,8 +105,16 @@ const sendMessage = async (to: string, body: WhatsAppRequest, supabase: any) => 
   // only allowed when we have evidence of an open 24h customer service window.
   let lastTemplateError: unknown = null;
   if (body.templateName) {
-    const attempt = await post(templatePayload(to, body));
-    if (attempt.ok) return { to, ok: true, channel: "template", data: attempt.data };
+    // Try the requested language, then common variants (Meta is strict here).
+    const languages = [...new Set([body.templateLanguage || "en", "en_US", "en"])];
+    let attempt = { ok: false, data: null as unknown };
+    for (const language of languages) {
+      attempt = await post(templatePayload(to, { ...body, templateLanguage: language }));
+      if (attempt.ok) {
+        return { to, ok: true, channel: "template", language, data: attempt.data };
+      }
+      lastTemplateError = attempt.data;
+    }
     lastTemplateError = attempt.data;
     console.error(
       `WhatsApp template "${resolveTemplateName(body.templateName)}" failed:`,

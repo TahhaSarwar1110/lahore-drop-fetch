@@ -263,7 +263,6 @@ const PlaceOrder = () => {
         phone: `${countryCode}${phone}`,
         templateName: WHATSAPP_TEMPLATES.orderReceived.name,
         templateLanguage: WHATSAPP_TEMPLATES.orderReceived.language,
-        templateParams: [fullName, shortId, String(orderItems.length)],
         message: `Tabedaar.com: Thank you ${fullName}! Your order #${shortId} has been placed with ${orderItems.length} item(s). Our team will review it shortly.`,
       });
       await sendWhatsAppNotification({
