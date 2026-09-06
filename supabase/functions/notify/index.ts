@@ -176,70 +176,9 @@ const log = (event: string, data: Record<string, unknown> = {}) =>
   console.log(JSON.stringify({ scope: "notify", event, ...data }));
 
 // ---------------------------------------------------------------- native push
-let cachedFcm: { token: string; exp: number; projectId: string } | null = null;
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/firebase_messaging";
 
-const b64url = (bytes: Uint8Array) =>
-  btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_")
-    .replace(/=+$/, "");
-
-const getFcmAccessToken = async (): Promise<{ token: string; projectId: string } | null> => {
-  if (!FCM_SERVICE_ACCOUNT_JSON) return null;
-  const now = Math.floor(Date.now() / 1000);
-  if (cachedFcm && cachedFcm.exp - 60 > now) return cachedFcm;
-  try {
-    const rawSa = FCM_SERVICE_ACCOUNT_JSON.trim().replace(/^['"]|['"]$/g, "");
-    if (!rawSa.startsWith("{")) {
-      log("fcm_credentials_invalid", {
-        hint: "FCM_SERVICE_ACCOUNT_JSON must be the full service account JSON file contents, not just the private key",
-      });
-      return null;
-    }
-    const sa = JSON.parse(rawSa);
-
-    const header = b64url(new TextEncoder().encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
-    const claims = b64url(new TextEncoder().encode(JSON.stringify({
-      iss: sa.client_email,
-      scope: "https://www.googleapis.com/auth/firebase.messaging",
-      aud: "https://oauth2.googleapis.com/token",
-      iat: now,
-      exp: now + 3600,
-    })));
-    const pem = (sa.private_key as string)
-      .replace(/-----BEGIN PRIVATE KEY-----/, "")
-      .replace(/-----END PRIVATE KEY-----/, "")
-      .replace(/\s+/g, "");
-    const der = Uint8Array.from(atob(pem), (c) => c.charCodeAt(0));
-    const key = await crypto.subtle.importKey(
-      "pkcs8",
-      der,
-      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-      false,
-      ["sign"],
-    );
-    const sig = new Uint8Array(
-      await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(`${header}.${claims}`)),
-    );
-    const assertion = `${header}.${claims}.${b64url(sig)}`;
-    const res = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-        assertion,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.access_token) {
-      log("fcm_token_failed", { status: res.status });
-      return null;
-    }
-    cachedFcm = { token: data.access_token, exp: now + 3300, projectId: sa.project_id };
-    return cachedFcm;
-  } catch (e) {
-    log("fcm_token_error", { message: String(e) });
-    return null;
-  }
-};
+const fcmConfigured = () => Boolean(LOVABLE_API_KEY && FIREBASE_MESSAGING_API_KEY);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
