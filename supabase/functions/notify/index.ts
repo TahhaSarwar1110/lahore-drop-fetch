@@ -401,7 +401,7 @@ serve(async (req) => {
         webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
       }
 
-      const fcm = await getFcmAccessToken();
+      const fcmReady = fcmConfigured();
 
       for (const sub of subs ?? []) {
         const s = sub as {
