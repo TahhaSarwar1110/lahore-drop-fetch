@@ -52,9 +52,29 @@ export const usePushNotifications = () => {
         .eq("user_id", user.id)
         .is("revoked_at", null)
         .limit(1);
-      setSubscribed((data ?? []).length > 0);
+      const hasRow = (data ?? []).length > 0;
+      setSubscribed(hasRow);
+
+      // Device tokens rotate (reinstall, app data cleared, token refresh), so a
+      // stored row can be stale. Silently re-register whenever permission is
+      // already granted, keeping the current token on file for this user.
+      try {
+        if (isNative()) {
+          const { PushNotifications } = await import("@capacitor/push-notifications");
+          const status = await PushNotifications.checkPermissions();
+          if (status.receive === "granted") {
+            setPermission("granted");
+            await refreshNativeToken();
+          }
+        } else if (Notification.permission === "granted") {
+          await refreshWebSubscription();
+        }
+      } catch (error) {
+        console.error("Push re-registration failed:", error);
+      }
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const saveSubscription = useCallback(
