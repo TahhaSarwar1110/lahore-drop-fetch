@@ -137,10 +137,10 @@ export const usePushNotifications = () => {
           const status = await PushNotifications.checkPermissions();
           if (status.receive === "granted") {
             setPermission("granted");
-            await refreshNativeToken();
+            if (await refreshNativeToken()) setSubscribed(true);
           }
         } else if (Notification.permission === "granted") {
-          await refreshWebSubscription();
+          if (await refreshWebSubscription()) setSubscribed(true);
         }
       } catch (error) {
         console.error("Push re-registration failed:", error);
