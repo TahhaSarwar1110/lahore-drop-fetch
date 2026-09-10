@@ -24,6 +24,79 @@ const urlBase64ToUint8Array = (base64: string) => {
 
 const LOCAL_PROMPT_KEY = "tabedaar_push_prompt_dismissed";
 
+/** Stores/refreshes this device's push subscription for the signed-in user. */
+const upsertSubscription = async (
+  platform: Platform,
+  endpoint: string,
+  keys?: { p256dh: string; auth: string },
+) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  await supabase.from("push_subscriptions").upsert(
+    {
+      user_id: user.id,
+      platform,
+      endpoint,
+      p256dh: keys?.p256dh ?? null,
+      auth: keys?.auth ?? null,
+      device_label: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 180) : null,
+      last_seen_at: new Date().toISOString(),
+      revoked_at: null,
+    },
+    { onConflict: "endpoint" },
+  );
+
+  await supabase
+    .from("notification_preferences")
+    .upsert({ user_id: user.id, push_enabled: true }, { onConflict: "user_id" });
+
+  return true;
+};
+
+/** Native: asks FCM/APNs for the current token and stores it. Permission must already be granted. */
+const refreshNativeToken = async () => {
+  const { PushNotifications } = await import("@capacitor/push-notifications");
+  const token = await new Promise<string | null>((resolve) => {
+    const timeout = setTimeout(() => resolve(null), 15000);
+    PushNotifications.addListener("registration", (t) => {
+      clearTimeout(timeout);
+      resolve(t.value);
+    });
+    PushNotifications.addListener("registrationError", () => {
+      clearTimeout(timeout);
+      resolve(null);
+    });
+    PushNotifications.register();
+  });
+  if (!token) return false;
+  return upsertSubscription(nativePlatform(), token);
+};
+
+/** Web: reuses/creates the browser push subscription and stores it. Permission must already be granted. */
+const refreshWebSubscription = async () => {
+  const { data: config } = await supabase.functions.invoke("push-config");
+  const vapidPublicKey = (config as { vapidPublicKey?: string })?.vapidPublicKey;
+  if (!vapidPublicKey) return false;
+
+  const registration = await navigator.serviceWorker.register("/push-sw.js");
+  await navigator.serviceWorker.ready;
+  const existing = await registration.pushManager.getSubscription();
+  const subscription =
+    existing ??
+    (await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+    }));
+
+  const json = subscription.toJSON() as {
+    endpoint?: string;
+    keys?: { p256dh: string; auth: string };
+  };
+  if (!json.endpoint || !json.keys) return false;
+  return upsertSubscription("web", json.endpoint, json.keys);
+};
+
 export const usePushNotifications = () => {
   const [supported, setSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | "unknown">("unknown");
