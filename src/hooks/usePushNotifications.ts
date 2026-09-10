@@ -152,30 +152,8 @@ export const usePushNotifications = () => {
 
   const saveSubscription = useCallback(
     async (platform: Platform, endpoint: string, keys?: { p256dh: string; auth: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Subscriptions are always stored against the authenticated user; the same
-      // user may have many devices/browsers.
-      await supabase.from("push_subscriptions").upsert(
-        {
-          user_id: user.id,
-          platform,
-          endpoint,
-          p256dh: keys?.p256dh ?? null,
-          auth: keys?.auth ?? null,
-          device_label: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 180) : null,
-          last_seen_at: new Date().toISOString(),
-          revoked_at: null,
-        },
-        { onConflict: "endpoint" },
-      );
-
-      await supabase
-        .from("notification_preferences")
-        .upsert({ user_id: user.id, push_enabled: true }, { onConflict: "user_id" });
-
-      setSubscribed(true);
+      const ok = await upsertSubscription(platform, endpoint, keys);
+      if (ok) setSubscribed(true);
     },
     [],
   );
