@@ -23,6 +23,8 @@ const urlBase64ToUint8Array = (base64: string) => {
 };
 
 const LOCAL_PROMPT_KEY = "tabedaar_push_prompt_dismissed";
+const LOCAL_ENDPOINT_KEY = "tabedaar_push_endpoint";
+const LOCAL_PLATFORM_KEY = "tabedaar_push_platform";
 
 /** Stores/refreshes this device's push subscription for the signed-in user. */
 const upsertSubscription = async (
@@ -35,19 +37,23 @@ const upsertSubscription = async (
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
-  await supabase.from("push_subscriptions").upsert(
-    {
-      user_id: user.id,
+  const { error: registrationError } = await supabase.functions.invoke("register-push", {
+    body: {
+      action: "register",
       platform,
       endpoint,
       p256dh: keys?.p256dh ?? null,
       auth: keys?.auth ?? null,
       device_label: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 180) : null,
-      last_seen_at: new Date().toISOString(),
-      revoked_at: null,
     },
-    { onConflict: "endpoint" },
-  );
+  });
+  if (registrationError) {
+    console.error("Push device registration failed:", registrationError);
+    return false;
+  }
+
+  localStorage.setItem(LOCAL_ENDPOINT_KEY, endpoint);
+  localStorage.setItem(LOCAL_PLATFORM_KEY, platform);
 
   if (markPreferenceEnabled) {
     await supabase
@@ -63,15 +69,16 @@ const refreshNativeToken = async () => {
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const token = await new Promise<string | null>((resolve) => {
     const timeout = setTimeout(() => resolve(null), 15000);
-    PushNotifications.addListener("registration", (t) => {
+    void PushNotifications.addListener("registration", (t) => {
       clearTimeout(timeout);
       resolve(t.value);
     });
-    PushNotifications.addListener("registrationError", () => {
+    void PushNotifications.addListener("registrationError", (error) => {
       clearTimeout(timeout);
+      console.error("Native push registration failed:", error);
       resolve(null);
     });
-    PushNotifications.register();
+    void PushNotifications.register();
   });
   if (!token) return false;
   return upsertSubscription(nativePlatform(), token, undefined, false);
@@ -191,15 +198,16 @@ export const usePushNotifications = () => {
 
         const token = await new Promise<string | null>((resolve) => {
           const timeout = setTimeout(() => resolve(null), 15000);
-          PushNotifications.addListener("registration", (t) => {
+          void PushNotifications.addListener("registration", (t) => {
             clearTimeout(timeout);
             resolve(t.value);
           });
-          PushNotifications.addListener("registrationError", () => {
+          void PushNotifications.addListener("registrationError", (error) => {
             clearTimeout(timeout);
+            console.error("Native push registration failed:", error);
             resolve(null);
           });
-          PushNotifications.register();
+          void PushNotifications.register();
         });
 
         if (!token) return { ok: false, reason: "registration_failed" as const };
@@ -302,16 +310,26 @@ export const usePushNotifications = () => {
 /** Clears this device's subscription on sign-out. */
 export const cleanupPushOnLogout = async () => {
   try {
-    if (Capacitor.isNativePlatform() || !webPushSupported()) return;
-    const registration = await navigator.serviceWorker.getRegistration("/push-sw.js");
-    const subscription = await registration?.pushManager.getSubscription();
-    if (subscription) {
-      await supabase
-        .from("push_subscriptions")
-        .update({ revoked_at: new Date().toISOString() })
-        .eq("endpoint", subscription.endpoint);
-      await subscription.unsubscribe();
+    let endpoint = localStorage.getItem(LOCAL_ENDPOINT_KEY);
+    let platform = localStorage.getItem(LOCAL_PLATFORM_KEY) as Platform | null;
+
+    if (!Capacitor.isNativePlatform() && webPushSupported()) {
+      const registration = await navigator.serviceWorker.getRegistration("/push-sw.js");
+      const subscription = await registration?.pushManager.getSubscription();
+      if (subscription) {
+        endpoint = subscription.endpoint;
+        platform = "web";
+        await subscription.unsubscribe();
+      }
     }
+
+    if (endpoint && platform) {
+      await supabase.functions.invoke("register-push", {
+        body: { action: "unregister", platform, endpoint },
+      });
+    }
+    localStorage.removeItem(LOCAL_ENDPOINT_KEY);
+    localStorage.removeItem(LOCAL_PLATFORM_KEY);
   } catch (error) {
     console.error("Push cleanup on logout failed:", error);
   }
