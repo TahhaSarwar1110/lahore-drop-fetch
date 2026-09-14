@@ -315,13 +315,29 @@ serve(async (req) => {
     const version = body.event_version ?? "v1";
 
     const created: {
-      id: string;
+      id: string | null;
       userId: string;
       link: string;
       duplicate: boolean;
     }[] = [];
 
+    // Honour the recipient's in-app preference (push has its own toggle).
+    const { data: allPrefs } = await admin
+      .from("notification_preferences")
+      .select("user_id, in_app_enabled")
+      .in("user_id", unique.map((r) => r.userId));
+    const inAppDisabled = new Set(
+      (allPrefs ?? [])
+        .filter((p: { in_app_enabled: boolean }) => p.in_app_enabled === false)
+        .map((p: { user_id: string }) => p.user_id),
+    );
+
     for (const r of unique) {
+      if (inAppDisabled.has(r.userId)) {
+        log("in_app_skipped_preference", { user_id: r.userId, event_type: body.event_type });
+        created.push({ id: null, userId: r.userId, link: linkFor(r.audience, body.order_id), duplicate: false });
+        continue;
+      }
       const dedupeKey = `${body.event_type}:${body.order_id ?? "none"}:${r.userId}:${version}`;
       const link = linkFor(r.audience, body.order_id);
 
