@@ -203,9 +203,10 @@ serve(async (req: Request): Promise<Response> => {
       return ids.filter((id) => !optedOut.has(id));
     };
 
+    /** Returns how many opted-in users were allowed through. */
     const addPhonesForUsers = async (ids: string[]) => {
       const allowed = await filterOptedIn(ids);
-      if (!allowed.length) return;
+      if (!allowed.length) return 0;
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
         .select("phone")
@@ -214,12 +215,19 @@ serve(async (req: Request): Promise<Response> => {
         const p = normalizePhone(pr.phone ?? "");
         if (p) recipients.push(p);
       });
+      return allowed.length;
     };
 
     if (body.userId) {
-      await addPhonesForUsers([body.userId]);
+      const before = recipients.length;
+      const allowed = await addPhonesForUsers([body.userId]);
+      // Profile has no usable phone: fall back to the number supplied by the caller
+      if (allowed && recipients.length === before && body.phone) {
+        const p = normalizePhone(body.phone);
+        if (p) recipients.push(p);
+      }
     } else if (body.phone) {
-      // Explicit number with no linked user (e.g. order form fallback)
+      // Explicit number with no linked user
       const p = normalizePhone(body.phone);
       if (p) recipients.push(p);
     }
