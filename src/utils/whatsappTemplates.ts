@@ -10,7 +10,10 @@
  */
 export const WHATSAPP_TEMPLATES = {
   orderReceived: { name: "order", language: "en" },
-  newOrderManager: { name: "tabedaar_new_order_manager", language: "en" },
+  // "tabedaar_new_order_manager" is not approved in the WhatsApp account yet, so
+  // manager alerts reuse the approved "order" template (no body variables).
+  // Once a dedicated manager template is approved, set its name here.
+  newOrderManager: { name: "order", language: "en" },
   itemApproved: { name: "tabedaar_item_approved", language: "en" },
   itemRejected: { name: "tabedaar_item_rejected", language: "en" },
   orderConfirmed: { name: "tabedaar_order_confirmed", language: "en" },

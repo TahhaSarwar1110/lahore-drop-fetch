@@ -269,7 +269,6 @@ const PlaceOrder = () => {
         role: "manager",
         templateName: WHATSAPP_TEMPLATES.newOrderManager.name,
         templateLanguage: WHATSAPP_TEMPLATES.newOrderManager.language,
-        templateParams: [shortId, fullName, String(orderItems.length)],
         message: `Tabedaar.com: New order #${shortId} placed by ${fullName} (${countryCode}${phone}) with ${orderItems.length} item(s). Please review it.`,
       });
 
