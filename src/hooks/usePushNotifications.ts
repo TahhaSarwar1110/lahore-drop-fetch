@@ -29,6 +29,8 @@ const upsertSubscription = async (
   platform: Platform,
   endpoint: string,
   keys?: { p256dh: string; auth: string },
+  /** Only a deliberate opt-in may switch the push preference back on. */
+  markPreferenceEnabled = true,
 ) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
@@ -47,9 +49,11 @@ const upsertSubscription = async (
     { onConflict: "endpoint" },
   );
 
-  await supabase
-    .from("notification_preferences")
-    .upsert({ user_id: user.id, push_enabled: true }, { onConflict: "user_id" });
+  if (markPreferenceEnabled) {
+    await supabase
+      .from("notification_preferences")
+      .upsert({ user_id: user.id, push_enabled: true }, { onConflict: "user_id" });
+  }
 
   return true;
 };
