@@ -482,7 +482,7 @@ serve(async (req) => {
                     notification: { title, body: message },
                     data: {
                       url: target.link,
-                      notificationId: target.id,
+                      notificationId: target.id ?? "",
                       eventType: body.event_type,
                     },
                   },
@@ -535,7 +535,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        created: created.length,
+        created: created.filter((c) => c.id).length,
         recipients: unique.length,
         push_sent: pushSent,
       }),
