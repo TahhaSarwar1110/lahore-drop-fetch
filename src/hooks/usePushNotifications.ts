@@ -29,6 +29,8 @@ const upsertSubscription = async (
   platform: Platform,
   endpoint: string,
   keys?: { p256dh: string; auth: string },
+  /** Only a deliberate opt-in may switch the push preference back on. */
+  markPreferenceEnabled = true,
 ) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
@@ -47,9 +49,11 @@ const upsertSubscription = async (
     { onConflict: "endpoint" },
   );
 
-  await supabase
-    .from("notification_preferences")
-    .upsert({ user_id: user.id, push_enabled: true }, { onConflict: "user_id" });
+  if (markPreferenceEnabled) {
+    await supabase
+      .from("notification_preferences")
+      .upsert({ user_id: user.id, push_enabled: true }, { onConflict: "user_id" });
+  }
 
   return true;
 };
@@ -70,7 +74,7 @@ const refreshNativeToken = async () => {
     PushNotifications.register();
   });
   if (!token) return false;
-  return upsertSubscription(nativePlatform(), token);
+  return upsertSubscription(nativePlatform(), token, undefined, false);
 };
 
 /** Web: reuses/creates the browser push subscription and stores it. Permission must already be granted. */
@@ -94,7 +98,7 @@ const refreshWebSubscription = async () => {
     keys?: { p256dh: string; auth: string };
   };
   if (!json.endpoint || !json.keys) return false;
-  return upsertSubscription("web", json.endpoint, json.keys);
+  return upsertSubscription("web", json.endpoint, json.keys, false);
 };
 
 export const usePushNotifications = () => {
@@ -126,7 +130,18 @@ export const usePushNotifications = () => {
         .is("revoked_at", null)
         .limit(1);
       const hasRow = (data ?? []).length > 0;
-      setSubscribed(hasRow);
+
+      const { data: pref } = await supabase
+        .from("notification_preferences")
+        .select("push_enabled")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const pushOptedOut = pref ? pref.push_enabled === false : false;
+
+      setSubscribed(hasRow && !pushOptedOut);
+
+      // Respect an explicit opt-out: never silently re-register.
+      if (pushOptedOut) return;
 
       // Device tokens rotate (reinstall, app data cleared, token refresh), so a
       // stored row can be stale. Silently re-register whenever permission is
