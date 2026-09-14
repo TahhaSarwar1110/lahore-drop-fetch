@@ -188,18 +188,39 @@ serve(async (req: Request): Promise<Response> => {
     // Resolve recipients
     const recipients: string[] = [];
 
-    if (body.phone) {
-      const p = normalizePhone(body.phone);
-      if (p) recipients.push(p);
-    }
+    /** Drops users who switched WhatsApp notifications off in their settings. */
+    const filterOptedIn = async (ids: string[]): Promise<string[]> => {
+      if (!ids.length) return [];
+      const { data: prefs } = await supabaseAdmin
+        .from("notification_preferences")
+        .select("user_id, whatsapp_enabled")
+        .in("user_id", ids);
+      const optedOut = new Set(
+        (prefs ?? [])
+          .filter((p: { whatsapp_enabled: boolean }) => p.whatsapp_enabled === false)
+          .map((p: { user_id: string }) => p.user_id),
+      );
+      return ids.filter((id) => !optedOut.has(id));
+    };
 
-    if (body.userId) {
-      const { data: profile } = await supabaseAdmin
+    const addPhonesForUsers = async (ids: string[]) => {
+      const allowed = await filterOptedIn(ids);
+      if (!allowed.length) return;
+      const { data: profiles } = await supabaseAdmin
         .from("profiles")
         .select("phone")
-        .eq("id", body.userId)
-        .maybeSingle();
-      const p = normalizePhone(profile?.phone ?? "");
+        .in("id", allowed);
+      (profiles ?? []).forEach((pr) => {
+        const p = normalizePhone(pr.phone ?? "");
+        if (p) recipients.push(p);
+      });
+    };
+
+    if (body.userId) {
+      await addPhonesForUsers([body.userId]);
+    } else if (body.phone) {
+      // Explicit number with no linked user (e.g. order form fallback)
+      const p = normalizePhone(body.phone);
       if (p) recipients.push(p);
     }
 
@@ -208,17 +229,7 @@ serve(async (req: Request): Promise<Response> => {
         .from("user_roles")
         .select("user_id")
         .eq("role", body.role);
-      const ids = (roleRows ?? []).map((r) => r.user_id);
-      if (ids.length) {
-        const { data: profiles } = await supabaseAdmin
-          .from("profiles")
-          .select("phone")
-          .in("id", ids);
-        (profiles ?? []).forEach((pr) => {
-          const p = normalizePhone(pr.phone ?? "");
-          if (p) recipients.push(p);
-        });
-      }
+      await addPhonesForUsers((roleRows ?? []).map((r) => r.user_id));
     }
 
     const unique = [...new Set(recipients)];
