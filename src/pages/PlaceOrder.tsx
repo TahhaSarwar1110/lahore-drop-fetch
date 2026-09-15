@@ -194,12 +194,7 @@ const PlaceOrder = () => {
   };
 
   const calculateTotalPrice = () => {
-    return orderItems.reduce((total, item) => {
-      const priceField = Object.entries(item.itemData).find(
-        ([key]) => key.toLowerCase().includes("price")
-      );
-      return total + (priceField ? parseFloat(priceField[1]) || 0 : 0);
-    }, 0);
+    return orderItems.reduce((total, item) => total + getItemTotalPrice(item.itemData), 0);
   };
 
   const handleSubmitOrder = async () => {
