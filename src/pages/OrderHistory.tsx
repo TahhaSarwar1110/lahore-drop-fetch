@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Package, Eye, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
+import { getItemTotalPrice } from "@/utils/orderPricing";
 import {
   Table,
   TableBody,

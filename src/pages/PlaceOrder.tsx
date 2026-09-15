@@ -17,6 +17,7 @@ import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 import { useAuth } from "@/hooks/useAuth";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 import { triggerNotification } from "@/utils/notify";
+import { getItemTotalPrice } from "@/utils/orderPricing";
 import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 import {
   Select,
