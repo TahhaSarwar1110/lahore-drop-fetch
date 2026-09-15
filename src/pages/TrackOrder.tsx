@@ -8,7 +8,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, Circle, Package, Paperclip } from "lucide-react";
+import { CheckCircle2, Circle, Package, Paperclip, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -301,7 +301,18 @@ const TrackOrder = () => {
 
       <main className="flex-1 py-4 sm:py-8 native-scroll">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h1 className="mobile-header mb-6">Track Your Order</h1>
+          <div className="flex items-center gap-3 mb-6">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10 rounded-full shrink-0"
+              onClick={() => navigate(-1)}
+              aria-label="Go back"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="mobile-header mb-0">Track Your Order</h1>
+          </div>
 
           <Card className="mobile-card mb-6">
             <CardContent className="p-4 sm:p-6">
