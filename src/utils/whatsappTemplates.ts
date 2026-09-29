@@ -9,7 +9,8 @@
  * If a template name changes in WhatsApp Manager, change it here only.
  */
 export const WHATSAPP_TEMPLATES = {
-  orderReceived: { name: "order", language: "en" },
+  // Sent server-side by send-whatsapp (event "order_received"); listed for reference.
+  orderReceived: { name: "tabedaar_order_received", language: "en" },
   // "tabedaar_new_order_manager" is not approved in the WhatsApp account yet, so
   // manager alerts reuse the approved "order" template (no body variables).
   // Once a dedicated manager template is approved, set its name here.

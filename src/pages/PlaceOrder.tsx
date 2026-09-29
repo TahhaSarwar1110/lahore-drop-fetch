@@ -254,13 +254,13 @@ const PlaceOrder = () => {
 
       const shortId = orderData.id.slice(0, 8);
       await triggerNotification({ event_type: "order_placed", order_id: orderData.id });
-      await sendWhatsAppNotification({
-        userId: userId,
-        phone: `${countryCode}${phone}`,
-        templateName: WHATSAPP_TEMPLATES.orderReceived.name,
-        templateLanguage: WHATSAPP_TEMPLATES.orderReceived.language,
-        message: `Tabedaar.com: Thank you ${fullName}! Your order #${shortId} has been placed with ${orderItems.length} item(s). Our team will review it shortly.`,
-      });
+      // Customer confirmation: built entirely server-side from the saved order.
+      supabase.functions
+        .invoke("send-whatsapp", { body: { event: "order_received", orderId: orderData.id } })
+        .then(({ data, error }) => {
+          if (error || data?.success === false) console.error("WhatsApp order confirmation failed:", error ?? data);
+        })
+        .catch((e) => console.error("WhatsApp order confirmation failed:", e));
       await sendWhatsAppNotification({
         role: "manager",
         templateName: WHATSAPP_TEMPLATES.newOrderManager.name,
