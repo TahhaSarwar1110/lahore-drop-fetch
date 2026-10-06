@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { triggerNotification } from "@/utils/notify";
 import { Loader2, Package, Check, Upload, Image as ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RiderMapView } from "@/components/map/RiderMapView";
@@ -134,6 +135,7 @@ export const OrderDetailsDialog = ({
         });
 
       if (insertError) throw insertError;
+      void triggerNotification({ event_type: "order_picked_up", order_id: orderId, event_version: itemId });
 
       toast.success("Item marked as picked with proof uploaded");
       await fetchOrderItems();
