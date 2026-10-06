@@ -261,6 +261,10 @@ const PlaceOrder = () => {
           if (error || data?.success === false) console.error("WhatsApp order confirmation failed:", error ?? data);
         })
         .catch((e) => console.error("WhatsApp order confirmation failed:", e));
+      supabase.functions
+        .invoke("send-notification-email", { body: { event: "order_received", orderId: orderData.id } })
+        .then(({ error }) => { if (error) console.error("Email order confirmation failed:", error); })
+        .catch((e) => console.error("Email order confirmation failed:", e));
       await sendWhatsAppNotification({
         role: "manager",
         templateName: WHATSAPP_TEMPLATES.newOrderManager.name,
