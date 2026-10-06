@@ -1,25 +1,21 @@
 project_id = "oubqyskezyagkfoorzvy"
 
-[functions.create-user]
-verify_jwt = true
-
-[functions.assign-order]
-verify_jwt = true
-
-[functions.desidrop-chat]
-verify_jwt = false
-
-[functions.send-notification-email]
-verify_jwt = true
-
-[functions.send-whatsapp]
-verify_jwt = true
-
-[functions.whatsapp-webhook]
-verify_jwt = false
-
-[functions.notify]
-verify_jwt = true
-
-[functions.push-config]
-verify_jwt = true
+[functions]
+  [functions.assign-order]
+    verify_jwt = true
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.create-user]
+    verify_jwt = true
+  [functions.desidrop-chat]
+    verify_jwt = false
+  [functions.notify]
+    verify_jwt = true
+  [functions.push-config]
+    verify_jwt = true
+  [functions.send-notification-email]
+    verify_jwt = true
+  [functions.send-whatsapp]
+    verify_jwt = true
+  [functions.whatsapp-webhook]
+    verify_jwt = false
