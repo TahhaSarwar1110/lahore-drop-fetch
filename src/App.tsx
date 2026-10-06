@@ -29,6 +29,7 @@ import AssignRider from "./pages/manager/AssignRider";
 import Notifications from "./pages/Notifications";
 import NotificationSettings from "./pages/NotificationSettings";
 import { PushOptInBanner } from "./components/notifications/PushOptInBanner";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/rider/order/:orderId" element={<RiderOrderDetails />} />
           <Route path="/track" element={<TrackOrder />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings/notifications" element={<NotificationSettings />} />
 
