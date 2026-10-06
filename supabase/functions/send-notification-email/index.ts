@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
           orderNumber: orderId.slice(0, 8),
           items: lines,
           total: rs(itemsTotal + extra),
-          orderLink: `${SITE_URL}/order/${orderId}`,
+          orderLink: `${SITE_URL}/order-details?orderId=${orderId}`,
         },
         idempotencyKey: `order-confirmation-${orderId}`,
       });
@@ -116,11 +116,8 @@ Deno.serve(async (req) => {
       .from("profiles").select("full_name").eq("id", body.userId).maybeSingle();
 
     let orderLink: string | undefined;
-    if (typeof body.orderLink === "string" && body.orderLink.startsWith(SITE_URL)) {
-      orderLink = body.orderLink.slice(0, 300);
-    } else if (typeof body.orderLink === "string" && /^\/[\w\-/]*$/.test(body.orderLink)) {
-      orderLink = SITE_URL + body.orderLink;
-    }
+    const m = typeof body.orderLink === "string" ? body.orderLink.match(/orderId=([0-9a-f-]{36})/i) : null;
+    if (m && UUID_RE.test(m[1])) orderLink = `${SITE_URL}/order-details?orderId=${m[1]}`;
 
     const result = await sendTemplateEmail("order-update", email, {
       templateData: { name: profile?.full_name || "Customer", title, message, orderLink },
