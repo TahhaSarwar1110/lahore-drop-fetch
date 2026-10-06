@@ -7,7 +7,7 @@ import { TEMPLATES } from './registry.ts'
 // expose sending to the browser.
 
 // Configuration baked in at scaffold time
-const SITE_NAME = "Desi Drop Connect"
+const SITE_NAME = "Tabedaar.com"
 // SENDER_DOMAIN is the verified sender subdomain FQDN (e.g., "notify.example.com").
 // It MUST match the subdomain delegated to Lovable's nameservers. NEVER use the root domain.
 const SENDER_DOMAIN = "notify.tabedaar.com"
@@ -78,7 +78,7 @@ export async function sendTemplateEmail(
         purpose: 'transactional',
         label: templateName,
         idempotency_key: options.idempotencyKey || crypto.randomUUID(),
-        reply_to: options.replyTo,
+        reply_to: options.replyTo ?? "contact@tabedaar.com",
       },
       { apiKey, sendUrl: Deno.env.get('LOVABLE_SEND_URL') }
     )
