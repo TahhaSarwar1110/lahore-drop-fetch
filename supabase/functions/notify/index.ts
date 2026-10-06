@@ -4,6 +4,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -529,6 +530,42 @@ serve(async (req) => {
             error: msg.slice(0, 500),
           });
         }
+      }
+    }
+
+    // ---- customer email for key order stages (never blocks the flow)
+    const EMAILS: Record<string, { title: string; message: string; once?: boolean }[]> = {
+      order_confirmed: [{ title: "Payment pending", message: "Your order #{order} is confirmed. Payment is now pending - please open your order and upload your payment proof so we can proceed." }],
+      payment_requested: [{ title: "Payment pending", message: "Payment is pending for your order #{order}. Please open your order and upload your payment proof." }],
+      payment_confirmed: [{ title: "Payment confirmed", message: "We have received and confirmed your payment for order #{order}. We will assign a rider shortly." }],
+      delivery_payment_requested: [{ title: "Delivery payment pending", message: "Delivery charges are pending for your order #{order}. Please open your order and upload your payment proof." }],
+      delivery_payment_confirmed: [{ title: "Delivery payment confirmed", message: "Your delivery payment for order #{order} has been confirmed." }],
+      rider_assigned: [{ title: "Rider assigned", message: "A rider has been assigned to your order #{order} and will pick up your items soon." }],
+      order_picked_up: [{ title: "Items picked up", message: "Our rider has picked up the items for your order #{order}. They are on their way to you.", once: true }],
+      order_delivered: [{ title: "Order delivered", message: "Your order #{order} has been delivered. Thank you for choosing Tabedaar.com!" }],
+    };
+    const emailDefs = EMAILS[body.event_type];
+    if (emailDefs && order) {
+      try {
+        const { data: u } = await admin.auth.admin.getUserById(order.user_id);
+        const to = u?.user?.email;
+        if (to) {
+          for (const d of emailDefs) {
+            const key = `${d.title.toLowerCase().replace(/\s+/g, "-")}-${order.id}${d.once ? "" : "-" + version}`;
+            const r = await sendTemplateEmail("order-update", to, {
+              templateData: {
+                name: customerName === "a customer" ? "Customer" : customerName,
+                title: d.title,
+                message: render(d.message),
+                orderLink: `https://tabedaar.com/order-details?orderId=${order.id}`,
+              },
+              idempotencyKey: key,
+            });
+            log("email_sent", { event_type: body.event_type, sent: r.sent });
+          }
+        }
+      } catch (e) {
+        log("email_failed", { event_type: body.event_type, message: String((e as Error)?.message ?? e) });
       }
     }
 

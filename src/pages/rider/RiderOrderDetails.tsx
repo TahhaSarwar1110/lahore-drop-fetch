@@ -147,6 +147,7 @@ const RiderOrderDetails = () => {
         });
 
       if (insertError) throw insertError;
+      void triggerNotification({ event_type: "order_picked_up", order_id: orderId, event_version: itemId });
 
       toast.success("Item marked as picked with proof uploaded");
       await fetchOrderDetails();
