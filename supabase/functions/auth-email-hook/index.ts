@@ -15,7 +15,7 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "Desi Drop Connect"
+const SITE_NAME = "Tabedaar.com"
 const SENDER_DOMAIN = "notify.tabedaar.com"
 const ROOT_DOMAIN = "tabedaar.com"
 const FROM_DOMAIN = "tabedaar.com"
