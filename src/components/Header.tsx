@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Shield, Menu, BarChart3 } from "lucide-react";
+import { LogOut, Shield, Menu, BarChart3, UserCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import logo from "@/assets/tabedaar-logo-header.png";
@@ -94,6 +94,10 @@ export const Header = () => {
                 </>
               )}
               <NotificationBell />
+              <Link to="/profile" aria-label="My Profile" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110 flex items-center gap-1">
+                <UserCircle className="h-4 w-4" />
+                Profile
+              </Link>
               <Button variant="ghost" size="sm" onClick={handleLogout} className="text-primary-foreground/80 hover:text-secondary hover:bg-primary-foreground/10 transition-all duration-300 hover:scale-105">
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
@@ -210,6 +214,14 @@ export const Header = () => {
                       </Link>
                     </>
                   )}
+                  <Link 
+                    to="/profile" 
+                    className="text-base font-medium transition-colors hover:text-primary py-2 flex items-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <UserCircle className="h-4 w-4" />
+                    My Profile
+                  </Link>
                   <Button 
                     variant="outline" 
                     className="justify-start transition-all duration-300 hover:scale-105" 
