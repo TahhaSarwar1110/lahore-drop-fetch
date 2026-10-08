@@ -24,11 +24,13 @@ export const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <img 
-                src={logo} 
-                alt="Tabedaar.com Logo" 
-                className="h-28 md:h-36 w-auto object-contain"
-              />
+              <div className="rounded-2xl bg-card px-4 py-3">
+                <img
+                  src={logo}
+                  alt="Tabedaar.com Logo"
+                  className="h-auto w-48 md:w-60 object-contain"
+                />
+              </div>
             </div>
             <p className="text-white/70 mb-6 text-sm leading-relaxed">
               Your personal shopper in Pakistan. We help overseas Pakistanis and local customers shop anything with complete transparency and reliability.
