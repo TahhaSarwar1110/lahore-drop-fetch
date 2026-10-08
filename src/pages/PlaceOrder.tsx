@@ -616,7 +616,7 @@ const PlaceOrder = () => {
                   <div className="flex gap-2.5 p-3 rounded-xl border border-primary/15 bg-primary/5">
                     <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" aria-hidden="true" />
                     <p className="text-xs leading-relaxed text-foreground">
-                      Our operating hours are <span className="font-semibold">9:00 PM to 6:00 AM (Pakistan Standard Time)</span>. Orders placed outside these hours will be processed the next working day.
+                      Our operating hours are <span className="font-semibold">9:00 AM to 6:00 PM (Pakistan Standard Time)</span>. Orders placed outside these hours will be processed the next working day.
                     </p>
                   </div>
                   <Button
@@ -642,7 +642,7 @@ const PlaceOrder = () => {
             </div>
             <DialogTitle className="text-xl">Thank You for Your Order!</DialogTitle>
             <DialogDescription className="text-sm leading-relaxed text-center">
-              Thank you for choosing Tabedaar! Our team will review your order and get back to you within 1–2 hours during our working hours (9:00 PM–6:00 AM PKT). Orders placed outside these hours will be reviewed the next working day.
+              Thank you for choosing Tabedaar! Our team will review your order and get back to you within 1–2 hours during our working hours (9:00 AM–6:00 PM PKT). Orders placed outside these hours will be reviewed the next working day.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
