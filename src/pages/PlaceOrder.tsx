@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,10 @@ import { OrderItemForm, OrderItem } from "@/components/OrderItemForm";
 import { CountryCodeSelect } from "@/components/CountryCodeSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { X, MapPin, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { X, MapPin, ChevronDown, ChevronUp, Pencil, Info, CheckCircle2 } from "lucide-react";
+import {
+  Dialog as ConfirmDialog,
+} from "@/components/ui/dialog";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
@@ -98,6 +101,8 @@ const PlaceOrder = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
   const [loading, setLoading] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const submittingRef = useRef(false);
   const [showDeliveryMap, setShowDeliveryMap] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -198,7 +203,13 @@ const PlaceOrder = () => {
     return orderItems.reduce((total, item) => total + getItemTotalPrice(item.itemData), 0);
   };
 
+  const finishOrder = () => {
+    setOrderPlaced(false);
+    navigate("/order-history");
+  };
+
   const handleSubmitOrder = async () => {
+    if (submittingRef.current || orderPlaced) return;
     if (orderItems.length === 0) {
       toast({
         title: "No Items",
@@ -208,8 +219,10 @@ const PlaceOrder = () => {
       return;
     }
 
+    let saved = false;
     try {
       buildOrderSchema(countryCode).parse({ fullName, phone, deliveryAddress });
+      submittingRef.current = true;
       setLoading(true);
 
       // Calculate bundle pricing based on item count
@@ -251,9 +264,15 @@ const PlaceOrder = () => {
         .insert(itemsToInsert);
 
       if (itemsError) throw itemsError;
+      saved = true;
 
       const shortId = orderData.id.slice(0, 8);
-      await triggerNotification({ event_type: "order_placed", order_id: orderData.id });
+      // Notifications must never turn a saved order into an error.
+      try {
+        await triggerNotification({ event_type: "order_placed", order_id: orderData.id });
+      } catch (e) {
+        console.error("Order notification failed:", e);
+      }
       // Customer confirmation: built entirely server-side from the saved order.
       supabase.functions
         .invoke("send-whatsapp", { body: { event: "order_received", orderId: orderData.id } })
@@ -265,19 +284,14 @@ const PlaceOrder = () => {
         .invoke("send-notification-email", { body: { event: "order_received", orderId: orderData.id } })
         .then(({ error }) => { if (error) console.error("Email order confirmation failed:", error); })
         .catch((e) => console.error("Email order confirmation failed:", e));
-      await sendWhatsAppNotification({
+      sendWhatsAppNotification({
         role: "manager",
         templateName: WHATSAPP_TEMPLATES.newOrderManager.name,
         templateLanguage: WHATSAPP_TEMPLATES.newOrderManager.language,
         message: `Tabedaar.com: New order #${shortId} placed by ${fullName} (${countryCode}${phone}) with ${orderItems.length} item(s). Please review it.`,
-      });
+      }).catch((e) => console.error("Manager WhatsApp alert failed:", e));
 
-      toast({
-        title: "Order Placed!",
-        description: "Your order has been successfully placed",
-      });
-
-      setTimeout(() => navigate("/order-history"), 1500);
+      setOrderPlaced(true);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
@@ -294,6 +308,8 @@ const PlaceOrder = () => {
       }
     } finally {
       setLoading(false);
+      // Keep the guard locked once saved so the same order can't be resubmitted.
+      if (!saved) submittingRef.current = false;
     }
   };
 
@@ -587,11 +603,17 @@ const PlaceOrder = () => {
                       </p>
                     </div>
                   )}
+                  <div className="flex gap-2.5 p-3 rounded-xl border border-primary/15 bg-primary/5">
+                    <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+                    <p className="text-xs leading-relaxed text-foreground">
+                      Our operating hours are <span className="font-semibold">9:00 PM to 6:00 AM (Pakistan Standard Time)</span>. Orders placed outside these hours will be processed the next working day.
+                    </p>
+                  </div>
                   <Button
                     onClick={handleSubmitOrder}
                     className="w-full mobile-button h-14 text-base bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-glow-accent"
                     size="lg"
-                    disabled={loading}
+                    disabled={loading || orderPlaced}
                   >
                     {loading ? "Placing Order..." : "Submit Order"}
                   </Button>
@@ -601,6 +623,28 @@ const PlaceOrder = () => {
           </div>
         </div>
       </main>
+
+      <Dialog open={orderPlaced} onOpenChange={(open) => { if (!open) finishOrder(); }}>
+        <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-2xl">
+          <DialogHeader className="items-center text-center">
+            <div className="mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-success/10">
+              <CheckCircle2 className="h-8 w-8 text-success" aria-hidden="true" />
+            </div>
+            <DialogTitle className="text-xl">Thank You for Your Order!</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed text-center">
+              Thank you for choosing Tabedaar! Our team will review your order and get back to you within 1–2 hours during our working hours (9:00 PM–6:00 AM PKT). Orders placed outside these hours will be reviewed the next working day.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={finishOrder}
+              className="w-full mobile-button bg-secondary text-secondary-foreground hover:bg-secondary/90"
+            >
+              Got It
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
       <AIBotButton />
