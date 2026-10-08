@@ -12,7 +12,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { X, MapPin, ChevronDown, ChevronUp, Pencil, Info, CheckCircle2 } from "lucide-react";
 import {
-  Dialog as ConfirmDialog,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
