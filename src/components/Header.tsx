@@ -36,11 +36,13 @@ export const Header = () => {
     <header className="sticky top-0 left-0 right-0 z-50 w-full bg-primary shadow-md safe-area-top">
       <div className="container mx-auto flex h-20 md:h-28 lg:h-32 items-center justify-between px-3 md:px-4">
         <Link to="/" className="flex min-w-0 items-center" aria-label="Tabedaar.com home">
-          <img
-            src={logo}
-            alt="Tabedaar.com Logo"
-            className="h-auto w-40 max-w-[55vw] object-contain sm:w-48 md:w-56 lg:w-64"
-          />
+          <span className="rounded-xl bg-card px-3 py-1.5 shadow-sm">
+            <img
+              src={logo}
+              alt="Tabedaar.com Logo"
+              className="block h-auto w-36 max-w-[50vw] object-contain sm:w-44 md:w-52 lg:w-60"
+            />
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
