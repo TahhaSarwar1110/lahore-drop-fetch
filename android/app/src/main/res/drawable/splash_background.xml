@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Brand navy base so the splash never flashes white -->
+    <!-- White base matching the logo background -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#0B1A3D" />
+            <solid android:color="#FFFFFF" />
         </shape>
     </item>
     <!-- Full-bleed branded splash artwork (density + orientation specific) -->
