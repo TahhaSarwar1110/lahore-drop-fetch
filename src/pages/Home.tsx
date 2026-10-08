@@ -28,6 +28,7 @@ import { PricingBundles } from "@/components/PricingBundles";
 import { useAuth } from "@/hooks/useAuth";
 import { TestimonialSlider } from "@/components/TestimonialSlider";
 import { AnimatedText, AnimatedFadeIn } from "@/components/AnimatedText";
+import { ShoppingCoverageSection } from "@/components/ShoppingCoverage";
 import fashionImg from "@/assets/category-fashion.jpg";
 import foodImg from "@/assets/category-food.jpg";
 import groceriesImg from "@/assets/category-grocery.jpg";
@@ -235,6 +236,8 @@ const Home = () => {
             </div>
           </div>
         </section>
+
+        <ShoppingCoverageSection />
 
         {/* What We Shop Section */}
         <section className="py-20 lg:py-28 bg-background">
