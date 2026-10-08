@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { ShoppingCoverageBanner } from "@/components/ShoppingCoverage";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -353,6 +354,10 @@ const PlaceOrder = () => {
               <div className="lg:hidden px-4 pt-4 pb-2">
                 <h1 className="text-xl font-bold text-foreground">Place Your Order</h1>
                 <p className="text-sm text-muted-foreground mt-0.5">Fill in the details below</p>
+              </div>
+
+              <div className="px-4 lg:px-0 pt-2 pb-1">
+                <ShoppingCoverageBanner />
               </div>
 
               {/* Personal Info Section */}
