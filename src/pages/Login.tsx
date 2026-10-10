@@ -125,6 +125,7 @@ const Login = () => {
       {/* Left Side - Gradient (desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary to-accent items-center justify-center p-12">
         <div className="text-primary-foreground text-center space-y-6">
+          <div className="inline-block bg-white rounded-2xl p-4"><img src={logo} alt="Tabedaar.com" className="h-16 xl:h-20 w-auto object-contain" /></div>
           <h1 className="text-5xl font-bold">Welcome Back</h1>
           <p className="text-xl opacity-90">
             Login to continue your shopping experience with Tabedaar.com
@@ -133,10 +134,10 @@ const Login = () => {
       </div>
 
       {/* Mobile header with logo */}
-      <div className="lg:hidden bg-primary safe-area-top">
-        <div className="flex items-center justify-center py-6">
+      <div className="lg:hidden bg-white safe-area-top border-b border-border">
+        <div className="flex items-center justify-center py-3 sm:py-4">
           <Link to="/">
-            <img src={logo} alt="Tabedaar.com" className="h-20 w-auto object-contain" />
+            <img src={logo} alt="Tabedaar.com" className="h-10 sm:h-12 md:h-14 w-auto max-w-[60vw] object-contain" />
           </Link>
         </div>
       </div>
