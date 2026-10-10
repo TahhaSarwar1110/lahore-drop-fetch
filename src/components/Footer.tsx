@@ -74,13 +74,13 @@ export const Footer = () => {
             <ul className="space-y-4">
               <li>
                 <a 
-                  href="https://maps.google.com" 
+                  href="https://www.google.com/maps/search/?api=1&query=IP+Building%2C+Gulberg%2C+Lahore%2C+Pakistan" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-start gap-3 text-white/70 hover:text-white transition-colors text-sm"
                 >
                   <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0" />
-                  <span>Lahore, Pakistan</span>
+                  <span>IP Building, Gulberg, Lahore, Pakistan</span>
                 </a>
               </li>
               <li>

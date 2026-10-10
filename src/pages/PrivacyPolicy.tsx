@@ -85,6 +85,7 @@ const sections = [
     title: "11. Contact Us",
     body: [
       "Questions about this policy or your information? Write to contact@tabedaar.com or send us a message on WhatsApp.",
+      "You can also reach us at our office: IP Building, Gulberg, Lahore, Pakistan.",
     ],
   },
 ];
