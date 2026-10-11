@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { OrderStatusSelect } from "@/components/admin/OrderStatusSelect";
+import { triggerNotification } from "@/utils/notify";
 import { toast } from "sonner";
 import { ArrowLeft, Package, User, MapPin, Clock, Image as ImageIcon } from "lucide-react";
 
@@ -83,27 +84,26 @@ const AdminOrderDetails = () => {
   };
 
   const handleStatusUpdate = async (newStatus: string) => {
-    if (!orderId) return;
+    if (!orderId || newStatus === order?.status) return;
     
     setUpdating(true);
     try {
-      // Update order status
-      const { error: updateError } = await supabase
-        .from("orders")
-        .update({ status: newStatus })
-        .eq("id", orderId);
+      const { error: updateError } = await supabase.rpc("update_order_status", {
+        p_order_id: orderId,
+        p_new_status: newStatus,
+      });
 
       if (updateError) throw updateError;
 
-      // Insert status history
-      const { error: historyError } = await supabase
-        .from("order_status_history")
-        .insert({ order_id: orderId, status: newStatus });
-
-      if (historyError) throw historyError;
-
       toast.success("Order status updated successfully");
-      fetchOrderDetails();
+      setOrder((currentOrder) => currentOrder ? { ...currentOrder, status: newStatus } : currentOrder);
+      void triggerNotification({
+        event_type: "order_status_changed",
+        order_id: orderId,
+        event_version: newStatus,
+        status: newStatus,
+      });
+      await fetchOrderDetails();
     } catch (error) {
       console.error("Error updating order status:", error);
       toast.error("Failed to update order status");
