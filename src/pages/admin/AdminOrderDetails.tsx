@@ -7,8 +7,6 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OrderStatusSelect } from "@/components/admin/OrderStatusSelect";
-import { triggerNotification } from "@/utils/notify";
 import { toast } from "sonner";
 import { ArrowLeft, Package, User, MapPin, Clock, Image as ImageIcon } from "lucide-react";
 
@@ -48,7 +46,6 @@ const AdminOrderDetails = () => {
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (isAdmin && orderId) {
@@ -80,35 +77,6 @@ const AdminOrderDetails = () => {
       navigate("/admin");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleStatusUpdate = async (newStatus: string) => {
-    if (!orderId || newStatus === order?.status) return;
-    
-    setUpdating(true);
-    try {
-      const { error: updateError } = await supabase.rpc("update_order_status", {
-        p_order_id: orderId,
-        p_new_status: newStatus,
-      });
-
-      if (updateError) throw updateError;
-
-      toast.success("Order status updated successfully");
-      setOrder((currentOrder) => currentOrder ? { ...currentOrder, status: newStatus } : currentOrder);
-      void triggerNotification({
-        event_type: "order_status_changed",
-        order_id: orderId,
-        event_version: newStatus,
-        status: newStatus,
-      });
-      await fetchOrderDetails();
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      toast.error("Failed to update order status");
-    } finally {
-      setUpdating(false);
     }
   };
 
@@ -160,11 +128,7 @@ const AdminOrderDetails = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Current Status</p>
-                <OrderStatusSelect
-                  currentStatus={order.status}
-                  onStatusChange={handleStatusUpdate}
-                  disabled={updating}
-                />
+                <Badge variant="outline">{order.status}</Badge>
               </div>
             </CardContent>
           </Card>

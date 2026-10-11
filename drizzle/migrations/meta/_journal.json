@@ -8,6 +8,13 @@
       "when": 1791745007433,
       "tag": "0000_secure_admin_order_status_update",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791745053868,
+      "tag": "0001_remove_admin_order_status_execute",
+      "breakpoints": true
     }
   ]
 }
