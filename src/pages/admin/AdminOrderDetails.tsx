@@ -7,7 +7,6 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OrderStatusSelect } from "@/components/admin/OrderStatusSelect";
 import { toast } from "sonner";
 import { ArrowLeft, Package, User, MapPin, Clock, Image as ImageIcon } from "lucide-react";
 
@@ -47,7 +46,6 @@ const AdminOrderDetails = () => {
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     if (isAdmin && orderId) {
@@ -79,36 +77,6 @@ const AdminOrderDetails = () => {
       navigate("/admin");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleStatusUpdate = async (newStatus: string) => {
-    if (!orderId) return;
-    
-    setUpdating(true);
-    try {
-      // Update order status
-      const { error: updateError } = await supabase
-        .from("orders")
-        .update({ status: newStatus })
-        .eq("id", orderId);
-
-      if (updateError) throw updateError;
-
-      // Insert status history
-      const { error: historyError } = await supabase
-        .from("order_status_history")
-        .insert({ order_id: orderId, status: newStatus });
-
-      if (historyError) throw historyError;
-
-      toast.success("Order status updated successfully");
-      fetchOrderDetails();
-    } catch (error) {
-      console.error("Error updating order status:", error);
-      toast.error("Failed to update order status");
-    } finally {
-      setUpdating(false);
     }
   };
 
@@ -160,11 +128,7 @@ const AdminOrderDetails = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Current Status</p>
-                <OrderStatusSelect
-                  currentStatus={order.status}
-                  onStatusChange={handleStatusUpdate}
-                  disabled={updating}
-                />
+                <Badge variant="outline">{order.status}</Badge>
               </div>
             </CardContent>
           </Card>
