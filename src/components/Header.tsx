@@ -193,10 +193,6 @@ export const Header = () => {
             <SheetTitle className="sr-only">Navigation menu</SheetTitle>
 
             <div className="safe-area-top shrink-0 bg-primary px-5 pb-5 pt-5">
-              <div className="mb-5 inline-flex rounded-md bg-card px-3 py-2 shadow-sm">
-                <img src={logo} alt="Tabedaar.com" className="h-auto w-36 object-contain" />
-              </div>
-
               {isAuthenticated ? (
                 <Link
                   to="/profile"
