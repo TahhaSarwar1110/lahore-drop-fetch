@@ -11,6 +11,23 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  *  - WHATSAPP_VERIFY_TOKEN
  */
 const VERIFY_TOKEN = Deno.env.get("WHATSAPP_VERIFY_TOKEN");
+const APP_SECRET = Deno.env.get("WHATSAPP_APP_SECRET");
+
+const isValidSignature = async (body: string, header: string, secret: string): Promise<boolean> => {
+  if (!header.startsWith("sha256=")) return false;
+  const expectedHex = header.slice(7).toLowerCase();
+  if (!/^[a-f0-9]{64}$/.test(expectedHex)) return false;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+  );
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(body)));
+  const actualHex = Array.from(sig).map((b) => b.toString(16).padStart(2, "0")).join("");
+  // Constant-time comparison
+  let diff = 0;
+  for (let i = 0; i < 64; i++) diff |= actualHex.charCodeAt(i) ^ expectedHex.charCodeAt(i);
+  return diff === 0;
+};
 
 const admin = () =>
   createClient(
@@ -67,9 +84,21 @@ serve(async (req: Request): Promise<Response> => {
     return new Response("Method not allowed", { status: 405 });
   }
 
+  // --- Signature verification (X-Hub-Signature-256 = HMAC-SHA256 of raw body with App Secret) ---
+  const rawBody = await req.text();
+  if (!APP_SECRET) {
+    console.error("WHATSAPP_APP_SECRET is not configured");
+    return new Response("Server misconfigured", { status: 500 });
+  }
+  const sigHeader = req.headers.get("x-hub-signature-256") ?? "";
+  if (!(await isValidSignature(rawBody, sigHeader, APP_SECRET))) {
+    console.warn("Rejected WhatsApp webhook POST: invalid signature");
+    return new Response("Invalid signature", { status: 401 });
+  }
+
   // --- Inbound events ---
   try {
-    const payload = await req.json();
+    const payload = JSON.parse(rawBody);
 
     // Only process well-formed WhatsApp Cloud API payloads.
     if (payload?.object !== "whatsapp_business_account" || !Array.isArray(payload?.entry)) {
