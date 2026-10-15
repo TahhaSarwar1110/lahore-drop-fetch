@@ -14,7 +14,8 @@ export const Footer = () => {
 
   const legalLinks = [
     { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "#" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Data Deletion", href: "/data-deletion" },
   ];
 
   return (
@@ -132,12 +133,12 @@ export const Footer = () => {
             <ul className="space-y-2">
               {legalLinks.map((link, index) => (
                 <li key={index}>
-                  <a 
-                    href={link.href} 
+                  <Link 
+                    to={link.href} 
                     className="text-white/70 hover:text-white transition-colors text-sm"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
