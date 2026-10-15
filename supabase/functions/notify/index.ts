@@ -487,6 +487,12 @@ serve(async (req) => {
                       notificationId: target.id ?? "",
                       eventType: body.event_type,
                     },
+                    // High-importance channel created by the app; heads-up + sound.
+                    android: {
+                      priority: "HIGH",
+                      notification: { channel_id: "tabedaar_orders", sound: "default" },
+                    },
+                    apns: { headers: { "apns-priority": "10" }, payload: { aps: { sound: "default" } } },
                   },
                 }),
               },
