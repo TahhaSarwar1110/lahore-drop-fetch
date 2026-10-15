@@ -64,22 +64,57 @@ const upsertSubscription = async (
   return true;
 };
 
-/** Native: asks FCM/APNs for the current token and stores it. Permission must already be granted. */
-const refreshNativeToken = async () => {
+/** Android 8+ only shows pushes on a channel; this one is high-importance (heads-up + sound). */
+export const ANDROID_CHANNEL_ID = "tabedaar_orders";
+
+const ensureAndroidChannel = async () => {
+  if (Capacitor.getPlatform() !== "android") return;
   const { PushNotifications } = await import("@capacitor/push-notifications");
+  try {
+    await PushNotifications.createChannel({
+      id: ANDROID_CHANNEL_ID,
+      name: "Order updates",
+      description: "Order, payment and delivery alerts",
+      importance: 5,
+      visibility: 1,
+      sound: "default",
+      vibration: true,
+    });
+  } catch (error) {
+    console.error("Could not create Android notification channel:", error);
+  }
+};
+
+/** Registers with FCM/APNs and resolves the device token (or null). Cleans up its listeners. */
+export const getNativeToken = async (): Promise<string | null> => {
+  const { PushNotifications } = await import("@capacitor/push-notifications");
+  await ensureAndroidChannel();
+  const handles: { remove: () => Promise<void> }[] = [];
   const token = await new Promise<string | null>((resolve) => {
     const timeout = setTimeout(() => resolve(null), 15000);
     void PushNotifications.addListener("registration", (t) => {
       clearTimeout(timeout);
       resolve(t.value);
-    });
+    }).then((h) => handles.push(h));
     void PushNotifications.addListener("registrationError", (error) => {
       clearTimeout(timeout);
       console.error("Native push registration failed:", error);
       resolve(null);
+    }).then((h) => handles.push(h));
+    PushNotifications.register().catch((error) => {
+      clearTimeout(timeout);
+      console.error("Native push register() failed (plugin not synced?):", error);
+      resolve(null);
     });
-    void PushNotifications.register();
   });
+  handles.forEach((h) => void h.remove());
+  return token;
+};
+
+/** Native: asks FCM/APNs for the current token and stores it. Permission must already be granted. */
+const refreshNativeToken = async () => {
+  const { PushNotifications } = await import("@capacitor/push-notifications");
+  const token = await getNativeToken();
   if (!token) return false;
   return upsertSubscription(nativePlatform(), token, undefined, false);
 };
@@ -208,23 +243,13 @@ export const usePushNotifications = () => {
         }
         setPermission("granted");
 
-        const token = await new Promise<string | null>((resolve) => {
-          const timeout = setTimeout(() => resolve(null), 15000);
-          void PushNotifications.addListener("registration", (t) => {
-            clearTimeout(timeout);
-            resolve(t.value);
-          });
-          void PushNotifications.addListener("registrationError", (error) => {
-            clearTimeout(timeout);
-            console.error("Native push registration failed:", error);
-            resolve(null);
-          });
-          void PushNotifications.register();
-        });
+        const token = await getNativeToken();
 
         if (!token) return { ok: false, reason: "registration_failed" as const };
-        await saveSubscription(nativePlatform(), token);
-        return { ok: true as const };
+        const stored = await upsertSubscription(nativePlatform(), token);
+        if (!stored) return { ok: false, reason: "store_failed" as const };
+        setSubscribed(true);
+        return { ok: true as const, token };
       }
 
       if (!webPushSupported()) return { ok: false, reason: "unsupported" as const };
