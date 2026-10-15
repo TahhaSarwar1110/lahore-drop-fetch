@@ -144,6 +144,12 @@ export const Header = () => {
                     <BarChart3 className="h-4 w-4" />
                     Reports
                   </Link>
+                  {!isManager && (
+                    <Link to="/manager/whatsapp" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110 flex items-center gap-1">
+                      <MessageCircle className="h-4 w-4" />
+                      WhatsApp
+                    </Link>
+                  )}
                 </>
               )}
               {isManager && (
