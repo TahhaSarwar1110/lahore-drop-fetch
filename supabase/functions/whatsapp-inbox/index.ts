@@ -16,7 +16,7 @@ const ALLOWED_TEMPLATES = new Set([
   "tabedaar_payment_confirmed",
   "tabedaar_rider_assigned",
   "tabedaar_items_picked_up",
-  "order_delivered",
+  "tabedaar_order_delivered",
 ]);
 
 const cors = {

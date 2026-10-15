@@ -28,6 +28,7 @@ import RiderOrderDetails from "./pages/rider/RiderOrderDetails";
 import ManagerDashboard from "./pages/manager/ManagerDashboard";
 import ManagerOrderDetails from "./pages/manager/ManagerOrderDetails";
 import { PricingManagement } from "./pages/manager/PricingManagement";
+import WhatsAppInbox from "./pages/manager/WhatsAppInbox";
 import AssignRider from "./pages/manager/AssignRider";
 import Notifications from "./pages/Notifications";
 import NotificationSettings from "./pages/NotificationSettings";
@@ -72,6 +73,7 @@ const App = () => (
           <Route path="/admin/reports/export" element={<ExportFilters />} />
           <Route path="/manager" element={<ManagerDashboard />} />
           <Route path="/manager/orders/:orderId" element={<ManagerOrderDetails />} />
+          <Route path="/manager/whatsapp" element={<WhatsAppInbox />} />
           <Route path="/manager/pricing" element={<PricingManagement />} />
           <Route path="/manager/assign-rider/:orderId" element={<AssignRider />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

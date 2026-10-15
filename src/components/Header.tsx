@@ -153,6 +153,9 @@ export const Header = () => {
                   <Link to="/manager/pricing" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
                     Pricing
                   </Link>
+                  <Link to="/manager/whatsapp" className="text-sm font-medium text-primary-foreground/80 transition-all duration-300 hover:text-secondary hover:scale-110">
+                    WhatsApp
+                  </Link>
                 </>
               )}
               <NotificationBell />
@@ -243,6 +246,7 @@ export const Header = () => {
                     <>
                       <MobileMenuLink to="/manager" label="Manager Dashboard" icon={BriefcaseBusiness} />
                       <MobileMenuLink to="/manager/pricing" label="Pricing Management" icon={Tags} />
+                      <MobileMenuLink to="/manager/whatsapp" label="WhatsApp Inbox" icon={MessageCircle} />
                     </>
                   )}
                     <div className="my-3 border-t border-border" />

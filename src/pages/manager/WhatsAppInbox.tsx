@@ -38,11 +38,11 @@ interface Message {
 
 const TEMPLATES = [
   { name: "tabedaar_order_received", params: ["Customer name", "Order number", "Item summary", "Total"] },
-  { name: "tabedaar_payment_pending", params: [] as string[] },
-  { name: "tabedaar_payment_confirmed", params: [] as string[] },
-  { name: "tabedaar_rider_assigned", params: [] as string[] },
-  { name: "tabedaar_items_picked_up", params: [] as string[] },
-  { name: "order_delivered", params: [] as string[] },
+  { name: "tabedaar_payment_pending", params: ["Customer name", "Order number", "Amount", "Payment reason"] },
+  { name: "tabedaar_payment_confirmed", params: ["Customer name", "Order number", "Amount"] },
+  { name: "tabedaar_rider_assigned", params: ["Customer name", "Order number", "Rider name"] },
+  { name: "tabedaar_items_picked_up", params: ["Customer name", "Order number"] },
+  { name: "tabedaar_order_delivered", params: ["Customer name", "Order number", "Total"] },
 ];
 
 const WINDOW_MS = 24 * 60 * 60 * 1000;
