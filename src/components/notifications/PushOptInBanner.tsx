@@ -29,7 +29,15 @@ export const PushOptInBanner = () => {
         const url = (action.notification.data as { url?: string })?.url;
         if (url) navigate(url);
       });
-      remove = () => handle.remove();
+      // Android does not display pushes while the app is open; show them in-app.
+      const fg = await PushNotifications.addListener("pushNotificationReceived", (n) => {
+        const url = (n.data as { url?: string })?.url;
+        toast(n.title ?? "Tabedaar.com", {
+          description: n.body,
+          action: url ? { label: "Open", onClick: () => navigate(url) } : undefined,
+        });
+      });
+      remove = () => { void handle.remove(); void fg.remove(); };
     })();
     return () => remove?.();
   }, [navigate]);

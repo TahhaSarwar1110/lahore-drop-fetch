@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { PushTestPanel } from "@/components/notifications/PushTestPanel";
 
 interface Prefs {
   in_app_enabled: boolean;
@@ -128,6 +129,8 @@ const NotificationSettings = () => {
                   onCheckedChange={handlePushToggle}
                 />
               </Card>
+
+              <PushTestPanel />
 
               <Card className="flex items-center justify-between gap-4 p-4">
                 <div>

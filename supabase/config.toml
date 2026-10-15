@@ -13,6 +13,8 @@ project_id = "oubqyskezyagkfoorzvy"
     verify_jwt = true
   [functions.push-config]
     verify_jwt = true
+  [functions.test-push]
+    verify_jwt = true
   [functions.send-notification-email]
     verify_jwt = true
   [functions.send-whatsapp]
