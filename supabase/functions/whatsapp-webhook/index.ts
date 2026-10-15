@@ -55,6 +55,109 @@ const claimEvent = async (
   return true;
 };
 
+
+const RANK: Record<string, number> = { sent: 1, delivered: 2, read: 3 };
+
+const previewFor = (msg: any): { type: string; body: string | null; mediaId: string | null; mime: string | null; filename: string | null } => {
+  const type: string = msg?.type ?? "unknown";
+  if (type === "text") return { type, body: msg?.text?.body ?? "", mediaId: null, mime: null, filename: null };
+  if (["image", "document", "audio", "video", "sticker"].includes(type)) {
+    const m = msg?.[type] ?? {};
+    return { type, body: m.caption ?? m.filename ?? null, mediaId: m.id ?? null, mime: m.mime_type ?? null, filename: m.filename ?? null };
+  }
+  if (type === "button") return { type: "text", body: msg?.button?.text ?? "", mediaId: null, mime: null, filename: null };
+  if (type === "interactive") {
+    const i = msg?.interactive ?? {};
+    return { type: "text", body: i?.button_reply?.title ?? i?.list_reply?.title ?? "[interactive]", mediaId: null, mime: null, filename: null };
+  }
+  return { type, body: null, mediaId: null, mime: null, filename: null };
+};
+
+const labelFor = (type: string, body: string | null) =>
+  body && type === "text" ? body : body ? `[${type}] ${body}` : `[${type}]`;
+
+/** Persist an inbound message into the inbox (idempotent via unique wa_message_id). */
+const storeInbound = async (
+  supabase: ReturnType<typeof admin>,
+  msg: any,
+  from: string,
+  contactName: string | null,
+  at: string,
+) => {
+  const p = previewFor(msg);
+  const preview = labelFor(p.type, p.body).slice(0, 200);
+
+  const { data: existing } = await supabase
+    .from("whatsapp_conversations")
+    .select("id, unread_count, display_name, customer_user_id")
+    .eq("phone", from)
+    .maybeSingle();
+
+  let convId = existing?.id as string | undefined;
+  let customerId = existing?.customer_user_id as string | null | undefined;
+
+  if (!customerId && from.length >= 10) {
+    const tail = from.slice(-10);
+    const { data: matches } = await supabase.from("profiles").select("id").ilike("phone", `%${tail}`).limit(2);
+    if (matches && matches.length === 1) customerId = matches[0].id;
+  }
+
+  if (!convId) {
+    const { data: created, error } = await supabase
+      .from("whatsapp_conversations")
+      .upsert({ phone: from, display_name: contactName, customer_user_id: customerId ?? null, last_message_at: at, last_message_preview: preview, last_inbound_at: at, unread_count: 0 }, { onConflict: "phone" })
+      .select("id, unread_count")
+      .single();
+    if (error) throw error;
+    convId = created.id;
+  }
+
+  const { error: insErr } = await supabase.from("whatsapp_messages").insert({
+    conversation_id: convId,
+    wa_message_id: msg.id,
+    direction: "inbound",
+    msg_type: p.type,
+    body: p.body,
+    media_id: p.mediaId,
+    media_mime: p.mime,
+    media_filename: p.filename,
+    status: "received",
+    created_at: at,
+  });
+  if (insErr) {
+    if ((insErr as { code?: string }).code === "23505") return; // duplicate
+    throw insErr;
+  }
+
+  const { data: cur } = await supabase.from("whatsapp_conversations").select("unread_count").eq("id", convId).single();
+  await supabase.from("whatsapp_conversations").update({
+    unread_count: (cur?.unread_count ?? 0) + 1,
+    last_message_at: at,
+    last_message_preview: preview,
+    last_inbound_at: at,
+    display_name: contactName ?? existing?.display_name ?? null,
+    customer_user_id: customerId ?? null,
+  }).eq("id", convId);
+};
+
+const applyStatus = async (supabase: ReturnType<typeof admin>, status: any) => {
+  const state: string = status?.status ?? "";
+  if (!["sent", "delivered", "read", "failed"].includes(state)) return;
+  const { data: row } = await supabase
+    .from("whatsapp_messages").select("id, status").eq("wa_message_id", status.id).eq("direction", "outbound").maybeSingle();
+  if (!row) return;
+  if (state !== "failed" && (RANK[state] ?? 0) <= (RANK[row.status] ?? 0)) return;
+  const errMsg = state === "failed"
+    ? String(status?.errors?.[0]?.title ?? status?.errors?.[0]?.message ?? "Delivery failed").slice(0, 300)
+    : null;
+  const ts = Number(status?.timestamp);
+  await supabase.from("whatsapp_messages").update({
+    status: state,
+    error: errMsg,
+    status_updated_at: Number.isFinite(ts) && ts > 0 ? new Date(ts * 1000).toISOString() : new Date().toISOString(),
+  }).eq("id", row.id);
+};
+
 serve(async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
 
@@ -142,6 +245,15 @@ serve(async (req: Request): Promise<Response> => {
             .from("whatsapp_contacts")
             .upsert({ phone: from, last_inbound_at: lastInboundAt }, { onConflict: "phone" });
 
+          // Persist into the manager WhatsApp Inbox (best-effort, never blocks the 200).
+          try {
+            const contactName: string | null =
+              (value.contacts ?? []).find((c: any) => String(c?.wa_id) === from)?.profile?.name ?? null;
+            await storeInbound(supabaseAdmin, msg, from, contactName, lastInboundAt);
+          } catch (e) {
+            console.error("Failed to store inbound message in inbox:", (e as Error)?.message);
+          }
+
           // Best-effort: notify managers in-app that a customer wrote in.
           try {
             const { data: managers } = await supabaseAdmin
@@ -177,6 +289,11 @@ serve(async (req: Request): Promise<Response> => {
           if (!isNew) continue;
 
           console.log("WhatsApp delivery status", JSON.stringify({ id: statusId, status: state }));
+          try {
+            await applyStatus(supabaseAdmin, status);
+          } catch (e) {
+            console.error("Failed to apply status to inbox:", (e as Error)?.message);
+          }
         }
       }
     }
