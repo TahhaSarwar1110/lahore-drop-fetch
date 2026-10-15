@@ -15,6 +15,13 @@
       "when": 1791745053868,
       "tag": "0001_remove_admin_order_status_execute",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792082933767,
+      "tag": "0002_whatsapp_inbox",
+      "breakpoints": true
     }
   ]
 }
