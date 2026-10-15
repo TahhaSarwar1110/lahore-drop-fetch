@@ -11,6 +11,7 @@ import {
   LogIn,
   LogOut,
   Menu,
+  MessageCircle,
   Search,
   Shield,
   ShoppingBag,
@@ -240,6 +241,7 @@ export const Header = () => {
                     <>
                       <MobileMenuLink to="/admin" label="Admin Dashboard" icon={Shield} />
                       <MobileMenuLink to="/admin/reports" label="Reports" icon={BarChart3} />
+                      <MobileMenuLink to="/manager/whatsapp" label="WhatsApp Inbox" icon={MessageCircle} />
                     </>
                   )}
                   {isManager && (
