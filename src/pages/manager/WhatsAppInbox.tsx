@@ -122,7 +122,7 @@ const StatusIcon = ({ status }: { status: string }) => {
   return <Check className="h-3.5 w-3.5" />;
 };
 
-export default function WhatsAppInbox() {
+export function InboxPanel() {
   const { isManager, loading: roleLoading } = useManagerCheck();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -256,10 +256,7 @@ export default function WhatsAppInbox() {
   const tpl = TEMPLATES.find((x) => x.name === templateName)!;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Header />
-      <main className="container mx-auto flex-1 px-0 sm:px-4 py-0 sm:py-6">
-        <div className="flex h-[calc(100dvh-8rem)] overflow-hidden border border-border bg-card sm:rounded-lg">
+    <div className="flex h-[calc(100dvh-14rem)] min-h-[28rem] overflow-hidden border border-border bg-card sm:rounded-lg">
           {/* Conversation list */}
           <aside className={`${selectedId ? "hidden md:flex" : "flex"} w-full flex-col border-r border-border md:w-80 md:shrink-0`}>
             <div className="space-y-2 border-b border-border p-3">
@@ -386,8 +383,17 @@ export default function WhatsAppInbox() {
               </>
             )}
           </section>
-        </div>
-      </main>
     </div>
   );
 }
+
+const WhatsAppInboxPage = () => (
+  <div className="flex min-h-screen flex-col bg-background">
+    <Header />
+    <main className="container mx-auto flex-1 px-0 sm:px-4 py-0 sm:py-6">
+      <InboxPanel />
+    </main>
+  </div>
+);
+
+export default WhatsAppInboxPage;

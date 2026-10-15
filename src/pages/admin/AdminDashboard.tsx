@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Search, Package, Users, MapPin } from "lucide-react";
+import { Search, Package, Users, MapPin, MessageCircle } from "lucide-react";
+import { InboxPanel } from "@/pages/manager/WhatsAppInbox";
 
 interface Order {
   id: string;
@@ -129,6 +130,10 @@ const AdminDashboard = () => {
               <TabsTrigger value="permissions" className="gap-2 whitespace-nowrap">
                 Role Permissions
               </TabsTrigger>
+              <TabsTrigger value="whatsapp" className="gap-2 whitespace-nowrap">
+                <MessageCircle className="h-4 w-4" />
+                WhatsApp
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -182,6 +187,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="permissions">
             <RolePermissionsManagement />
+          </TabsContent>
+
+          <TabsContent value="whatsapp">
+            <InboxPanel />
           </TabsContent>
         </Tabs>
       </main>
