@@ -98,6 +98,23 @@ Deno.serve(async (req) => {
         idempotencyKey: `order-confirmation-${orderId}`,
       });
       console.log(`[order_confirmation] order=${orderId} sent=${result.sent}`);
+
+      // Staff alert to the shared Tabedaar inbox (fixed recipient in template)
+      try {
+        const staff = await sendTemplateEmail("new-order-staff", "contact@tabedaar.com", {
+          templateData: {
+            customerName: profile?.full_name || "A customer",
+            orderNumber: orderId.slice(0, 8),
+            items: lines,
+            total: rs(itemsTotal + extra),
+            dashboardLink: `${SITE_URL}/manager`,
+          },
+          idempotencyKey: `new-order-staff-${orderId}`,
+        });
+        console.log(`[new_order_staff] order=${orderId} sent=${staff.sent}`);
+      } catch (e) {
+        console.error(`[new_order_staff] order=${orderId} failed`, (e as Error)?.message);
+      }
       return json({ success: true, ...result });
     }
 
