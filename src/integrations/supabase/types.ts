@@ -824,6 +824,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_save_user_details: {
+        Args: {
+          p_address: string
+          p_alternative: string
+          p_bill_name: string
+          p_bill_url: string
+          p_cnic: string
+          p_full_name: string
+          p_id_name: string
+          p_id_url: string
+          p_phone: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       get_customer_ids_for_rider_orders: {
         Args: { _rider_id: string }
         Returns: string[]
