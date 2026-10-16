@@ -8,4 +8,4 @@
 - [x] Add admin user details, editing, and safe deletion
 - [x] Add Manager to edit-role choices with atomic admin-authorized saves
 - [x] Add admin bank-detail management and customer payment accounts
-- [ ] Notify every manager by email on order placement — blocked: managed app emails prohibit recipient-list sends; requires a supported external email service explicitly requested by the user
+- [ ] Notify every manager's registered email on order placement (re-requested) — blocked: managed app emails prohibit recipient-list sends; needs user choice of single shared inbox/forwarding or an external email service
