@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      bank_accounts: {
+        Row: {
+          account_number: string
+          account_title: string
+          bank_name: string
+          created_at: string
+          iban: string | null
+          id: string
+          instructions: string
+          is_active: boolean
+        }
+        Insert: {
+          account_number: string
+          account_title: string
+          bank_name: string
+          created_at?: string
+          iban?: string | null
+          id?: string
+          instructions?: string
+          is_active?: boolean
+        }
+        Update: {
+          account_number?: string
+          account_title?: string
+          bank_name?: string
+          created_at?: string
+          iban?: string | null
+          id?: string
+          instructions?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
       item_pickups: {
         Row: {
           created_at: string | null

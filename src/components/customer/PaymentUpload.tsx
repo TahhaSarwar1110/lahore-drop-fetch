@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Upload, CheckCircle, Clock, CreditCard, Image } from "lucide-react";
 import { toast } from "sonner";
 import { triggerNotification } from "@/utils/notify";
+import { BankAccountDetails } from "./BankAccountDetails";
 
 interface PaymentUploadProps {
   orderId: string;
@@ -113,16 +114,7 @@ export const PaymentUpload = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Bank Details */}
-        <div className="bg-primary/5 p-4 rounded-lg border border-primary/20">
-          <h4 className="font-semibold mb-2">Tabedar Bank Details</h4>
-          <div className="space-y-1 text-sm">
-            <p><span className="font-medium">Bank:</span> HBL Bank</p>
-            <p><span className="font-medium">Account Title:</span> Tabedar Services</p>
-            <p><span className="font-medium">Account Number:</span> 1234567890123</p>
-            <p><span className="font-medium">IBAN:</span> PK12HABB1234567890123</p>
-          </div>
-        </div>
+        <BankAccountDetails />
 
         {paymentStatus === "pending" && (
           <div className="space-y-3">

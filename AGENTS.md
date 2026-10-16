@@ -4,3 +4,5 @@
 - Keep legal and data-deletion information on public pages linked from the shared footer so customers can access them without signing in; deletion requests use the support contact unless an actual deletion workflow is implemented.
 - Admin user viewing, editing and deletion go through the manage-users function with server-verified admin authorization; saves use a service-role-only transactional RPC and deletion is blocked for self or linked operational history to prevent accidental loss of orders.
 - Admin account creation replaces the signup default through a service-role-only transactional role RPC after server-side admin authorization; direct signup relies on the existing customer trigger, never client-side role inserts.
+- Admin role edits use manage-users and the transactional role replacement RPC; never delete and insert roles from the browser, so role changes cannot leave users without access.
+- Payment screens read active bank_accounts through shared BankAccountDetails; admin-only RLS protects mutations and placeholder bank numbers must never be used as a fallback.

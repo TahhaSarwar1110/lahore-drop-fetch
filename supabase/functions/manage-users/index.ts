@@ -28,6 +28,13 @@ serve(async req => {
     if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) return reply({ error: "Invalid user" }, 400);
     const { data: account, error: accountError } = await db.auth.admin.getUserById(id);
     if (accountError || !account.user) return reply({ error: "User not found" }, 404);
+    if (body.action === "role") {
+      if (!["admin", "manager", "rider", "customer", "user"].includes(body.role)) return reply({ error: "Invalid role" }, 400);
+      if (id === user.id && body.role !== "admin") return reply({ error: "You cannot remove your own admin access" }, 409);
+      const { error } = await db.rpc("assign_admin_created_user_role", { p_user_id: id, p_role: body.role });
+      if (error) throw new Error("Unable to update role");
+      return reply({ success: true });
+    }
     const { data: details, error: detailsError } = await db.from("user_details").select("*").eq("user_id", id).maybeSingle();
     if (detailsError) throw new Error("Unable to load user details");
     const documentPath = (url: string) => {

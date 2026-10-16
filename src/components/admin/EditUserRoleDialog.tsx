@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Edit, Loader2 } from "lucide-react";
+import { userRequest } from "./UserDetailsDialog";
 
 interface EditUserRoleDialogProps {
   userId: string;
@@ -24,20 +25,7 @@ export const EditUserRoleDialog = ({ userId, currentRoles, userName, onRoleUpdat
     setLoading(true);
 
     try {
-      // Delete all existing roles for this user
-      const { error: deleteError } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", userId);
-
-      if (deleteError) throw deleteError;
-
-      // Insert the new role
-      const { error: insertError } = await supabase
-        .from("user_roles")
-        .insert([{ user_id: userId, role: selectedRole as "admin" | "customer" | "rider" | "user" }]);
-
-      if (insertError) throw insertError;
+      await userRequest({ action: "role", userId, role: selectedRole });
 
       toast.success("Role updated successfully!");
       setOpen(false);
@@ -77,6 +65,7 @@ export const EditUserRoleDialog = ({ userId, currentRoles, userName, onRoleUpdat
                   <SelectItem value="user">User</SelectItem>
                   <SelectItem value="customer">Customer</SelectItem>
                   <SelectItem value="rider">Rider</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
