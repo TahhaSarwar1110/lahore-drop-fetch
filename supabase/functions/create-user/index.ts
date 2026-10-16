@@ -18,7 +18,13 @@ serve(async (req) => {
     );
 
     // Verify admin user
-    const authHeader = req.headers.get('Authorization')!;
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
 
@@ -73,8 +79,6 @@ serve(async (req) => {
     }
 
 
-    console.log('Creating user with email:', email);
-
     // Create auth user
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -93,17 +97,24 @@ serve(async (req) => {
 
     console.log('User created:', newUser.user.id);
 
-    // Profile is created automatically by trigger, now assign role
-    const { error: roleError } = await supabaseAdmin
-      .from('user_roles')
-      .insert({ user_id: newUser.user.id, role });
+    // Signup creates a customer role by default. Replace it atomically for
+    // this newly created account, using the server-validated admin selection.
+    const { error: roleError } = await supabaseAdmin.rpc('assign_admin_created_user_role', {
+      p_user_id: newUser.user.id,
+      p_role: role,
+    });
 
     if (roleError) {
       console.error('Error assigning role:', roleError);
-      // User created but role assignment failed
+      // Do not leave an account with an unintended default role on failure.
+      const { error: cleanupError } = await supabaseAdmin.auth.admin.deleteUser(newUser.user.id);
+      if (cleanupError) {
+        console.error('Failed to clean up user after role assignment failure:', cleanupError);
+      }
       return new Response(JSON.stringify({ 
-        error: 'User created but role assignment failed',
-        userId: newUser.user.id 
+        error: cleanupError
+          ? 'Role assignment failed; contact support before retrying'
+          : 'Could not assign selected role; account creation cancelled'
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
