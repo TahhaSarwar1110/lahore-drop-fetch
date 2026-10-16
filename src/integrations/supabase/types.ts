@@ -839,6 +839,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      assign_admin_created_user_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       get_customer_ids_for_rider_orders: {
         Args: { _rider_id: string }
         Returns: string[]

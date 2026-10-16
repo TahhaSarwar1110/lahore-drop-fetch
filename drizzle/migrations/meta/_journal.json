@@ -29,6 +29,13 @@
       "when": 1792133339519,
       "tag": "0003_admin_save_user_details",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792134768150,
+      "tag": "0004_assign_admin_created_user_role",
+      "breakpoints": true
     }
   ]
 }
