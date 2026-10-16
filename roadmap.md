@@ -6,3 +6,6 @@
 - [x] Add Terms of Service and Data Deletion pages and verify footer navigation
 
 - [x] Add admin user details, editing, and safe deletion
+- [ ] Add Manager to edit-role choices with atomic admin-authorized saves
+- [ ] Add admin bank-detail management and customer payment accounts
+- [ ] Notify every manager by email on order placement
