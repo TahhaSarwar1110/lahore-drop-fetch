@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Search, Package, Users, MapPin, MessageCircle } from "lucide-react";
 import { InboxPanel } from "@/pages/manager/WhatsAppInbox";
+import { BankDetailsManagement } from "@/components/admin/BankDetailsManagement";
 
 interface Order {
   id: string;
@@ -130,6 +131,9 @@ const AdminDashboard = () => {
               <TabsTrigger value="permissions" className="gap-2 whitespace-nowrap">
                 Role Permissions
               </TabsTrigger>
+              <TabsTrigger value="bank-details" className="gap-2 whitespace-nowrap">
+                Bank Details
+              </TabsTrigger>
               <TabsTrigger value="whatsapp" className="gap-2 whitespace-nowrap">
                 <MessageCircle className="h-4 w-4" />
                 WhatsApp
@@ -187,6 +191,9 @@ const AdminDashboard = () => {
 
           <TabsContent value="permissions">
             <RolePermissionsManagement />
+          </TabsContent>
+          <TabsContent value="bank-details">
+            <BankDetailsManagement />
           </TabsContent>
 
           <TabsContent value="whatsapp">
