@@ -71,8 +71,9 @@ Deno.serve(async (req) => {
       const live = (items ?? []).filter((i: any) => i.approval_status !== "rejected");
       if (!live.length) return json({ error: "Order has no items yet" }, 409);
 
+      if (!user.email) return json({ success: false, skipped: "no_email" });
       const { data: profile } = await admin
-        .from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle();
+        .from("profiles").select("full_name").eq("id", user.id).maybeSingle();
 
       let itemsTotal = 0;
       const lines = live.map((i: any) => {
@@ -85,34 +86,13 @@ Deno.serve(async (req) => {
       const extra = num(order.additional_charges) + num(order.delivery_charges);
       if (num(order.delivery_charges)) lines.push({ label: "Delivery charges", amount: rs(num(order.delivery_charges)) });
       if (num(order.additional_charges)) lines.push({ label: "Additional charges", amount: rs(num(order.additional_charges)) });
-      const total = rs(itemsTotal + extra);
-      const orderNumber = orderId.slice(0, 8);
 
-      // Staff inbox alert (fixed recipient in template); never blocks the customer email.
-      try {
-        const staff = await sendTemplateEmail("staff-new-order", "contact@tabedaar.com", {
-          templateData: {
-            customerName: profile?.full_name || "A customer",
-            customerPhone: profile?.phone || undefined,
-            orderNumber,
-            items: lines,
-            total,
-            dashboardLink: `${SITE_URL}/manager`,
-          },
-          idempotencyKey: `staff-new-order-${orderId}`,
-        });
-        console.log(`[staff_new_order] order=${orderId} sent=${staff.sent}`);
-      } catch (e: any) {
-        console.error("[staff_new_order] failed:", e?.code ?? "", e?.message ?? e);
-      }
-
-      if (!user.email) return json({ success: false, skipped: "no_email" });
       const result = await sendTemplateEmail("order-confirmation", user.email, {
         templateData: {
           name: profile?.full_name || "Customer",
-          orderNumber,
+          orderNumber: orderId.slice(0, 8),
           items: lines,
-          total,
+          total: rs(itemsTotal + extra),
           orderLink: `${SITE_URL}/order-details?orderId=${orderId}`,
         },
         idempotencyKey: `order-confirmation-${orderId}`,
