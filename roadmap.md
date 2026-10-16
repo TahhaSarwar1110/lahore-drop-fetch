@@ -8,4 +8,4 @@
 - [x] Add admin user details, editing, and safe deletion
 - [x] Add Manager to edit-role choices with atomic admin-authorized saves
 - [x] Add admin bank-detail management and customer payment accounts
-- [ ] Notify every manager's registered email on order placement (re-requested) — blocked: managed app emails prohibit recipient-list sends; needs user choice of single shared inbox/forwarding or an external email service
+- [x] Email new-order alerts to the shared contact@tabedaar.com inbox (GoDaddy forwards to managers)
