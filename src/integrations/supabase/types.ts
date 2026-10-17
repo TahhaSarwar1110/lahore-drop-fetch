@@ -429,6 +429,41 @@ export type Database = {
           },
         ]
       }
+      order_payment_proofs: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_url: string
+          id: string
+          order_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          order_id: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          order_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_payment_proofs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_status_history: {
         Row: {
           id: string
@@ -1088,7 +1123,7 @@ export type Database = {
           p_approved: boolean
           p_order_id: string
           p_paid_amount: number
-          p_reason?: string
+          p_reason: string
         }
         Returns: undefined
       }
