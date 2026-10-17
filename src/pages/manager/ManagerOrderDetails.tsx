@@ -347,7 +347,9 @@ const ManagerOrderDetails = () => {
                     variant={!canConfirmOrder() ? "outline" : "default"}
                   >
                     {hasRejectedItems() 
-                      ? "Resolve Rejected Items First" 
+                      ? "Resolve Rejected Items First"
+                      : !isPaymentVerifiedForApproval()
+                      ? "Verify Payment First"
                       : "Confirm Order"}
                   </Button>
                 )}
