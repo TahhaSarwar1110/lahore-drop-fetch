@@ -126,8 +126,17 @@ serve(async (req) => {
         tabedaar_items_picked_up: ["Test Customer", "abcd1234"],
         tabedaar_order_delivered: ["Test Customer", "abcd1234", "Rs. 3,500"],
       };
+      // Optional probe mode: { action: "check_templates", names: ["x", ...] }
+      // sends each named template with generic sample params; wrong names fail
+      // without delivering, so this is a safe way to discover the real name.
+      const probeNames: string[] = Array.isArray(body.names)
+        ? body.names.filter((n: unknown) => typeof n === "string" && /^[a-z0-9_]{1,60}$/.test(n as string)).slice(0, 10)
+        : [];
+      const entries: [string, string[]][] = probeNames.length
+        ? probeNames.map((n) => [n, ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500", "Out of stock"]])
+        : Object.entries(SAMPLES);
       const results: Record<string, unknown> = {};
-      for (const [name, params] of Object.entries(SAMPLES)) {
+      for (const [name, params] of entries) {
         let r = await graphPost({
           messaging_product: "whatsapp", to: own, type: "template",
           template: {
