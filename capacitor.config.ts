@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.dc8528808d134e6b95c8cce4660ffa8d',
+  appId: 'com.tabedaar.app',
   appName: 'Tabedaar.com',
   webDir: 'dist',
   backgroundColor: '#0B1A3D',

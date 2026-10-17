@@ -1,4 +1,4 @@
-package app.lovable.dc8528808d134e6b95c8cce4660ffa8d;
+package com.tabedaar.app;
 
 import com.getcapacitor.BridgeActivity;
 
