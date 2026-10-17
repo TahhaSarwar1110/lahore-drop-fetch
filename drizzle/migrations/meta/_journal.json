@@ -43,6 +43,13 @@
       "when": 1792135755274,
       "tag": "0005_tabedaar_bank_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792245172615,
+      "tag": "0006_repair_private_attachment_read_access",
+      "breakpoints": true
     }
   ]
 }

@@ -879,6 +879,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      can_read_legacy_pickup_proof: {
+        Args: { p_path: string }
+        Returns: boolean
+      }
+      can_read_order_attachment: { Args: { p_path: string }; Returns: boolean }
       get_customer_ids_for_rider_orders: {
         Args: { _rider_id: string }
         Returns: string[]
