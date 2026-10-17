@@ -124,6 +124,27 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = z.string().trim().email("Invalid email address").safeParse(forgotEmail);
+    if (!parsed.success) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address", variant: "destructive" });
+      return;
+    }
+    setForgotLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setForgotLoading(false);
+    if (error) {
+      toast({ title: "Could not send reset email", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Reset email sent", description: "Check your email for a password reset link" });
+    setForgotOpen(false);
+    setForgotEmail("");
+  };
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row tap-highlight-none">
       {/* Left Side - Gradient (desktop only) */}
@@ -169,7 +190,16 @@ const Login = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="mobile-label">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="mobile-label">Password</Label>
+                  <button
+                    type="button"
+                    onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
+                    className="text-sm text-primary font-medium hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <PasswordInput
                   id="password"
                   placeholder="Enter your password"
