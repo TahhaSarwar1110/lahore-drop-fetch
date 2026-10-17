@@ -218,7 +218,9 @@ export const PaymentVerification = ({
           <div className="flex gap-2">
             <Button onClick={() => submit(true)} disabled={saving} className="flex-1">
               <ShieldCheck className="h-4 w-4 mr-1" />
-              {settled ? "Verify & Mark Settlement Done" : "Verify Payment"}
+              {settled || (expenseVerified && Number.isFinite(parsedAmount) && paidAmount + parsedAmount >= (shoppingExpense as number))
+                ? "Verify & Mark Settlement Done"
+                : "Verify Payment"}
             </Button>
             <Button variant="destructive" onClick={() => submit(false)} disabled={saving} className="flex-1">
               <ShieldX className="h-4 w-4 mr-1" />
