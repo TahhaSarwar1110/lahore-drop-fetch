@@ -121,9 +121,12 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
     case "delivery_payment_requested":
       if (o.delivery_payment_status !== "pending" || num(o.delivery_charges) <= 0) return null;
       return { template: "tabedaar_payment_pending", key: `${orderId}:payment_pending:delivery`, params: [name, no, rs(num(o.delivery_charges)), "Delivery charges"] };
-    case "payment_confirmed":
-      if (o.payment_status !== "confirmed") return null;
-      return { template: "tabedaar_payment_confirmed", key: `${orderId}:payment_confirmed:order`, params: [name, no, rs(await goods())] };
+    case "payment_confirmed": {
+      // Authoritative amount: the manager-verified paid total on the order.
+      const paid = num(o.paid_amount_pkr);
+      if (o.payment_verification !== "verified" || paid <= 0) return null;
+      return { template: "tabedaar_payment_confirmed", key: `${orderId}:payment_confirmed:${version || paid}`, params: [name, no, rs(paid)] };
+    }
     case "delivery_payment_confirmed":
       if (o.delivery_payment_status !== "confirmed") return null;
       return { template: "tabedaar_payment_confirmed", key: `${orderId}:payment_confirmed:delivery`, params: [name, no, rs(num(o.delivery_charges))] };
@@ -152,6 +155,7 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
 }
 
 export const WHATSAPP_EVENTS = new Set([
+  "items_reviewed", "payment_required_after_review",
   "order_confirmed", "delivery_payment_requested", "payment_confirmed",
   "delivery_payment_confirmed", "rider_assigned", "order_picked_up", "order_delivered",
 ]);
