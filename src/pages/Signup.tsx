@@ -86,6 +86,30 @@ const Signup = () => {
       // password-reset support and account recovery.
       const accountEmail = phoneToSyntheticEmail(fullPhoneNumber);
 
+      // Server-side uniqueness pre-check so the customer gets a clear
+      // message before account creation is attempted.
+      const { data: availability } = await supabase.rpc("check_signup_contact", {
+        p_phone: `+${normalizePhoneDigits(fullPhoneNumber)}`,
+        p_email: validatedData.email || null,
+      });
+      const taken = availability as { phone_taken?: boolean; email_taken?: boolean } | null;
+      if (taken?.phone_taken) {
+        toast({
+          title: "Account exists",
+          description: "This mobile number is already registered. Please login instead.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (taken?.email_taken) {
+        toast({
+          title: "Account exists",
+          description: "This email address is already registered. Please login instead.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: accountEmail,
         password: validatedData.password,
@@ -104,6 +128,12 @@ const Signup = () => {
           toast({
             title: "Account exists",
             description: "This mobile number is already registered. Please login instead.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes("Database error saving new user")) {
+          toast({
+            title: "Account exists",
+            description: "This mobile number or email is already registered. Please login instead.",
             variant: "destructive",
           });
         } else {
