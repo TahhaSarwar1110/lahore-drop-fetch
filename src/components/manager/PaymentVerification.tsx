@@ -159,11 +159,11 @@ export function PaymentVerification(props: PaymentVerificationProps) {
           )}
         </div>
 
-        {proofs.length > 0 ? (
+        {allProofs.length > 0 ? (
           <div>
-            <p className="text-sm font-medium mb-2">Payment Proofs ({proofs.length})</p>
+            <p className="text-sm font-medium mb-2">Payment Proofs ({allProofs.length})</p>
             <div className="grid grid-cols-2 gap-3">
-              {proofs.map((proof, index) => (
+              {allProofs.map((proof, index) => (
                 <div key={proof.id} className="space-y-1">
                   <StorageImage
                     bucket="payment-proofs"
