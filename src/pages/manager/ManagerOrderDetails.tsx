@@ -211,18 +211,34 @@ const ManagerOrderDetails = () => {
     return order?.payment_status === 'confirmed';
   };
 
+  const isPaymentVerifiedForApproval = () => {
+    if (!order) return false;
+    // Orders placed before reconciliation (no total snapshot) keep the old rule
+    if (order.order_total_pkr === null || order.order_total_pkr === undefined) {
+      return isPaymentConfirmed();
+    }
+    return canApproveOrder(order.order_total_pkr, order.paid_amount_pkr, order.payment_verification);
+  };
+
   const canAssignRider = () => {
     return allItemsApproved() && order?.confirmed_at && isPaymentConfirmed();
   };
 
   const canConfirmOrder = () => {
-    return allItemsApproved();
+    return allItemsApproved() && isPaymentVerifiedForApproval();
   };
 
   const handleConfirmOrder = async () => {
     if (!canConfirmOrder()) {
       if (hasRejectedItems()) {
         toast.error("Cannot confirm order with rejected items. Please ensure all items are approved.");
+      } else if (!isPaymentVerifiedForApproval() && order) {
+        const outstanding = getOutstandingAmount(order.order_total_pkr ?? 0, order.paid_amount_pkr);
+        toast.error(
+          outstanding > 0
+            ? `Payment short by Rs. ${outstanding.toLocaleString()}. Verify full payment before confirming.`
+            : "Payment must be verified before confirming the order."
+        );
       }
       return;
     }
