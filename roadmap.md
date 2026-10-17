@@ -14,4 +14,4 @@
 - [x] Configure Android camera registration and iOS sync-time permission setup; verify web gallery and photo viewing
 - [ ] Verify camera/gallery on physical iOS and Android devices — requires restored iOS Xcode project and rebuilt apps on the user's devices
 
-- [ ] Correct verified payment heading, outstanding balance, and rider assignment across manager flow
+- [x] Correct verified payment heading, outstanding balance, and rider assignment across manager flow
