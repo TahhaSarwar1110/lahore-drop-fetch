@@ -572,8 +572,8 @@ serve(async (req) => {
     if (emailDefs && order) {
       try {
         const { data: u } = await admin.auth.admin.getUserById(order.user_id);
-        const to = u?.user?.email;
-        if (to) {
+        const to = customerEmailOverride || u?.user?.email;
+        if (to && !to.endsWith("@tabedaar.local")) {
           for (const d of emailDefs) {
             const key = `${d.title.toLowerCase().replace(/\s+/g, "-")}-${order.id}${d.once ? "" : "-" + version}`;
             const r = await sendTemplateEmail("order-update", to, {
