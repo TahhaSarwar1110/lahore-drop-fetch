@@ -137,7 +137,7 @@ serve(async (req) => {
       if (!/^\d{10,15}$/.test(own)) return json({ error: "Your profile has no valid phone number for the test send" }, 400);
 
       const SAMPLES: Record<string, string[]> = {
-        tabedaar_order_received: ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500"],
+        tabedaar_order_received: ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket"],
         tabedaar_items_reviewed: ["Test Customer", "abcd1234", "2 Shirts", "1 Jacket", "Out of stock"],
         tabedaar_payment_required_after_review: ["Test Customer", "abcd1234", "2 Shirts", "None", "Rs. 2,000"],
         tabedaar_payment_confirmed: ["Test Customer", "abcd1234", "Rs. 2,000"],
@@ -156,7 +156,7 @@ serve(async (req) => {
         : [];
       const langs = probeLangs.length ? probeLangs : ["en", "en_US"];
       const entries: [string, string[]][] = probeNames.length
-        ? probeNames.map((n) => [n, ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500", "Out of stock"]])
+        ? probeNames.map((n) => [n, SAMPLES[n] ?? ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500", "Out of stock"]])
         : Object.entries(SAMPLES);
       const results: Record<string, unknown> = {};
       for (const [name, params] of entries) {
