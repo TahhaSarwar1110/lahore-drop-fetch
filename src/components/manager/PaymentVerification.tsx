@@ -182,25 +182,6 @@ export function PaymentVerification(props: PaymentVerificationProps) {
               ))}
             </div>
           </div>
-        ) : paymentProofUrl ? (
-          <div>
-            <p className="text-sm font-medium mb-2">Payment Proof</p>
-            <StorageImage
-              bucket="payment-proofs"
-              src={paymentProofUrl}
-              alt={paymentProofName || "Payment proof"}
-              className="max-h-96 w-auto rounded-md border"
-            />
-            <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => void openAttachment(paymentProofUrl, "payment-proofs")}>
-              <ExternalLink className="h-4 w-4 mr-1" />
-              View Full Size
-            </Button>
-            {paymentSubmittedAt && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Submitted {new Date(paymentSubmittedAt).toLocaleString()}
-              </p>
-            )}
-          </div>
         ) : null}
 
         {verification === "rejected" && rejectionReason && (
