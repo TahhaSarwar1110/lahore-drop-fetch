@@ -459,6 +459,8 @@ const ManagerOrderDetails = () => {
               paymentProofUrl={order.payment_proof_url}
               paymentProofName={order.payment_proof_name}
               paymentSubmittedAt={order.payment_submitted_at}
+              shoppingExpense={order.shopping_expense_pkr}
+              expenseStatus={order.expense_status}
               onUpdate={fetchOrderDetails}
             />
 

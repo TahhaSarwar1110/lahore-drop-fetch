@@ -62,7 +62,17 @@ export const PaymentUpload = ({
 
       if (uploadError) throw uploadError;
 
-
+      // Keep a history row so the manager can see every payment screenshot
+      // (first payment and any later top-ups) side by side.
+      const { error: proofError } = await supabase
+        .from("order_payment_proofs")
+        .insert({
+          order_id: orderId,
+          uploaded_by: user.id,
+          file_url: filePath,
+          file_name: selectedFile.name,
+        });
+      if (proofError) throw proofError;
 
       const { error: updateError } = await supabase
         .from("orders")
@@ -125,7 +135,7 @@ export const PaymentUpload = ({
                   Remaining amount due: Rs. {amountDue.toLocaleString()}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  The actual shopping cost was higher than your payment. Please transfer the remaining amount and upload the screenshot. Delivery starts after it is verified.
+                  The actual shopping cost was higher than your payment. Please transfer only the remaining amount and upload the screenshot. Delivery starts after it is verified.
                 </p>
               </div>
             ) : (
