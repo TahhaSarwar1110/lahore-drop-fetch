@@ -132,11 +132,36 @@ serve(async (req) => {
       const probeNames: string[] = Array.isArray(body.names)
         ? body.names.filter((n: unknown) => typeof n === "string" && /^[a-z0-9_]{1,60}$/.test(n as string)).slice(0, 10)
         : [];
+      // Optional language override: { action: "check_templates", names: [...], langs: ["en_GB", "ur"] }
+      const probeLangs: string[] = Array.isArray(body.langs)
+        ? body.langs.filter((l: unknown) => typeof l === "string" && /^[a-z]{2}(_[A-Z]{2})?$/.test(l as string)).slice(0, 6)
+        : [];
+      const langs = probeLangs.length ? probeLangs : ["en", "en_US"];
       const entries: [string, string[]][] = probeNames.length
         ? probeNames.map((n) => [n, ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500", "Out of stock"]])
         : Object.entries(SAMPLES);
       const results: Record<string, unknown> = {};
       for (const [name, params] of entries) {
+        let r: any = { ok: false, data: {} };
+        for (const language of langs) {
+          r = await graphPost({
+            messaging_product: "whatsapp", to: own, type: "template",
+            template: {
+              name, language: { code: language },
+              components: [{ type: "body", parameters: params.map((text) => ({ type: "text", text })) }],
+            },
+          });
+          if (r.ok) {
+            results[name] = { ok: true, language, messageId: r.data?.messages?.[0]?.id };
+            break;
+          }
+        }
+        if (r.ok) continue;
+        const e = r.data?.error ?? {};
+        results[name] = { ok: false, code: e.code, subcode: e.error_subcode, message: e.message, details: e.error_data?.details, blame: e.error_data?.blame_field_specs };
+      }
+      return json({ ok: true, sentTo: `***${own.slice(-4)}`, ownLength: own.length, results });
+    }
         let r = await graphPost({
           messaging_product: "whatsapp", to: own, type: "template",
           template: {
