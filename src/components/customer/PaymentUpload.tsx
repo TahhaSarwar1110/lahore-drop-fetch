@@ -17,6 +17,7 @@ interface PaymentUploadProps {
   paymentProofUrl?: string | null;
   paymentSubmittedAt?: string | null;
   paymentConfirmedAt?: string | null;
+  amountDue?: number;
   onUpdate: () => void;
 }
 
@@ -26,6 +27,7 @@ export const PaymentUpload = ({
   paymentProofUrl,
   paymentSubmittedAt,
   paymentConfirmedAt,
+  amountDue,
   onUpdate,
 }: PaymentUploadProps) => {
   const [uploading, setUploading] = useState(false);
