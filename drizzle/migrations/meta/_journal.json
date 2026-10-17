@@ -85,6 +85,13 @@
       "when": 1792271589476,
       "tag": "0011_unique_profile_phone_email",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792275079450,
+      "tag": "0012_allow_confirm_before_payment",
+      "breakpoints": true
     }
   ]
 }
