@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { StorageImage } from "@/components/StorageImage";
 import { toast } from "sonner";
-import { Receipt, Upload, X } from "lucide-react";
-import { Capacitor } from "@capacitor/core";
-import { Camera as CapCamera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Receipt, X } from "lucide-react";
 import { EXPENSE_STATUS_LABELS } from "@/utils/orderFinancials";
+import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 
 interface ReceiptRow {
   id: string;
@@ -28,14 +27,6 @@ interface ShoppingExpenseFormProps {
   onUpdate: () => void;
 }
 
-const dataUrlToFile = (dataUrl: string, name: string): File => {
-  const [meta, base64] = dataUrl.split(",");
-  const mime = /data:(.*?);/.exec(meta)?.[1] || "image/jpeg";
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new File([bytes], name, { type: mime });
-};
 
 export const ShoppingExpenseForm = ({
   orderId,
@@ -50,7 +41,6 @@ export const ShoppingExpenseForm = ({
   const [files, setFiles] = useState<File[]>([]);
   const [receipts, setReceipts] = useState<ReceiptRow[]>([]);
   const [saving, setSaving] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canEdit = !expenseStatus || expenseStatus === "rejected";
 
@@ -72,26 +62,10 @@ export const ShoppingExpenseForm = ({
     if (expenseNotes) setNotes(expenseNotes);
   }, [expenseAmount, expenseNotes]);
 
-  const pickNative = async (source: CameraSource) => {
-    try {
-      const photo = await CapCamera.getPhoto({
-        quality: 80,
-        resultType: CameraResultType.DataUrl,
-        source,
-      });
-      if (photo.dataUrl) {
-        setFiles((prev) => [...prev, dataUrlToFile(photo.dataUrl!, `receipt-${Date.now()}.${photo.format || "jpeg"}`)]);
-      }
-    } catch (error) {
-      console.error("Camera error:", error);
-      toast.error("Could not get the photo. Please try again.");
-    }
+  const handlePicked = (picked: File[]) => {
+    setFiles((prev) => [...prev, ...picked]);
   };
 
-  const addFiles = (list: FileList | null) => {
-    if (!list) return;
-    setFiles((prev) => [...prev, ...Array.from(list)]);
-  };
 
   const submit = async () => {
     const parsed = parseInt(amount.replace(/[^0-9]/g, ""), 10);
@@ -193,31 +167,12 @@ export const ShoppingExpenseForm = ({
             </div>
             <div className="space-y-2">
               <Label>Purchase Receipts</Label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
+              <ImageSourcePicker
+                onFiles={handlePicked}
                 multiple
-                className="hidden"
-                onChange={(e) => addFiles(e.target.files)}
+                cameraLabel="Take Photo"
+                galleryLabel="Choose from Gallery"
               />
-              <div className="flex flex-wrap gap-2">
-                {Capacitor.isNativePlatform() ? (
-                  <>
-                    <Button type="button" variant="outline" size="sm" onClick={() => pickNative(CameraSource.Camera)}>
-                      Take Photo
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => pickNative(CameraSource.Photos)}>
-                      Choose from Gallery
-                    </Button>
-                  </>
-                ) : (
-                  <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                    <Upload className="h-4 w-4 mr-1" />
-                    Add Receipt Images
-                  </Button>
-                )}
-              </div>
               {files.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {files.map((f, i) => (

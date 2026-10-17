@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { triggerNotification } from "@/utils/notify";
 import { toast } from "sonner";
-import { Loader2, Check, Upload, Image as ImageIcon, ArrowLeft, Navigation, Package, Info } from "lucide-react";
+import { Loader2, Check, Image as ImageIcon, ArrowLeft, Navigation, Package, Info } from "lucide-react";
+import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -424,32 +425,16 @@ const RiderOrderDetails = () => {
                           All items picked! Upload delivery proof to complete the order.
                         </p>
                       </div>
-                      <label className="w-full sm:w-auto">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleDeliveryProofUpload(file);
-                          }}
-                          disabled={deliveringOrder}
-                        />
-                        <Button
-                          disabled={deliveringOrder}
-                          className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
-                          asChild
-                        >
-                          <span>
-                            {deliveringOrder ? (
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            ) : (
-                              <Upload className="h-4 w-4 mr-2" />
-                            )}
-                            Mark as Delivered with Proof
-                          </span>
-                        </Button>
-                      </label>
+                      <ImageSourcePicker
+                        className="w-full sm:w-auto"
+                        onFiles={(files) => {
+                          const file = files[0];
+                          if (file) handleDeliveryProofUpload(file);
+                        }}
+                        disabled={deliveringOrder}
+                        cameraLabel="Take Photo"
+                        galleryLabel="Gallery"
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -576,33 +561,15 @@ const RiderOrderDetails = () => {
                               <p className="text-sm text-muted-foreground">
                                 📷 Upload pickup proof to mark this item as picked
                               </p>
-                              <label className="w-full">
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleFileUpload(item.id, file);
-                                  }}
-                                  disabled={uploading === item.id}
-                                />
-                                <Button
-                                  size="sm"
-                                  disabled={uploading === item.id}
-                                  asChild
-                                  className="w-full sm:w-auto"
-                                >
-                                  <span>
-                                    {uploading === item.id ? (
-                                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    ) : (
-                                      <Upload className="h-4 w-4 mr-2" />
-                                    )}
-                                    Upload Pickup Proof
-                                  </span>
-                                </Button>
-                              </label>
+                              <ImageSourcePicker
+                                onFiles={(files) => {
+                                  const file = files[0];
+                                  if (file) handleFileUpload(item.id, file);
+                                }}
+                                disabled={uploading === item.id}
+                                cameraLabel="Take Photo"
+                                galleryLabel="Gallery"
+                              />
                             </div>
                           )}
                         </div>
