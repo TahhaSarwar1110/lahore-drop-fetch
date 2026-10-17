@@ -73,6 +73,16 @@ const RECIPES: Record<string, Recipe> = {
     title: "Item rejected",
     message: "Your item {item} in order #{order} was rejected. {note}",
   },
+  items_reviewed: {
+    audiences: ["customer"],
+    title: "Items reviewed",
+    message: "Our team has finished reviewing the items in your order #{order}. Open the order to see the results.",
+  },
+  payment_required_after_review: {
+    audiences: ["customer"],
+    title: "Payment required",
+    message: "Payment is now due for the approved items in your order #{order}. Please upload your payment proof.",
+  },
   order_confirmation_required: {
     audiences: ["manager"],
     title: "Order requires confirmation",

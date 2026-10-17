@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Banknote, ShieldCheck, ShieldX, ExternalLink } from "lucide-react";
 import { openAttachment } from "@/utils/attachmentStorage";
 import { getOutstandingAmount, PAYMENT_VERIFICATION_LABELS } from "@/utils/orderFinancials";
+import { triggerNotification } from "@/utils/notify";
 
 interface PaymentVerificationProps {
   orderId: string;
@@ -99,6 +100,15 @@ export function PaymentVerification(props: PaymentVerificationProps) {
         p_reason: approved ? null : reason.trim(),
       });
       if (error) throw error;
+      if (approved) {
+        // Server reads the authoritative verified paid total; versioned by
+        // amount so each distinct approved payment notifies exactly once.
+        void triggerNotification({
+          event_type: "payment_confirmed",
+          order_id: orderId,
+          event_version: `paid_${parsedAmount}`,
+        });
+      }
       toast.success(approved ? "Payment verified — settlement updated" : "Payment rejected");
       setAmount("");
       void loadProofs();

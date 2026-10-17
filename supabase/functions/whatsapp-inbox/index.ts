@@ -94,6 +94,77 @@ serve(async (req) => {
       });
     }
 
+    // ---------- List approved templates from Meta ----------
+    if (action === "list_templates") {
+      const tryGet = async (u: string) => {
+        const r = await fetch(u, { headers: { Authorization: `Bearer ${TOKEN}` } });
+        return { ok: r.ok, data: await r.json().catch(() => ({})) };
+      };
+      let r = await tryGet(`${GRAPH}/${PHONE_ID}/message_templates?limit=100`);
+      if (!r.ok) {
+        // Need the WABA id: resolve it from the phone number's verified name edge.
+        const pn = await tryGet(`${GRAPH}/${PHONE_ID}?fields=id`);
+        return json({ error: "template_list_unavailable", status: r.data?.error?.message, phone: pn.data }, 502);
+      }
+      const names = (r.data?.data ?? []).map((t: any) => ({ name: t.name, language: t.language, status: t.status, params: (t.components ?? []).find((c: any) => c.type === "BODY")?.text }));
+      return json({ ok: true, count: names.length, templates: names });
+    }
+
+    // ---------- Template diagnostic: live-send each lifecycle template to our own number ----------
+    if (action === "check_templates") {
+      // Meta rejects sends to the business's own number, so the live check
+      // goes to the calling manager/admin's own profile phone.
+      const { data: prof } = await db.from("profiles").select("phone").eq("id", userId).maybeSingle();
+      const own = String(prof?.phone ?? "").replace(/\D/g, "").replace(/^0/, "92");
+      if (!/^\d{10,15}$/.test(own)) return json({ error: "Your profile has no valid phone number for the test send" }, 400);
+
+      const SAMPLES: Record<string, string[]> = {
+        tabedaar_order_received: ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500"],
+        tabedaar_items_reviewed: ["Test Customer", "abcd1234", "2 Shirts", "1 Jacket", "Out of stock"],
+        tabedaar_payment_required_after_review: ["Test Customer", "abcd1234", "2 Shirts", "None", "Rs. 2,000"],
+        tabedaar_payment_confirmed: ["Test Customer", "abcd1234", "Rs. 2,000"],
+        tabedaar_items_picked_up: ["Test Customer", "abcd1234"],
+        tabedaar_order_delivered: ["Test Customer", "abcd1234", "Rs. 3,500"],
+      };
+      // Optional probe mode: { action: "check_templates", names: ["x", ...] }
+      // sends each named template with generic sample params; wrong names fail
+      // without delivering, so this is a safe way to discover the real name.
+      const probeNames: string[] = Array.isArray(body.names)
+        ? body.names.filter((n: unknown) => typeof n === "string" && /^[a-z0-9_]{1,60}$/.test(n as string)).slice(0, 10)
+        : [];
+      const entries: [string, string[]][] = probeNames.length
+        ? probeNames.map((n) => [n, ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500", "Out of stock"]])
+        : Object.entries(SAMPLES);
+      const results: Record<string, unknown> = {};
+      for (const [name, params] of entries) {
+        let r = await graphPost({
+          messaging_product: "whatsapp", to: own, type: "template",
+          template: {
+            name, language: { code: "en" },
+            components: [{ type: "body", parameters: params.map((text) => ({ type: "text", text })) }],
+          },
+        });
+        if (!r.ok) {
+          r = await graphPost({
+            messaging_product: "whatsapp", to: own, type: "template",
+            template: {
+              name, language: { code: "en_US" },
+              components: [{ type: "body", parameters: params.map((text) => ({ type: "text", text })) }],
+            },
+          });
+          if (r.ok) {
+            results[name] = { ok: true, language: "en_US", messageId: r.data?.messages?.[0]?.id };
+            continue;
+          }
+        }
+        const e = r.data?.error ?? {};
+        results[name] = r.ok
+          ? { ok: true, language: "en", messageId: r.data?.messages?.[0]?.id }
+          : { ok: false, code: e.code, subcode: e.error_subcode, message: e.message, details: e.error_data?.details, blame: e.error_data?.blame_field_specs };
+      }
+      return json({ ok: true, sentTo: `***${own.slice(-4)}`, ownLength: own.length, results });
+    }
+
     // ---------- Actions on a conversation ----------
     if (!isUuid(body.conversationId)) return json({ error: "Invalid conversationId" }, 400);
     const { data: conv } = await db
