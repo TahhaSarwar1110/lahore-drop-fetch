@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Banknote, ShieldCheck, ShieldX, ExternalLink } from "lucide-react";
 import { openAttachment } from "@/utils/attachmentStorage";
 import { getOutstandingAmount, PAYMENT_VERIFICATION_LABELS } from "@/utils/orderFinancials";
+import { triggerNotification } from "@/utils/notify";
 
 interface PaymentVerificationProps {
   orderId: string;
