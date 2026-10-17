@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ interface PaymentVerificationProps {
   paymentProofUrl: string | null;
   paymentProofName: string | null;
   paymentSubmittedAt: string | null;
+  shoppingExpense?: number | null;
+  expenseStatus?: string | null;
   onUpdate: () => void;
 }
 
@@ -33,11 +35,32 @@ export const PaymentVerification = ({
   paymentProofUrl,
   paymentProofName,
   paymentSubmittedAt,
+  shoppingExpense,
+  expenseStatus,
   onUpdate,
-}: PaymentVerificationProps) => {
-  const [amount, setAmount] = useState<string>(paidAmount > 0 ? String(paidAmount) : "");
+}: PaymentVerificationProps) {
+  const [amount, setAmount] = useState<string>("");
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
+  const [proofs, setProofs] = useState<{ id: string; file_url: string; file_name: string; created_at: string }[]>([]);
+
+  const loadProofs = useCallback(async () => {
+    const { data } = await supabase
+      .from("order_payment_proofs")
+      .select("id, file_url, file_name, created_at")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: true });
+    setProofs(data ?? []);
+  }, [orderId]);
+
+  useEffect(() => {
+    void loadProofs();
+  }, [loadProofs]);
+
+  const expenseVerified = expenseStatus === "verified" && typeof shoppingExpense === "number";
+  const settlementTarget = expenseVerified ? shoppingExpense : orderTotal;
+  const remainingToSettle = Math.max(0, settlementTarget - paidAmount);
+  const settled = expenseVerified && paidAmount >= (shoppingExpense as number);
 
   const parsedAmount = parseInt(amount.replace(/[^0-9]/g, ""), 10);
   const outstanding = Number.isFinite(parsedAmount) ? getOutstandingAmount(orderTotal, parsedAmount) : orderTotal;
@@ -99,7 +122,49 @@ export const PaymentVerification = ({
           )}
         </div>
 
-        {paymentProofUrl && (
+        {expenseVerified && (
+          <div className="grid gap-2 text-sm border-t pt-3">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Verified Shopping Expense</span>
+              <span className="font-medium">Rs. {(shoppingExpense as number).toLocaleString()}</span>
+            </div>
+            {remainingToSettle > 0 ? (
+              <div className="flex justify-between text-destructive">
+                <span>Remaining settlement amount</span>
+                <span className="font-medium">Rs. {remainingToSettle.toLocaleString()}</span>
+              </div>
+            ) : (
+              <p className="text-xs text-green-700 dark:text-green-300">
+                Payment fully covers the shopping expense — settlement can be marked done.
+              </p>
+            )}
+          </div>
+        )}
+
+        {proofs.length > 0 ? (
+          <div>
+            <p className="text-sm font-medium mb-2">Payment Proofs ({proofs.length})</p>
+            <div className="grid grid-cols-2 gap-3">
+              {proofs.map((proof, index) => (
+                <div key={proof.id} className="space-y-1">
+                  <StorageImage
+                    bucket="payment-proofs"
+                    src={proof.file_url}
+                    alt={proof.file_name || `Payment proof ${index + 1}`}
+                    className="h-32 w-full object-cover rounded-md border"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {index === 0 ? "First payment" : `Top-up ${index}`} · {new Date(proof.created_at).toLocaleString()}
+                  </p>
+                  <Button type="button" variant="outline" size="sm" onClick={() => void openAttachment(proof.file_url, "payment-proofs")}>
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                    View Full Size
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : paymentProofUrl ? (
           <div>
             <p className="text-sm font-medium mb-2">Payment Proof</p>
             <StorageImage
@@ -118,7 +183,7 @@ export const PaymentVerification = ({
               </p>
             )}
           </div>
-        )}
+        ) : null}
 
         {verification === "rejected" && rejectionReason && (
           <p className="text-sm text-destructive">Rejection reason: {rejectionReason}</p>
