@@ -162,33 +162,6 @@ serve(async (req) => {
       }
       return json({ ok: true, sentTo: `***${own.slice(-4)}`, ownLength: own.length, results });
     }
-        let r = await graphPost({
-          messaging_product: "whatsapp", to: own, type: "template",
-          template: {
-            name, language: { code: "en" },
-            components: [{ type: "body", parameters: params.map((text) => ({ type: "text", text })) }],
-          },
-        });
-        if (!r.ok) {
-          r = await graphPost({
-            messaging_product: "whatsapp", to: own, type: "template",
-            template: {
-              name, language: { code: "en_US" },
-              components: [{ type: "body", parameters: params.map((text) => ({ type: "text", text })) }],
-            },
-          });
-          if (r.ok) {
-            results[name] = { ok: true, language: "en_US", messageId: r.data?.messages?.[0]?.id };
-            continue;
-          }
-        }
-        const e = r.data?.error ?? {};
-        results[name] = r.ok
-          ? { ok: true, language: "en", messageId: r.data?.messages?.[0]?.id }
-          : { ok: false, code: e.code, subcode: e.error_subcode, message: e.message, details: e.error_data?.details, blame: e.error_data?.blame_field_specs };
-      }
-      return json({ ok: true, sentTo: `***${own.slice(-4)}`, ownLength: own.length, results });
-    }
 
     // ---------- Actions on a conversation ----------
     if (!isUuid(body.conversationId)) return json({ error: "Invalid conversationId" }, 400);
