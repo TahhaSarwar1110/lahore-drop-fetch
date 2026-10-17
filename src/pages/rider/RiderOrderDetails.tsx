@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { triggerNotification } from "@/utils/notify";
 import { toast } from "sonner";
-import { Loader2, Check, Upload, Image as ImageIcon, ArrowLeft, Navigation, Package, Info } from "lucide-react";
+import { Loader2, Check, Image as ImageIcon, ArrowLeft, Navigation, Package, Info } from "lucide-react";
 import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
