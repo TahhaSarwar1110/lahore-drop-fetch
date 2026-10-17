@@ -8,6 +8,8 @@ export type NotificationEvent =
   | "item_approval_required"
   | "item_approved"
   | "item_rejected"
+  | "items_reviewed"
+  | "payment_required_after_review"
   | "order_confirmation_required"
   | "order_confirmed"
   | "payment_requested"
