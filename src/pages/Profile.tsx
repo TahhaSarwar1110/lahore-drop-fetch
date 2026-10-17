@@ -90,7 +90,15 @@ const Profile = () => {
       .update(updates)
       .eq("id", userId);
     setSavingProfile(false);
-    if (error) toast.error("Could not save your details. Please try again.");
+    if (error) {
+      if (error.message.includes("mobile number is already registered")) {
+        toast.error("This mobile number is already registered on another account.");
+      } else if (error.message.includes("email address is already registered")) {
+        toast.error("This email address is already registered on another account.");
+      } else {
+        toast.error("Could not save your details. Please try again.");
+      }
+    }
     else toast.success("Your details have been updated");
   };
 
