@@ -63,6 +63,21 @@ export function PaymentVerification(props: PaymentVerificationProps) {
   const remainingToSettle = Math.max(0, settlementTarget - paidAmount);
   const settled = expenseVerified && paidAmount >= (shoppingExpense as number);
 
+  // Merge the legacy proof stored on the order with the proof history,
+  // so orders placed before proof history existed still show every payment.
+  const allProofs = (() => {
+    const list = proofs.map((p) => ({ ...p }));
+    if (paymentProofUrl && !list.some((p) => p.file_url === paymentProofUrl)) {
+      list.unshift({
+        id: "legacy",
+        file_url: paymentProofUrl,
+        file_name: paymentProofName || "Payment proof",
+        created_at: paymentSubmittedAt || new Date(0).toISOString(),
+      });
+    }
+    return list;
+  })();
+
   const parsedAmount = parseInt(amount.replace(/[^0-9]/g, ""), 10);
   const outstanding = Number.isFinite(parsedAmount) ? getOutstandingAmount(orderTotal, parsedAmount) : orderTotal;
 
@@ -113,25 +128,18 @@ export function PaymentVerification(props: PaymentVerificationProps) {
             <span className="text-muted-foreground">Order Total</span>
             <span className="font-medium">Rs. {orderTotal.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Verified Amount Received</span>
-            <span className="font-medium">Rs. {paidAmount.toLocaleString()}</span>
-          </div>
-          {outstanding > 0 && verification !== "rejected" && (
-            <div className="flex justify-between text-destructive">
-              <span>Outstanding</span>
-              <span className="font-medium">Rs. {outstanding.toLocaleString()}</span>
-            </div>
-          )}
-        </div>
-
-        {expenseVerified && (
-          <div className="grid gap-2 text-sm border-t pt-3">
+          {expenseVerified && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Verified Shopping Expense</span>
               <span className="font-medium">Rs. {(shoppingExpense as number).toLocaleString()}</span>
             </div>
-            {remainingToSettle > 0 ? (
+          )}
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Verified Amount Received</span>
+            <span className="font-medium">Rs. {paidAmount.toLocaleString()}</span>
+          </div>
+          {expenseVerified ? (
+            remainingToSettle > 0 ? (
               <div className="flex justify-between text-destructive">
                 <span>Remaining settlement amount</span>
                 <span className="font-medium">Rs. {remainingToSettle.toLocaleString()}</span>
@@ -140,15 +148,22 @@ export function PaymentVerification(props: PaymentVerificationProps) {
               <p className="text-xs text-green-700 dark:text-green-300">
                 Payment fully covers the shopping expense — settlement can be marked done.
               </p>
-            )}
-          </div>
-        )}
+            )
+          ) : (
+            outstanding > 0 && verification !== "rejected" && (
+              <div className="flex justify-between text-destructive">
+                <span>Outstanding</span>
+                <span className="font-medium">Rs. {outstanding.toLocaleString()}</span>
+              </div>
+            )
+          )}
+        </div>
 
-        {proofs.length > 0 ? (
+        {allProofs.length > 0 ? (
           <div>
-            <p className="text-sm font-medium mb-2">Payment Proofs ({proofs.length})</p>
+            <p className="text-sm font-medium mb-2">Payment Proofs ({allProofs.length})</p>
             <div className="grid grid-cols-2 gap-3">
-              {proofs.map((proof, index) => (
+              {allProofs.map((proof, index) => (
                 <div key={proof.id} className="space-y-1">
                   <StorageImage
                     bucket="payment-proofs"
@@ -166,25 +181,6 @@ export function PaymentVerification(props: PaymentVerificationProps) {
                 </div>
               ))}
             </div>
-          </div>
-        ) : paymentProofUrl ? (
-          <div>
-            <p className="text-sm font-medium mb-2">Payment Proof</p>
-            <StorageImage
-              bucket="payment-proofs"
-              src={paymentProofUrl}
-              alt={paymentProofName || "Payment proof"}
-              className="max-h-96 w-auto rounded-md border"
-            />
-            <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => void openAttachment(paymentProofUrl, "payment-proofs")}>
-              <ExternalLink className="h-4 w-4 mr-1" />
-              View Full Size
-            </Button>
-            {paymentSubmittedAt && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Submitted {new Date(paymentSubmittedAt).toLocaleString()}
-              </p>
-            )}
           </div>
         ) : null}
 
