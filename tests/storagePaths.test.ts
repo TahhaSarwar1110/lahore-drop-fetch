@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { storagePath } from "./storagePaths";
+import { storagePath } from "../src/utils/storagePaths";
 
 describe("private attachment compatibility", () => {
   test("keeps new paths stable", () => expect(storagePath("customer/order/proof.jpg", "payment-proofs")).toBe("customer/order/proof.jpg"));

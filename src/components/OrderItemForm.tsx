@@ -32,6 +32,9 @@ interface OrderItemFormProps {
 }
 
 export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }: OrderItemFormProps) => {
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const [picking, setPicking] = useState(false);
   const [itemType, setItemType] = useState("");
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -79,6 +82,8 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     }
   }, [initialItem]);
 
+
+  useEffect(() => () => { if (localPreviewUrl) URL.revokeObjectURL(localPreviewUrl); }, [localPreviewUrl]);
 
   const itemTypeFields: Record<string, { label: string; type: string; placeholder: string; required?: boolean; min?: number }[]> = {
     Cloth: [
@@ -146,30 +151,38 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
   };
 
   const nativePick = async (source: CameraSource) => {
+    if (picking) return;
+    setPicking(true);
     try {
       const image = await CapCamera.getPhoto({
         quality: 80,
         allowEditing: false,
-        resultType: CameraResultType.DataUrl,
+        resultType: CameraResultType.Uri,
         source,
       });
-      if (image.dataUrl) {
-        const blob = await (await fetch(image.dataUrl)).blob();
-        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: "image/jpeg" });
+      if (image.webPath) {
+        const response = await fetch(image.webPath);
+        if (!response.ok) throw new Error("Could not read photo");
+        const blob = await response.blob();
+        const format = image.format || "jpeg";
+        const file = new File([blob], `photo_${Date.now()}.${format}`, { type: `image/${format}` });
         setSelectedFile(file);
       }
     } catch (error) {
-      console.error("Image pick error:", error);
+      const message = error instanceof Error ? error.message : String(error);
+      if (!/cancel/i.test(message)) toast({ title: "Unable to open photos", description: "Please allow camera and photo access in Settings. If this continues, update the app.", variant: "destructive" });
+    } finally {
+      setPicking(false);
     }
   };
 
   const handleTakePhoto = () => {
-    if (isNative) return nativePick(CameraSource.Camera);
+    if (isNative && Capacitor.isPluginAvailable("Camera")) return nativePick(CameraSource.Camera);
     cameraInputRef.current?.click();
   };
 
   const handleChooseFromGallery = () => {
-    if (isNative) return nativePick(CameraSource.Photos);
+    if (isNative && Capacitor.isPluginAvailable("Camera")) return nativePick(CameraSource.Photos);
     fileInputRef.current?.click();
   };
 
@@ -202,6 +215,13 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
   };
 
   const handleAddItem = async () => {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setSaving(true);
+    try { await addItem(); } finally { savingRef.current = false; setSaving(false); }
+  };
+
+  const addItem = async () => {
     if (!isFormValid()) {
       toast({
         title: "Incomplete Form",
@@ -359,11 +379,11 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
               />
 
               <div className="flex gap-2 w-full">
-                <Button type="button" variant="outline" onClick={handleTakePhoto} className="flex-1 h-12 rounded-xl">
+                <Button type="button" variant="outline" onClick={handleTakePhoto} disabled={picking || saving} className="flex-1 h-12 rounded-xl">
                   <Camera className="h-4 w-4 mr-2" />
                   Take Photo
                 </Button>
-                <Button type="button" variant="outline" onClick={handleChooseFromGallery} className="flex-1 h-12 rounded-xl">
+                <Button type="button" variant="outline" onClick={handleChooseFromGallery} disabled={picking || saving} className="flex-1 h-12 rounded-xl">
                   <ImageIcon className="h-4 w-4 mr-2" />
                   Gallery
                 </Button>
@@ -462,10 +482,10 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
               <Button
                 onClick={handleAddItem}
                 className="flex-1 mobile-button"
-                disabled={!isFormValid()}
+                disabled={!isFormValid() || saving || picking}
               >
                 <Plus className="h-5 w-5 mr-2" />
-                {submitLabel || (initialItem ? "Update Item" : "Add Item to Order")}
+                {saving ? "Saving…" : submitLabel || (initialItem ? "Update Item" : "Add Item to Order")}
               </Button>
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel} className="mobile-button">

@@ -9,7 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:attachments": "bun test src/utils/storagePaths.test.ts",
+    "test:attachments": "bun test tests/storagePaths.test.ts",
     "capacitor:sync:before": "node scripts/native-photo-permissions.cjs"
   },
   "dependencies": {
