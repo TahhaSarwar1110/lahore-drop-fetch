@@ -128,25 +128,18 @@ export function PaymentVerification(props: PaymentVerificationProps) {
             <span className="text-muted-foreground">Order Total</span>
             <span className="font-medium">Rs. {orderTotal.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Verified Amount Received</span>
-            <span className="font-medium">Rs. {paidAmount.toLocaleString()}</span>
-          </div>
-          {outstanding > 0 && verification !== "rejected" && (
-            <div className="flex justify-between text-destructive">
-              <span>Outstanding</span>
-              <span className="font-medium">Rs. {outstanding.toLocaleString()}</span>
-            </div>
-          )}
-        </div>
-
-        {expenseVerified && (
-          <div className="grid gap-2 text-sm border-t pt-3">
+          {expenseVerified && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Verified Shopping Expense</span>
               <span className="font-medium">Rs. {(shoppingExpense as number).toLocaleString()}</span>
             </div>
-            {remainingToSettle > 0 ? (
+          )}
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Verified Amount Received</span>
+            <span className="font-medium">Rs. {paidAmount.toLocaleString()}</span>
+          </div>
+          {expenseVerified ? (
+            remainingToSettle > 0 ? (
               <div className="flex justify-between text-destructive">
                 <span>Remaining settlement amount</span>
                 <span className="font-medium">Rs. {remainingToSettle.toLocaleString()}</span>
@@ -155,9 +148,16 @@ export function PaymentVerification(props: PaymentVerificationProps) {
               <p className="text-xs text-green-700 dark:text-green-300">
                 Payment fully covers the shopping expense — settlement can be marked done.
               </p>
-            )}
-          </div>
-        )}
+            )
+          ) : (
+            outstanding > 0 && verification !== "rejected" && (
+              <div className="flex justify-between text-destructive">
+                <span>Outstanding</span>
+                <span className="font-medium">Rs. {outstanding.toLocaleString()}</span>
+              </div>
+            )
+          )}
+        </div>
 
         {proofs.length > 0 ? (
           <div>
