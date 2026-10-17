@@ -96,12 +96,11 @@ serve(async (req) => {
 
     // ---------- Template diagnostic: live-send each lifecycle template to our own number ----------
     if (action === "check_templates") {
-      const me = await fetch(`${GRAPH}/${PHONE_ID}?fields=display_phone_number`, {
-        headers: { Authorization: `Bearer ${TOKEN}` },
-      });
-      const meData = await me.json().catch(() => ({}));
-      const own = String(meData?.display_phone_number ?? "").replace(/\D/g, "");
-      if (!me.ok || !own) return json({ error: "Could not resolve own WhatsApp number", details: meData }, 502);
+      // Meta rejects sends to the business's own number, so the live check
+      // goes to the calling manager/admin's own profile phone.
+      const { data: prof } = await db.from("profiles").select("phone").eq("id", userId).maybeSingle();
+      const own = String(prof?.phone ?? "").replace(/\D/g, "").replace(/^0/, "92");
+      if (!/^\d{10,15}$/.test(own)) return json({ error: "Your profile has no valid phone number for the test send" }, 400);
 
       const SAMPLES: Record<string, string[]> = {
         tabedaar_order_received: ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500"],
