@@ -4,6 +4,7 @@ import { ArrowLeft, User, Mail, Phone, MapPin, Lock, ShieldCheck } from "lucide-
 import { z } from "zod";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
+import { isSyntheticEmail } from "@/utils/phoneAuth";
 import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
