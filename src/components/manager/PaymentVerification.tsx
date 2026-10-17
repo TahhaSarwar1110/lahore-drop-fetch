@@ -102,7 +102,8 @@ export const PaymentVerification = ({
           <div>
             <p className="text-sm font-medium mb-2">Payment Proof</p>
             <StorageImage
-              url={paymentProofUrl}
+              bucket="payment-proofs"
+              src={paymentProofUrl}
               alt={paymentProofName || "Payment proof"}
               className="max-h-48 rounded-md border"
             />

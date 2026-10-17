@@ -136,7 +136,7 @@ export const ExpenseReview = ({
             <p className="text-sm font-medium mb-2">Purchase Receipts ({receipts.length})</p>
             <div className="flex flex-wrap gap-3">
               {receipts.map((r) => (
-                <StorageImage key={r.id} url={r.file_url} alt={r.file_name} className="h-28 w-28 object-cover rounded-md border" />
+                <StorageImage key={r.id} bucket="pickup-proofs" src={r.file_url} alt={r.file_name} className="h-28 w-28 object-cover rounded-md border" />
               ))}
             </div>
           </div>

@@ -97,7 +97,7 @@ export const RefundManager = ({
         {refundProofUrl && (
           <div>
             <p className="text-sm font-medium mb-2">Refund Proof</p>
-            <StorageImage url={refundProofUrl} alt="Refund proof" className="max-h-40 rounded-md border" />
+            <StorageImage bucket="pickup-proofs" src={refundProofUrl} alt="Refund proof" className="max-h-40 rounded-md border" />
           </div>
         )}
 
