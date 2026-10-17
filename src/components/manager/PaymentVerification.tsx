@@ -83,7 +83,9 @@ export const PaymentVerification = ({
         p_reason: approved ? null : reason.trim(),
       });
       if (error) throw error;
-      toast.success(approved ? "Payment verified" : "Payment rejected");
+      toast.success(approved ? "Payment verified — settlement updated" : "Payment rejected");
+      setAmount("");
+      void loadProofs();
       onUpdate();
     } catch (error: any) {
       console.error("Payment verification error:", error);
@@ -191,14 +193,17 @@ export const PaymentVerification = ({
 
         <div className="space-y-3 border-t pt-4">
           <div className="space-y-1">
-            <Label htmlFor="paid-amount">Amount Actually Received (PKR)</Label>
+            <Label htmlFor="paid-amount">New Payment Received (PKR)</Label>
             <Input
               id="paid-amount"
               inputMode="numeric"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g. 16000"
+              placeholder="e.g. 2500"
             />
+            <p className="text-xs text-muted-foreground">
+              Enter only the amount of this payment. It is added to the Rs. {paidAmount.toLocaleString()} already verified.
+            </p>
           </div>
           <div className="space-y-1">
             <Label htmlFor="rejection-reason">Rejection Reason (only when rejecting)</Label>
@@ -213,7 +218,7 @@ export const PaymentVerification = ({
           <div className="flex gap-2">
             <Button onClick={() => submit(true)} disabled={saving} className="flex-1">
               <ShieldCheck className="h-4 w-4 mr-1" />
-              Verify Payment
+              {settled ? "Verify & Mark Settlement Done" : "Verify Payment"}
             </Button>
             <Button variant="destructive" onClick={() => submit(false)} disabled={saving} className="flex-1">
               <ShieldX className="h-4 w-4 mr-1" />
