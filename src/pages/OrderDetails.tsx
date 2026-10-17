@@ -20,6 +20,7 @@ import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem as FormOrderItem } from "@/components/OrderItemForm";
 import { PaymentUpload } from "@/components/customer/PaymentUpload";
+import { PaymentSummary } from "@/components/customer/PaymentSummary";
 import { DeliveryPaymentUpload } from "@/components/customer/DeliveryPaymentUpload";
 import { RiderContactDialog } from "@/components/customer/RiderContactDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,15 @@ interface Order {
   payment_proof_url: string | null;
   payment_submitted_at: string | null;
   payment_confirmed_at: string | null;
+  additional_charges: number | null;
+  order_total_pkr: number | null;
+  paid_amount_pkr: number;
+  payment_verification: string;
+  payment_rejection_reason: string | null;
+  shopping_expense_pkr: number | null;
+  expense_status: string | null;
+  customer_balance_pkr: number | null;
+  refund_status: string;
   total_weight_kg: number | null;
   delivery_charges: number;
   delivery_charges_set_at: string | null;
@@ -107,6 +117,15 @@ const OrderDetails = () => {
         payment_proof_url,
         payment_submitted_at,
         payment_confirmed_at,
+        additional_charges,
+        order_total_pkr,
+        paid_amount_pkr,
+        payment_verification,
+        payment_rejection_reason,
+        shopping_expense_pkr,
+        expense_status,
+        customer_balance_pkr,
+        refund_status,
         total_weight_kg,
         delivery_charges,
         delivery_charges_set_at,
