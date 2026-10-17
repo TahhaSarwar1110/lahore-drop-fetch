@@ -94,6 +94,22 @@ serve(async (req) => {
       });
     }
 
+    // ---------- List approved templates from Meta ----------
+    if (action === "list_templates") {
+      const tryGet = async (u: string) => {
+        const r = await fetch(u, { headers: { Authorization: `Bearer ${TOKEN}` } });
+        return { ok: r.ok, data: await r.json().catch(() => ({})) };
+      };
+      let r = await tryGet(`${GRAPH}/${PHONE_ID}/message_templates?limit=100`);
+      if (!r.ok) {
+        // Need the WABA id: resolve it from the phone number's verified name edge.
+        const pn = await tryGet(`${GRAPH}/${PHONE_ID}?fields=id`);
+        return json({ error: "template_list_unavailable", status: r.data?.error?.message, phone: pn.data }, 502);
+      }
+      const names = (r.data?.data ?? []).map((t: any) => ({ name: t.name, language: t.language, status: t.status, params: (t.components ?? []).find((c: any) => c.type === "BODY")?.text }));
+      return json({ ok: true, count: names.length, templates: names });
+    }
+
     // ---------- Template diagnostic: live-send each lifecycle template to our own number ----------
     if (action === "check_templates") {
       // Meta rejects sends to the business's own number, so the live check
