@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { StorageImage } from "@/components/StorageImage";
 import { toast } from "sonner";
-import { Receipt, Upload, X } from "lucide-react";
-import { Capacitor } from "@capacitor/core";
-import { Camera as CapCamera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Receipt, X } from "lucide-react";
 import { EXPENSE_STATUS_LABELS } from "@/utils/orderFinancials";
+import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 
 interface ReceiptRow {
   id: string;
@@ -28,14 +27,6 @@ interface ShoppingExpenseFormProps {
   onUpdate: () => void;
 }
 
-const dataUrlToFile = (dataUrl: string, name: string): File => {
-  const [meta, base64] = dataUrl.split(",");
-  const mime = /data:(.*?);/.exec(meta)?.[1] || "image/jpeg";
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new File([bytes], name, { type: mime });
-};
 
 export const ShoppingExpenseForm = ({
   orderId,
@@ -50,7 +41,6 @@ export const ShoppingExpenseForm = ({
   const [files, setFiles] = useState<File[]>([]);
   const [receipts, setReceipts] = useState<ReceiptRow[]>([]);
   const [saving, setSaving] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canEdit = !expenseStatus || expenseStatus === "rejected";
 

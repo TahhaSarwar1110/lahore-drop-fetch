@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Upload, CheckCircle, Clock, Truck } from "lucide-react";
 import { toast } from "sonner";
+import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 import { triggerNotification } from "@/utils/notify";
 import { BankAccountDetails } from "./BankAccountDetails";
 
@@ -36,8 +37,8 @@ export const DeliveryPaymentUpload = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const handleSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFiles = (files: File[]) => {
+    const file = files[0];
     if (file) {
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
@@ -131,8 +132,8 @@ export const DeliveryPaymentUpload = ({
               Please transfer the delivery amount above and upload the payment screenshot.
             </p>
             <div className="space-y-2">
-              <Label htmlFor="delivery-proof">Payment Screenshot</Label>
-              <Input id="delivery-proof" type="file" accept="image/*" onChange={handleSelect} className="cursor-pointer" />
+              <Label>Payment Screenshot</Label>
+              <ImageSourcePicker onFiles={handleFiles} cameraLabel="Take Photo" galleryLabel="Choose from Gallery" />
             </div>
             {previewUrl && (
               <img src={previewUrl} alt="Preview" className="max-h-48 rounded-lg border" />

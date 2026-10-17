@@ -1,11 +1,10 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Upload, Loader2, Camera, Image } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { Capacitor } from "@capacitor/core";
-import { Camera as CapCamera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 
 interface AttachmentUploadProps {
   orderId: string;
@@ -16,64 +15,12 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isNative = Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("Camera");
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-      setPreviewUrl(URL.createObjectURL(selectedFile));
-    }
-  };
-
-  const handleCameraCapture = async () => {
-    try {
-      const image = await CapCamera.getPhoto({
-        quality: 80,
-        allowEditing: false,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Camera,
-      });
-
-      if (image.dataUrl) {
-        // Convert base64 to File
-        const response = await fetch(image.dataUrl);
-        const blob = await response.blob();
-        const capturedFile = new File([blob], `capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
-        setFile(capturedFile);
-        setPreviewUrl(image.dataUrl);
-      }
-    } catch (error) {
-      if (!/cancel/i.test(String(error))) toast.error("Please allow camera access in Settings and try again");
-    }
-  };
-
-  const handleGallerySelect = async () => {
-    if (isNative) {
-      try {
-        const image = await CapCamera.getPhoto({
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.DataUrl,
-          source: CameraSource.Photos,
-        });
-
-        if (image.dataUrl) {
-          // Convert base64 to File
-          const response = await fetch(image.dataUrl);
-          const blob = await response.blob();
-          const selectedFile = new File([blob], `gallery_${Date.now()}.jpg`, { type: 'image/jpeg' });
-          setFile(selectedFile);
-          setPreviewUrl(image.dataUrl);
-        }
-      } catch (error) {
-        if (!/cancel/i.test(String(error))) toast.error("Please allow photo access in Settings and try again");
-      }
-    } else {
-      // Web fallback - trigger file input
-      fileInputRef.current?.click();
+  const handleFiles = (files: File[]) => {
+    const selected = files[0];
+    if (selected) {
+      setFile(selected);
+      setPreviewUrl(URL.createObjectURL(selected));
     }
   };
 
@@ -86,7 +33,7 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
     try {
       setUploading(true);
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         toast.error("Not authenticated");
         return;
@@ -102,8 +49,6 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
-
-
 
       // Save attachment record to database
       const { error: dbError } = await supabase
@@ -132,31 +77,18 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
   const clearSelection = () => {
     setFile(null);
     setPreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   return (
     <div className="space-y-3">
       <Label>Upload Proof</Label>
-      
-      {/* Hidden file input for web */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        onChange={handleFileChange}
-        accept="image/*,.pdf"
-        disabled={uploading}
-        className="hidden"
-      />
 
       {/* Preview */}
       {previewUrl && (
         <div className="relative">
-          <img 
-            src={previewUrl} 
-            alt="Preview" 
+          <img
+            src={previewUrl}
+            alt="Preview"
             className="w-full max-h-48 object-contain rounded-lg border"
           />
           <Button
@@ -170,59 +102,30 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
         </div>
       )}
 
-      {/* Action buttons */}
-      <div className="flex flex-col gap-2">
-        {isNative ? (
-          // Native mobile - show camera and gallery buttons
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleCameraCapture}
-              disabled={uploading}
-              className="flex-1"
-            >
-              <Camera className="h-4 w-4 mr-2" />
-              Camera
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleGallerySelect}
-              disabled={uploading}
-              className="flex-1"
-            >
-              <Image className="h-4 w-4 mr-2" />
-              Gallery
-            </Button>
-          </div>
-        ) : (
-          // Web - show file picker button
-          <Button
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="w-full"
-          >
-            <Image className="h-4 w-4 mr-2" />
-            Select File
-          </Button>
-        )}
+      {/* Always two options: take a new picture or pick one from the gallery */}
+      <ImageSourcePicker
+        onFiles={handleFiles}
+        disabled={uploading}
+        accept="image/*,.pdf"
+        cameraLabel="Camera"
+        galleryLabel="Gallery"
+      />
 
-        {/* Upload button */}
-        {file && (
-          <Button
-            onClick={handleUpload}
-            disabled={uploading}
-            className="w-full"
-          >
-            {uploading ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Upload className="h-4 w-4 mr-2" />
-            )}
-            Upload
-          </Button>
-        )}
-      </div>
+      {/* Upload button */}
+      {file && (
+        <Button
+          onClick={handleUpload}
+          disabled={uploading}
+          className="w-full"
+        >
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <Upload className="h-4 w-4 mr-2" />
+          )}
+          Upload
+        </Button>
+      )}
     </div>
   );
 };
