@@ -227,21 +227,19 @@ async function handleOrderReceived(supabase: any, callerId: string, orderId: unk
     return json({ error: "Could not record send" }, 500);
   }
 
-  let itemsTotal = 0;
+  // Approved template tabedaar_order_received has exactly 3 body params:
+  // {{1}} customer name, {{2}} order number, {{3}} items summary. No total.
   const lines = live.map((i: any, idx: number) => {
     const d = (i.item_data ?? {}) as Record<string, unknown>;
     const q = qtyOf(d);
     const line = priceOf(d) * q;
-    itemsTotal += line;
     return `${idx + 1}) ${nameOf(d, i.item_type)} x${q}${line ? ` - ${rs(line)}` : ""}`;
   });
-  const total = itemsTotal + num(order.additional_charges) + num(order.delivery_charges);
 
   const params = [
     cleanParam(profile?.full_name || "Customer", 60),
     orderId.slice(0, 8),
     cleanParam(lines.join(" | ")),
-    rs(total),
   ];
 
   let result: any = { ok: false };
