@@ -188,43 +188,45 @@ export function PaymentVerification(props: PaymentVerificationProps) {
           <p className="text-sm text-destructive">Rejection reason: {rejectionReason}</p>
         )}
 
-        <div className="space-y-3 border-t pt-4">
-          <div className="space-y-1">
-            <Label htmlFor="paid-amount">New Payment Received (PKR)</Label>
-            <Input
-              id="paid-amount"
-              inputMode="numeric"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g. 2500"
-            />
-            <p className="text-xs text-muted-foreground">
-              Enter only the amount of this payment. It is added to the Rs. {paidAmount.toLocaleString()} already verified.
-            </p>
+        {verification === "pending" ? (
+          <div className="space-y-3 border-t pt-4">
+            <div className="space-y-1">
+              <Label htmlFor="paid-amount">New Payment Received (PKR)</Label>
+              <Input
+                id="paid-amount"
+                inputMode="numeric"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="e.g. 2500"
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter only the amount of this payment. It is added to the Rs. {paidAmount.toLocaleString()} already verified.
+              </p>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="rejection-reason">Rejection Reason (only when rejecting)</Label>
+              <Textarea
+                id="rejection-reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Explain why the payment is rejected"
+                rows={2}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => submit(true)} disabled={saving} className="flex-1">
+                <ShieldCheck className="h-4 w-4 mr-1" />
+                {settled || (expenseVerified && Number.isFinite(parsedAmount) && paidAmount + parsedAmount >= (shoppingExpense as number))
+                  ? "Verify & Mark Settlement Done"
+                  : "Verify Payment"}
+              </Button>
+              <Button variant="destructive" onClick={() => submit(false)} disabled={saving} className="flex-1">
+                <ShieldX className="h-4 w-4 mr-1" />
+                Reject
+              </Button>
+            </div>
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="rejection-reason">Rejection Reason (only when rejecting)</Label>
-            <Textarea
-              id="rejection-reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Explain why the payment is rejected"
-              rows={2}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={() => submit(true)} disabled={saving} className="flex-1">
-              <ShieldCheck className="h-4 w-4 mr-1" />
-              {settled || (expenseVerified && Number.isFinite(parsedAmount) && paidAmount + parsedAmount >= (shoppingExpense as number))
-                ? "Verify & Mark Settlement Done"
-                : "Verify Payment"}
-            </Button>
-            <Button variant="destructive" onClick={() => submit(false)} disabled={saving} className="flex-1">
-              <ShieldX className="h-4 w-4 mr-1" />
-              Reject
-            </Button>
-          </div>
-        </div>
+        ) : null}
       </CardContent>
     </Card>
   );
