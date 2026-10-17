@@ -20,6 +20,7 @@ import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
 import { OrderItemForm, OrderItem as FormOrderItem } from "@/components/OrderItemForm";
 import { PaymentUpload } from "@/components/customer/PaymentUpload";
+import { PaymentSummary } from "@/components/customer/PaymentSummary";
 import { DeliveryPaymentUpload } from "@/components/customer/DeliveryPaymentUpload";
 import { RiderContactDialog } from "@/components/customer/RiderContactDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,15 @@ interface Order {
   payment_proof_url: string | null;
   payment_submitted_at: string | null;
   payment_confirmed_at: string | null;
+  additional_charges: number | null;
+  order_total_pkr: number | null;
+  paid_amount_pkr: number;
+  payment_verification: string;
+  payment_rejection_reason: string | null;
+  shopping_expense_pkr: number | null;
+  expense_status: string | null;
+  customer_balance_pkr: number | null;
+  refund_status: string;
   total_weight_kg: number | null;
   delivery_charges: number;
   delivery_charges_set_at: string | null;
@@ -107,6 +117,15 @@ const OrderDetails = () => {
         payment_proof_url,
         payment_submitted_at,
         payment_confirmed_at,
+        additional_charges,
+        order_total_pkr,
+        paid_amount_pkr,
+        payment_verification,
+        payment_rejection_reason,
+        shopping_expense_pkr,
+        expense_status,
+        customer_balance_pkr,
+        refund_status,
         total_weight_kg,
         delivery_charges,
         delivery_charges_set_at,
@@ -332,11 +351,27 @@ const OrderDetails = () => {
               </p>
               {calculateTotal() > 0 && (
                 <p className="text-sm font-medium">
-                  Total (Approved Items): <span className="text-primary text-lg">PKR {calculateTotal().toLocaleString()}</span>
+                  Order Total (incl. service charges): <span className="text-primary text-lg">PKR {(calculateTotal() + (order.additional_charges || 0)).toLocaleString()}</span>
                 </p>
               )}
             </div>
           </div>
+
+          {/* Payment Summary - visible as soon as the order has a total */}
+          {order.order_total_pkr !== null && (
+            <div className="mb-6">
+              <PaymentSummary
+                orderTotal={order.order_total_pkr}
+                paidAmount={order.paid_amount_pkr ?? 0}
+                paymentVerification={order.payment_verification || "pending"}
+                paymentRejectionReason={order.payment_rejection_reason}
+                shoppingExpense={order.shopping_expense_pkr}
+                expenseStatus={order.expense_status}
+                customerBalance={order.customer_balance_pkr}
+                refundStatus={order.refund_status || "none"}
+              />
+            </div>
+          )}
 
           {/* Assigned Rider Card */}
           {order.order_assignments && (
@@ -363,8 +398,8 @@ const OrderDetails = () => {
             </Card>
           )}
 
-          {/* Payment Section - Show after order is confirmed */}
-          {order.confirmed_at && (
+          {/* Payment Section - available right after placement so the manager can verify payment before approval */}
+          {(order.confirmed_at || order.order_total_pkr !== null) && (
             <div className="mb-6">
               <PaymentUpload
                 orderId={order.id}

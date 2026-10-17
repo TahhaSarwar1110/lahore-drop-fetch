@@ -10,9 +10,12 @@ import { Loader2, ArrowLeft, User, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
 import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
-import { PaymentConfirmation } from "@/components/manager/PaymentConfirmation";
+import { PaymentVerification } from "@/components/manager/PaymentVerification";
+import { ExpenseReview } from "@/components/manager/ExpenseReview";
+import { RefundManager } from "@/components/manager/RefundManager";
 import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput";
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
+import { canApproveOrder, getOutstandingAmount, isFinanciallySettled } from "@/utils/orderFinancials";
 import { sendNotificationEmail } from "@/utils/notificationHelper";
 import { triggerNotification } from "@/utils/notify";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
@@ -45,6 +48,21 @@ interface Order {
   payment_proof_name: string | null;
   payment_submitted_at: string | null;
   payment_confirmed_at: string | null;
+  order_total_pkr: number | null;
+  paid_amount_pkr: number;
+  payment_verification: string;
+  payment_rejection_reason: string | null;
+  shopping_expense_pkr: number | null;
+  expense_status: string | null;
+  expense_notes: string | null;
+  expense_submitted_at: string | null;
+  expense_rejection_reason: string | null;
+  customer_balance_pkr: number | null;
+  refund_status: string;
+  refund_method: string | null;
+  refund_reference: string | null;
+  refund_notes: string | null;
+  refund_proof_url: string | null;
   total_weight_kg: number | null;
   delivery_charges: number;
   delivery_charges_set_at: string | null;
@@ -193,18 +211,34 @@ const ManagerOrderDetails = () => {
     return order?.payment_status === 'confirmed';
   };
 
+  const isPaymentVerifiedForApproval = () => {
+    if (!order) return false;
+    // Orders placed before reconciliation (no total snapshot) keep the old rule
+    if (order.order_total_pkr === null || order.order_total_pkr === undefined) {
+      return isPaymentConfirmed();
+    }
+    return canApproveOrder(order.order_total_pkr, order.paid_amount_pkr, order.payment_verification);
+  };
+
   const canAssignRider = () => {
     return allItemsApproved() && order?.confirmed_at && isPaymentConfirmed();
   };
 
   const canConfirmOrder = () => {
-    return allItemsApproved();
+    return allItemsApproved() && isPaymentVerifiedForApproval();
   };
 
   const handleConfirmOrder = async () => {
     if (!canConfirmOrder()) {
       if (hasRejectedItems()) {
         toast.error("Cannot confirm order with rejected items. Please ensure all items are approved.");
+      } else if (!isPaymentVerifiedForApproval() && order) {
+        const outstanding = getOutstandingAmount(order.order_total_pkr ?? 0, order.paid_amount_pkr);
+        toast.error(
+          outstanding > 0
+            ? `Payment short by Rs. ${outstanding.toLocaleString()}. Verify full payment before confirming.`
+            : "Payment must be verified before confirming the order."
+        );
       }
       return;
     }
@@ -313,7 +347,9 @@ const ManagerOrderDetails = () => {
                     variant={!canConfirmOrder() ? "outline" : "default"}
                   >
                     {hasRejectedItems() 
-                      ? "Resolve Rejected Items First" 
+                      ? "Resolve Rejected Items First"
+                      : !isPaymentVerifiedForApproval()
+                      ? "Verify Payment First"
                       : "Confirm Order"}
                   </Button>
                 )}
@@ -413,19 +449,57 @@ const ManagerOrderDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Payment Confirmation Card - Show after order is confirmed */}
-            {order.confirmed_at && (
-              <PaymentConfirmation
+            {/* Payment Verification - manager verifies the amount actually received */}
+            <PaymentVerification
+              orderId={order.id}
+              orderTotal={order.order_total_pkr ?? 0}
+              paidAmount={order.paid_amount_pkr ?? 0}
+              verification={order.payment_verification || "pending"}
+              rejectionReason={order.payment_rejection_reason}
+              paymentProofUrl={order.payment_proof_url}
+              paymentProofName={order.payment_proof_name}
+              paymentSubmittedAt={order.payment_submitted_at}
+              onUpdate={fetchOrderDetails}
+            />
+
+            {/* Rider shopping expense review */}
+            {order.order_assignments?.rider_id && (
+              <ExpenseReview
                 orderId={order.id}
-                userId={order.user_id}
-                paymentStatus={order.payment_status || "pending"}
-                paymentProofUrl={order.payment_proof_url}
-                paymentProofName={order.payment_proof_name}
-                paymentSubmittedAt={order.payment_submitted_at}
-                paymentConfirmedAt={order.payment_confirmed_at}
-                assignedRiderId={order.order_assignments?.rider_id}
+                expenseAmount={order.shopping_expense_pkr}
+                expenseStatus={order.expense_status}
+                expenseNotes={order.expense_notes}
+                expenseSubmittedAt={order.expense_submitted_at}
+                rejectionReason={order.expense_rejection_reason}
                 onUpdate={fetchOrderDetails}
               />
+            )}
+
+            {/* Refund management when the customer overpaid */}
+            {order.customer_balance_pkr !== null && order.customer_balance_pkr > 0 && (
+              <RefundManager
+                orderId={order.id}
+                balance={order.customer_balance_pkr}
+                refundStatus={order.refund_status || "pending"}
+                refundMethod={order.refund_method}
+                refundReference={order.refund_reference}
+                refundNotes={order.refund_notes}
+                refundProofUrl={order.refund_proof_url}
+                onUpdate={fetchOrderDetails}
+              />
+            )}
+
+            {/* Financial settlement indicator */}
+            {order.expense_status && (
+              <Card className={isFinanciallySettled(order.expense_status, order.customer_balance_pkr, order.refund_status) ? "border-green-500 bg-green-500/5" : "border-yellow-500 bg-yellow-500/5"}>
+                <CardContent className="p-4">
+                  <p className="text-sm font-medium">
+                    {isFinanciallySettled(order.expense_status, order.customer_balance_pkr, order.refund_status)
+                      ? "✅ Financially settled"
+                      : "⏳ Financially open — expense verification or refund still pending"}
+                  </p>
+                </CardContent>
+              </Card>
             )}
 
             {/* Delivery Charges (out-of-city / out-of-country only) */}

@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CustomerContactCard } from "@/components/rider/CustomerContactCard";
+import { ShoppingExpenseForm } from "@/components/rider/ShoppingExpenseForm";
+import { REFUND_STATUS_LABELS } from "@/utils/orderFinancials";
 
 interface OrderItem {
   id: string;
@@ -36,6 +38,14 @@ interface OrderDetails {
   status: string;
   delivery_type: string;
   delivery_payment_status: string;
+  order_total_pkr: number | null;
+  paid_amount_pkr: number;
+  shopping_expense_pkr: number | null;
+  expense_status: string | null;
+  expense_notes: string | null;
+  expense_rejection_reason: string | null;
+  customer_balance_pkr: number | null;
+  refund_status: string;
   profiles: {
     full_name: string;
     phone: string;
@@ -77,6 +87,14 @@ const RiderOrderDetails = () => {
           status,
           delivery_type,
           delivery_payment_status,
+          order_total_pkr,
+          paid_amount_pkr,
+          shopping_expense_pkr,
+          expense_status,
+          expense_notes,
+          expense_rejection_reason,
+          customer_balance_pkr,
+          refund_status,
           profiles (
             full_name,
             phone
@@ -327,6 +345,43 @@ const RiderOrderDetails = () => {
                   )}
                 </CardContent>
               </Card>
+
+              {/* Financial Summary Card (read-only) */}
+              {order.order_total_pkr !== null && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Payment & Expense</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Order Total</span>
+                      <span className="font-medium">Rs. {order.order_total_pkr.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Received from Customer</span>
+                      <span className="font-medium">Rs. {(order.paid_amount_pkr ?? 0).toLocaleString()}</span>
+                    </div>
+                    {order.customer_balance_pkr !== null && order.customer_balance_pkr > 0 && (
+                      <div className="flex justify-between border-t pt-2">
+                        <span className="text-muted-foreground">Refund Due to Customer</span>
+                        <span className="font-medium">
+                          Rs. {order.customer_balance_pkr.toLocaleString()} ({REFUND_STATUS_LABELS[order.refund_status] || order.refund_status})
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Shopping Expense Submission */}
+              <ShoppingExpenseForm
+                orderId={order.id}
+                expenseAmount={order.shopping_expense_pkr}
+                expenseStatus={order.expense_status}
+                expenseNotes={order.expense_notes}
+                rejectionReason={order.expense_rejection_reason}
+                onUpdate={fetchOrderDetails}
+              />
             </div>
 
             {/* Right Column - Items */}
