@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import {
   getOutstandingAmount,
   canApproveOrder,
@@ -8,9 +8,21 @@ import {
   isFinanciallySettled,
   getAmountOwed,
   canRiderDeliver,
+  hasVerifiedOrderPayment,
 } from "../src/utils/orderFinancials";
 
 describe("order financial reconciliation rules", () => {
+  it("shows zero outstanding for the reported Rs. 7,299 verified payment", () => {
+    expect(getOutstandingAmount(7299, 7299)).toBe(0);
+  });
+
+  it("permits rider assignment for verified full payment despite stale submitted status", () => {
+    expect(hasVerifiedOrderPayment(7299, 7299, "verified", "submitted")).toBe(true);
+    expect(hasVerifiedOrderPayment(7299, 7298, "verified", "confirmed")).toBe(false);
+    expect(hasVerifiedOrderPayment(7299, 7299, "pending", "confirmed")).toBe(false);
+    expect(hasVerifiedOrderPayment(7299, 7299, "rejected", "confirmed")).toBe(false);
+    expect(hasVerifiedOrderPayment(null, 0, "pending", "confirmed")).toBe(true);
+  });
   it("blocks approval when the customer paid less than the order total (16,000 total / 14,000 paid)", () => {
     expect(canApproveOrder(16000, 14000, "verified")).toBe(false);
     expect(getOutstandingAmount(16000, 14000)).toBe(2000);

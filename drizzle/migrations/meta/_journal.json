@@ -92,6 +92,20 @@
       "when": 1792275079450,
       "tag": "0012_allow_confirm_before_payment",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792276405256,
+      "tag": "0013_synchronize_verified_payment_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792276454982,
+      "tag": "0014_credit_only_approved_payments",
+      "breakpoints": true
     }
   ]
 }

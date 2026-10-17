@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -17,7 +13,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: req.headers.get('Authorization') ?? '' },
         },
       }
     );
@@ -57,7 +53,8 @@ serve(async (req) => {
 
     const { order_id, rider_id } = await req.json();
 
-    if (!order_id || !rider_id) {
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (typeof order_id !== 'string' || typeof rider_id !== 'string' || !uuid.test(order_id) || !uuid.test(rider_id)) {
       return new Response(JSON.stringify({ error: 'Missing order_id or rider_id' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -84,7 +81,7 @@ serve(async (req) => {
     // Fetch order to validate status and payment
     const { data: order, error: orderError } = await supabaseClient
       .from('orders')
-      .select('status, payment_status')
+      .select('status, payment_status, order_total_pkr, paid_amount_pkr, payment_verification')
       .eq('id', order_id)
       .single();
 
@@ -104,7 +101,10 @@ serve(async (req) => {
       });
     }
 
-    if (order.payment_status !== 'confirmed') {
+    const paymentConfirmed = order.order_total_pkr == null
+      ? order.payment_status === 'confirmed'
+      : order.payment_verification === 'verified' && order.paid_amount_pkr >= order.order_total_pkr;
+    if (!paymentConfirmed) {
       return new Response(JSON.stringify({ 
         error: 'Cannot assign rider: payment must be confirmed first.' 
       }), {

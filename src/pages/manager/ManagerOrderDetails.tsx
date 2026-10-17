@@ -15,7 +15,7 @@ import { ExpenseReview } from "@/components/manager/ExpenseReview";
 import { RefundManager } from "@/components/manager/RefundManager";
 import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput";
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
-import { canApproveOrder, getOutstandingAmount, isFinanciallySettled } from "@/utils/orderFinancials";
+import { hasVerifiedOrderPayment, isFinanciallySettled } from "@/utils/orderFinancials";
 import { sendNotificationEmail } from "@/utils/notificationHelper";
 import { triggerNotification } from "@/utils/notify";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
@@ -208,16 +208,8 @@ const ManagerOrderDetails = () => {
   };
 
   const isPaymentConfirmed = () => {
-    return order?.payment_status === 'confirmed';
-  };
-
-  const isPaymentVerifiedForApproval = () => {
     if (!order) return false;
-    // Orders placed before reconciliation (no total snapshot) keep the old rule
-    if (order.order_total_pkr === null || order.order_total_pkr === undefined) {
-      return isPaymentConfirmed();
-    }
-    return canApproveOrder(order.order_total_pkr, order.paid_amount_pkr, order.payment_verification);
+    return hasVerifiedOrderPayment(order.order_total_pkr, order.paid_amount_pkr, order.payment_verification, order.payment_status);
   };
 
   const canAssignRider = () => {
@@ -508,7 +500,7 @@ const ManagerOrderDetails = () => {
             )}
 
             {/* Delivery Charges (out-of-city / out-of-country only) */}
-            {order.confirmed_at && order.delivery_type !== "within_city" && order.payment_status === "confirmed" && (
+            {order.confirmed_at && order.delivery_type !== "within_city" && isPaymentConfirmed() && (
               <DeliveryChargesInput
                 orderId={order.id}
                 userId={order.user_id}

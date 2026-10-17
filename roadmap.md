@@ -13,3 +13,5 @@
 - [x] Repair private photo uploads/viewing across customer, manager, admin and rider screens; verify real existing photos and test upload/readback
 - [x] Configure Android camera registration and iOS sync-time permission setup; verify web gallery and photo viewing
 - [ ] Verify camera/gallery on physical iOS and Android devices — requires restored iOS Xcode project and rebuilt apps on the user's devices
+
+- [x] Correct verified payment heading, outstanding balance, and rider assignment across manager flow
