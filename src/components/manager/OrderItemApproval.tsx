@@ -1,3 +1,4 @@
+import { StorageImage } from "@/components/StorageImage";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -248,7 +249,7 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
               {/* Item Image */}
               {item.image_url && (
                 <div className="flex justify-center">
-                  <img 
+                  <StorageImage bucket="order-images" 
                     src={item.image_url} 
                     alt={`${item.item_type} item`}
                     className="max-w-full h-48 object-cover rounded-lg border"

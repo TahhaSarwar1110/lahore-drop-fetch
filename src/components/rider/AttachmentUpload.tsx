@@ -105,10 +105,7 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('order-images')
-        .getPublicUrl(filePath);
+
 
       // Save attachment record to database
       const { error: dbError } = await supabase
@@ -116,7 +113,7 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
         .insert({
           order_id: orderId,
           uploaded_by: user.id,
-          file_url: publicUrl,
+          file_url: filePath,
           file_name: file.name,
         });
 

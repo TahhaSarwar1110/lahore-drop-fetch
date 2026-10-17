@@ -1,3 +1,5 @@
+import { openAttachment } from "@/utils/attachmentStorage";
+import { StorageImage } from "@/components/StorageImage";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -130,17 +132,16 @@ export const PaymentConfirmation = ({
               <div className="space-y-2">
                 <p className="text-sm font-medium">Payment Proof:</p>
                 <div className="relative group">
-                  <img
+                  <StorageImage bucket="payment-proofs"
                     src={paymentProofUrl}
                     alt="Payment proof"
                     className="max-h-64 rounded-lg border cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => window.open(paymentProofUrl, "_blank")}
                   />
                   <Button
                     variant="secondary"
                     size="sm"
                     className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => window.open(paymentProofUrl, "_blank")}
+                    onClick={() => paymentProofUrl && void openAttachment(paymentProofUrl, "payment-proofs")}
                   >
                     <ExternalLink className="h-4 w-4 mr-1" />
                     View Full
@@ -184,11 +185,10 @@ export const PaymentConfirmation = ({
             {paymentProofUrl && (
               <div>
                 <p className="text-sm font-medium mb-2">Payment Proof:</p>
-                <img
+                <StorageImage bucket="payment-proofs"
                   src={paymentProofUrl}
                   alt="Payment proof"
                   className="max-h-32 rounded-lg border cursor-pointer opacity-75"
-                  onClick={() => window.open(paymentProofUrl, "_blank")}
                 />
               </div>
             )}

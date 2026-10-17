@@ -1,3 +1,5 @@
+import { openAttachment } from "@/utils/attachmentStorage";
+import { StorageImage } from "@/components/StorageImage";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -112,7 +114,7 @@ export const OrderDetailsDialog = ({
       if (!user) return;
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${orderId}/pickup-${crypto.randomUUID()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("pickup-proofs")
@@ -120,9 +122,7 @@ export const OrderDetailsDialog = ({
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("pickup-proofs")
-        .getPublicUrl(fileName);
+
 
       // Create pickup record
       const { error: insertError } = await supabase
@@ -130,7 +130,7 @@ export const OrderDetailsDialog = ({
         .insert({
           order_item_id: itemId,
           rider_id: user.id,
-          pickup_proof_url: publicUrl,
+          pickup_proof_url: fileName,
           pickup_proof_name: file.name,
         });
 
@@ -211,7 +211,7 @@ export const OrderDetailsDialog = ({
                 <CardContent className="pt-4">
                   <div className="flex gap-4">
                     {item.image_url && (
-                      <img
+                      <StorageImage bucket="order-images"
                         src={item.image_url}
                         alt="Item"
                         className="w-20 h-20 object-cover rounded"
@@ -242,7 +242,7 @@ export const OrderDetailsDialog = ({
                           </p>
                           {item.pickup.pickup_proof_url && (
                             <a
-                              href={item.pickup.pickup_proof_url}
+                              href="#" onClick={(event) => { event.preventDefault(); if (item.pickup?.pickup_proof_url) void openAttachment(item.pickup.pickup_proof_url, "pickup-proofs"); }}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-xs text-primary hover:underline flex items-center gap-1"

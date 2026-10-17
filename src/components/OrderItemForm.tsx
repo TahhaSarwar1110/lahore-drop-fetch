@@ -1,3 +1,4 @@
+import { StorageImage } from "@/components/StorageImage";
 import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -243,11 +244,9 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
         return;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("order-images")
-        .getPublicUrl(filePath);
 
-      imageUrl = publicUrl;
+
+      imageUrl = filePath;
     }
 
 
@@ -372,7 +371,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
 
               {previewSrc && (
                 <div className="rounded-xl border border-border p-2 space-y-2">
-                  <img
+                  <StorageImage bucket="order-images"
                     src={previewSrc}
                     alt="Attached item image preview"
                     className="w-full max-h-40 object-contain rounded-lg"
@@ -404,7 +403,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
             <Dialog open={viewImageOpen} onOpenChange={setViewImageOpen}>
               <DialogContent className="max-w-lg">
                 {previewSrc && (
-                  <img src={previewSrc} alt="Attached item image" className="w-full max-h-[70vh] object-contain rounded-lg" />
+                  <StorageImage bucket="order-images" src={previewSrc} alt="Attached item image" className="w-full max-h-[70vh] object-contain rounded-lg" />
                 )}
               </DialogContent>
             </Dialog>

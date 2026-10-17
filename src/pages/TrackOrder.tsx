@@ -1,3 +1,4 @@
+import { openAttachment } from "@/utils/attachmentStorage";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -440,7 +441,7 @@ const TrackOrder = () => {
                       {attachments.map((attachment) => (
                         <a
                           key={attachment.id}
-                          href={attachment.file_url}
+                          href="#" onClick={(event) => { event.preventDefault(); void openAttachment(attachment.file_url, "order-images"); }}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
