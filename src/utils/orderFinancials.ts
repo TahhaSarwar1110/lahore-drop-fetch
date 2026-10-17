@@ -15,6 +15,16 @@ export const canApproveOrder = (
   verification: PaymentVerification | string | null | undefined
 ): boolean => verification === "verified" && paidAmount >= orderTotal;
 
+/** Reconciled orders use verified totals; only legacy orders use payment_status. */
+export const hasVerifiedOrderPayment = (
+  orderTotal: number | null | undefined,
+  paidAmount: number,
+  verification: string | null | undefined,
+  legacyStatus: string | null | undefined
+): boolean => orderTotal == null
+  ? legacyStatus === "confirmed"
+  : canApproveOrder(orderTotal, paidAmount, verification);
+
 /** Customer balance = verified payment − verified shopping expense. */
 export const getCustomerBalance = (paidAmount: number, shoppingExpense: number): number =>
   paidAmount - shoppingExpense;

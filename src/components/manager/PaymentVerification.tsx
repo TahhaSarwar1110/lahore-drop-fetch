@@ -80,7 +80,7 @@ export function PaymentVerification(props: PaymentVerificationProps) {
   })();
 
   const parsedAmount = parseInt(amount.replace(/[^0-9]/g, ""), 10);
-  const outstanding = Number.isFinite(parsedAmount) ? getOutstandingAmount(orderTotal, parsedAmount) : orderTotal;
+  const outstanding = getOutstandingAmount(orderTotal, paidAmount);
 
   const submit = async (approved: boolean) => {
     if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
@@ -160,7 +160,7 @@ export function PaymentVerification(props: PaymentVerificationProps) {
               </p>
             )
           ) : (
-            outstanding > 0 && verification !== "rejected" && (
+            (
               <div className="flex justify-between text-destructive">
                 <span>Outstanding</span>
                 <span className="font-medium">Rs. {outstanding.toLocaleString()}</span>
