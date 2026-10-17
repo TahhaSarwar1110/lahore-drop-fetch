@@ -1,3 +1,4 @@
+import { openAttachment } from "@/utils/attachmentStorage";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -181,16 +182,7 @@ const AdminOrderDetails = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={async () => {
-                            const { data, error } = await supabase.storage
-                              .from("order-images")
-                              .createSignedUrl(item.image_url as string, 60 * 10);
-                            if (error || !data?.signedUrl) {
-                              toast.error("Failed to load image");
-                              return;
-                            }
-                            window.open(data.signedUrl, "_blank", "noopener,noreferrer");
-                          }}
+                          onClick={() => { if (item.image_url) void openAttachment(item.image_url, "order-images"); }}
                         >
                           <ImageIcon className="h-4 w-4 mr-1" />
                           View Image

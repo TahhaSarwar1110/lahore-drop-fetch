@@ -1,3 +1,5 @@
+import { openAttachment } from "@/utils/attachmentStorage";
+import { StorageImage } from "@/components/StorageImage";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -125,7 +127,7 @@ const RiderOrderDetails = () => {
       if (!user) return;
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${orderId}/pickup-${crypto.randomUUID()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("pickup-proofs")
@@ -133,16 +135,14 @@ const RiderOrderDetails = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("pickup-proofs")
-        .getPublicUrl(fileName);
+
 
       const { error: insertError } = await supabase
         .from("item_pickups")
         .insert({
           order_item_id: itemId,
           rider_id: user.id,
-          pickup_proof_url: publicUrl,
+          pickup_proof_url: fileName,
           pickup_proof_name: file.name,
         });
 
@@ -170,7 +170,7 @@ const RiderOrderDetails = () => {
       if (!user) return;
 
       const fileExt = file.name.split('.').pop();
-      const fileName = `delivery/${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${orderId}/delivery-${crypto.randomUUID()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("pickup-proofs")
@@ -178,16 +178,14 @@ const RiderOrderDetails = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("pickup-proofs")
-        .getPublicUrl(fileName);
+
 
       // Update order status to Delivered with proof
       const { error: updateError } = await supabase
         .from("orders")
         .update({
           status: "Delivered",
-          delivery_proof_url: publicUrl,
+          delivery_proof_url: fileName,
           delivery_proof_name: file.name,
           delivered_at: new Date().toISOString(),
         })
@@ -412,7 +410,7 @@ const RiderOrderDetails = () => {
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-start gap-3">
                               {item.image_url ? (
-                                <img
+                                <StorageImage bucket="order-images"
                                   src={item.image_url}
                                   alt="Item"
                                   className="w-20 h-20 object-cover rounded-lg border flex-shrink-0"
@@ -490,7 +488,7 @@ const RiderOrderDetails = () => {
                               </p>
                               {item.pickup.pickup_proof_url && (
                                 <a
-                                  href={item.pickup.pickup_proof_url}
+                                  href="#" onClick={(event) => { event.preventDefault(); if (item.pickup?.pickup_proof_url) void openAttachment(item.pickup.pickup_proof_url, "pickup-proofs"); }}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-xs text-primary hover:underline flex items-center gap-1"

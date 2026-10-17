@@ -1,3 +1,4 @@
+import { StorageImage } from "@/components/StorageImage";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -59,14 +60,12 @@ export const PaymentUpload = ({
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("payment-proofs")
-        .getPublicUrl(filePath);
+
 
       const { error: updateError } = await supabase
         .from("orders")
         .update({
-          payment_proof_url: publicUrl,
+          payment_proof_url: filePath,
           payment_proof_name: selectedFile.name,
           payment_status: "submitted",
           payment_submitted_at: new Date().toISOString(),
@@ -169,11 +168,10 @@ export const PaymentUpload = ({
             {paymentProofUrl && (
               <div>
                 <p className="text-sm font-medium mb-2">Uploaded Proof:</p>
-                <img
+                <StorageImage bucket="payment-proofs"
                   src={paymentProofUrl}
                   alt="Payment proof"
                   className="max-h-48 rounded-lg border cursor-pointer"
-                  onClick={() => window.open(paymentProofUrl, "_blank")}
                 />
               </div>
             )}
@@ -197,11 +195,10 @@ export const PaymentUpload = ({
             {paymentProofUrl && (
               <div>
                 <p className="text-sm font-medium mb-2">Payment Proof:</p>
-                <img
+                <StorageImage bucket="payment-proofs"
                   src={paymentProofUrl}
                   alt="Payment proof"
                   className="max-h-32 rounded-lg border cursor-pointer opacity-75"
-                  onClick={() => window.open(paymentProofUrl, "_blank")}
                 />
               </div>
             )}

@@ -1,3 +1,4 @@
+import { StorageImage } from "@/components/StorageImage";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -465,7 +466,7 @@ const OrderDetails = () => {
                   </div>
 
                   {item.image_url && (
-                    <img
+                    <StorageImage bucket="order-images"
                       src={item.image_url}
                       alt="Item"
                       className="mt-3 rounded-lg max-h-48 object-cover"
@@ -532,7 +533,7 @@ const OrderDetails = () => {
                   </div>
 
                   {item.imageUrl && (
-                    <img
+                    <StorageImage bucket="order-images"
                       src={item.imageUrl}
                       alt="Item"
                       className="mt-3 rounded-lg max-h-48 object-cover"

@@ -6,3 +6,5 @@
 - Admin account creation replaces the signup default through a service-role-only transactional role RPC after server-side admin authorization; direct signup relies on the existing customer trigger, never client-side role inserts.
 - Admin role edits use manage-users and the transactional role replacement RPC; never delete and insert roles from the browser, so role changes cannot leave users without access.
 - Payment screens read active bank_accounts through shared BankAccountDetails; admin-only RLS protects mutations and placeholder bank numbers must never be used as a fallback.
+- Store order attachments as private bucket-relative paths; use StorageImage/openAttachment to refresh signed access, including compatibility with old public URLs, rather than saving expiring links.
+- Capacitor sync runs the native photo-permission hook on Mac to set iOS usage descriptions; regenerate plugin registration with cap sync instead of hand-editing generated Gradle files.

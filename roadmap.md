@@ -9,3 +9,6 @@
 - [x] Add Manager to edit-role choices with atomic admin-authorized saves
 - [x] Add admin bank-detail management and customer payment accounts
 - [x] Email new-order alerts to the shared contact@tabedaar.com inbox (GoDaddy forwards to managers)
+- [x] Repair private photo uploads/viewing across customer, manager, admin and rider screens; verify real existing photos and test upload/readback
+- [x] Configure Android camera registration and iOS sync-time permission setup; verify web gallery and photo viewing
+- [ ] Verify camera/gallery on physical iOS and Android devices — requires restored iOS Xcode project and rebuilt apps on the user's devices
