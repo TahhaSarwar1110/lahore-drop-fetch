@@ -27,6 +27,20 @@ const qtyOf = (d: Record<string, unknown>) => {
 };
 const priceOf = (d: Record<string, unknown>) =>
   num(Object.entries(d || {}).find(([k]) => k.toLowerCase().includes("price"))?.[1]);
+const nameOf = (d: Record<string, unknown>, type: string) => {
+  const e = Object.entries(d || {}).find(([k]) => /name|title|description/i.test(k));
+  return String(e?.[1] ?? "").trim() || type;
+};
+
+/** "2 Shirts, 1 Jacket" — aggregates quantities by item name. */
+const summarize = (items: { item_type: string; item_data: Record<string, unknown> }[]) => {
+  const counts = new Map<string, number>();
+  for (const i of items) {
+    const name = nameOf(i.item_data ?? {}, i.item_type);
+    counts.set(name, (counts.get(name) ?? 0) + qtyOf(i.item_data ?? {}));
+  }
+  return [...counts.entries()].map(([n, q]) => (q > 1 ? `${q} ${n}` : n)).join(", ");
+};
 
 // deno-lint-ignore no-explicit-any
 type Db = any;
