@@ -94,6 +94,53 @@ serve(async (req) => {
       });
     }
 
+    // ---------- Template diagnostic: live-send each lifecycle template to our own number ----------
+    if (action === "check_templates") {
+      const me = await fetch(`${GRAPH}/${PHONE_ID}?fields=display_phone_number`, {
+        headers: { Authorization: `Bearer ${TOKEN}` },
+      });
+      const meData = await me.json().catch(() => ({}));
+      const own = String(meData?.display_phone_number ?? "").replace(/\D/g, "");
+      if (!me.ok || !own) return json({ error: "Could not resolve own WhatsApp number", details: meData }, 502);
+
+      const SAMPLES: Record<string, string[]> = {
+        tabedaar_order_received: ["Test Customer", "abcd1234", "2 Shirts, 1 Jacket", "Rs. 3,500"],
+        tabedaar_items_reviewed: ["Test Customer", "abcd1234", "2 Shirts", "1 Jacket", "Out of stock"],
+        tabedaar_payment_required_after_review: ["Test Customer", "abcd1234", "2 Shirts", "None", "Rs. 2,000"],
+        tabedaar_payment_confirmed: ["Test Customer", "abcd1234", "Rs. 2,000"],
+        tabedaar_items_picked_up: ["Test Customer", "abcd1234"],
+        tabedaar_order_delivered: ["Test Customer", "abcd1234", "Rs. 3,500"],
+      };
+      const results: Record<string, unknown> = {};
+      for (const [name, params] of Object.entries(SAMPLES)) {
+        let r = await graphPost({
+          messaging_product: "whatsapp", to: own, type: "template",
+          template: {
+            name, language: { code: "en" },
+            components: [{ type: "body", parameters: params.map((text) => ({ type: "text", text })) }],
+          },
+        });
+        if (!r.ok) {
+          r = await graphPost({
+            messaging_product: "whatsapp", to: own, type: "template",
+            template: {
+              name, language: { code: "en_US" },
+              components: [{ type: "body", parameters: params.map((text) => ({ type: "text", text })) }],
+            },
+          });
+          if (r.ok) {
+            results[name] = { ok: true, language: "en_US", messageId: r.data?.messages?.[0]?.id };
+            continue;
+          }
+        }
+        const e = r.data?.error ?? {};
+        results[name] = r.ok
+          ? { ok: true, language: "en", messageId: r.data?.messages?.[0]?.id }
+          : { ok: false, code: e.code, subcode: e.error_subcode, message: e.message };
+      }
+      return json({ ok: true, sentTo: `***${own.slice(-4)}`, results });
+    }
+
     // ---------- Actions on a conversation ----------
     if (!isUuid(body.conversationId)) return json({ error: "Invalid conversationId" }, 400);
     const { data: conv } = await db
