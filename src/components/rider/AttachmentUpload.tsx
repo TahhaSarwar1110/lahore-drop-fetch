@@ -18,7 +18,7 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isNative = Capacitor.isNativePlatform();
+  const isNative = Capacitor.isNativePlatform() && Capacitor.isPluginAvailable("Camera");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -46,8 +46,7 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
         setPreviewUrl(image.dataUrl);
       }
     } catch (error) {
-      console.error("Camera error:", error);
-      toast.error("Failed to capture photo");
+      if (!/cancel/i.test(String(error))) toast.error("Please allow camera access in Settings and try again");
     }
   };
 
@@ -70,8 +69,7 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
           setPreviewUrl(image.dataUrl);
         }
       } catch (error) {
-        console.error("Gallery error:", error);
-        toast.error("Failed to select photo");
+        if (!/cancel/i.test(String(error))) toast.error("Please allow photo access in Settings and try again");
       }
     } else {
       // Web fallback - trigger file input
