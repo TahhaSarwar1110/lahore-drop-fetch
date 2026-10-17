@@ -447,19 +447,57 @@ const ManagerOrderDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Payment Confirmation Card - Show after order is confirmed */}
-            {order.confirmed_at && (
-              <PaymentConfirmation
+            {/* Payment Verification - manager verifies the amount actually received */}
+            <PaymentVerification
+              orderId={order.id}
+              orderTotal={order.order_total_pkr ?? 0}
+              paidAmount={order.paid_amount_pkr ?? 0}
+              verification={order.payment_verification || "pending"}
+              rejectionReason={order.payment_rejection_reason}
+              paymentProofUrl={order.payment_proof_url}
+              paymentProofName={order.payment_proof_name}
+              paymentSubmittedAt={order.payment_submitted_at}
+              onUpdate={fetchOrderDetails}
+            />
+
+            {/* Rider shopping expense review */}
+            {order.order_assignments?.rider_id && (
+              <ExpenseReview
                 orderId={order.id}
-                userId={order.user_id}
-                paymentStatus={order.payment_status || "pending"}
-                paymentProofUrl={order.payment_proof_url}
-                paymentProofName={order.payment_proof_name}
-                paymentSubmittedAt={order.payment_submitted_at}
-                paymentConfirmedAt={order.payment_confirmed_at}
-                assignedRiderId={order.order_assignments?.rider_id}
+                expenseAmount={order.shopping_expense_pkr}
+                expenseStatus={order.expense_status}
+                expenseNotes={order.expense_notes}
+                expenseSubmittedAt={order.expense_submitted_at}
+                rejectionReason={order.expense_rejection_reason}
                 onUpdate={fetchOrderDetails}
               />
+            )}
+
+            {/* Refund management when the customer overpaid */}
+            {order.customer_balance_pkr !== null && order.customer_balance_pkr > 0 && (
+              <RefundManager
+                orderId={order.id}
+                balance={order.customer_balance_pkr}
+                refundStatus={order.refund_status || "pending"}
+                refundMethod={order.refund_method}
+                refundReference={order.refund_reference}
+                refundNotes={order.refund_notes}
+                refundProofUrl={order.refund_proof_url}
+                onUpdate={fetchOrderDetails}
+              />
+            )}
+
+            {/* Financial settlement indicator */}
+            {order.expense_status && (
+              <Card className={isFinanciallySettled(order.expense_status, order.customer_balance_pkr, order.refund_status) ? "border-green-500 bg-green-500/5" : "border-yellow-500 bg-yellow-500/5"}>
+                <CardContent className="p-4">
+                  <p className="text-sm font-medium">
+                    {isFinanciallySettled(order.expense_status, order.customer_balance_pkr, order.refund_status)
+                      ? "✅ Financially settled"
+                      : "⏳ Financially open — expense verification or refund still pending"}
+                  </p>
+                </CardContent>
+              </Card>
             )}
 
             {/* Delivery Charges (out-of-city / out-of-country only) */}
