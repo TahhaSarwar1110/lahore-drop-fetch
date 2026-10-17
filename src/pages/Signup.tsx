@@ -200,6 +200,24 @@ const Signup = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="email" className="mobile-label">
+                  Email <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mobile-input"
+                  autoComplete="email"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Add an email to receive order updates and password-reset links.
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="password" className="mobile-label">Password</Label>
                 <PasswordInput
                   id="password"
