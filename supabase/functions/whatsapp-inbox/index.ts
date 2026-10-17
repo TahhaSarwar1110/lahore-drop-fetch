@@ -136,9 +136,9 @@ serve(async (req) => {
         const e = r.data?.error ?? {};
         results[name] = r.ok
           ? { ok: true, language: "en", messageId: r.data?.messages?.[0]?.id }
-          : { ok: false, code: e.code, subcode: e.error_subcode, message: e.message };
+          : { ok: false, code: e.code, subcode: e.error_subcode, message: e.message, details: e.error_data?.details, blame: e.error_data?.blame_field_specs };
       }
-      return json({ ok: true, sentTo: `***${own.slice(-4)}`, results });
+      return json({ ok: true, sentTo: `***${own.slice(-4)}`, ownLength: own.length, results });
     }
 
     // ---------- Actions on a conversation ----------
