@@ -62,26 +62,10 @@ export const ShoppingExpenseForm = ({
     if (expenseNotes) setNotes(expenseNotes);
   }, [expenseAmount, expenseNotes]);
 
-  const pickNative = async (source: CameraSource) => {
-    try {
-      const photo = await CapCamera.getPhoto({
-        quality: 80,
-        resultType: CameraResultType.DataUrl,
-        source,
-      });
-      if (photo.dataUrl) {
-        setFiles((prev) => [...prev, dataUrlToFile(photo.dataUrl!, `receipt-${Date.now()}.${photo.format || "jpeg"}`)]);
-      }
-    } catch (error) {
-      console.error("Camera error:", error);
-      toast.error("Could not get the photo. Please try again.");
-    }
+  const handlePicked = (picked: File[]) => {
+    setFiles((prev) => [...prev, ...picked]);
   };
 
-  const addFiles = (list: FileList | null) => {
-    if (!list) return;
-    setFiles((prev) => [...prev, ...Array.from(list)]);
-  };
 
   const submit = async () => {
     const parsed = parseInt(amount.replace(/[^0-9]/g, ""), 10);
@@ -183,31 +167,12 @@ export const ShoppingExpenseForm = ({
             </div>
             <div className="space-y-2">
               <Label>Purchase Receipts</Label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
+              <ImageSourcePicker
+                onFiles={handlePicked}
                 multiple
-                className="hidden"
-                onChange={(e) => addFiles(e.target.files)}
+                cameraLabel="Take Photo"
+                galleryLabel="Choose from Gallery"
               />
-              <div className="flex flex-wrap gap-2">
-                {Capacitor.isNativePlatform() ? (
-                  <>
-                    <Button type="button" variant="outline" size="sm" onClick={() => pickNative(CameraSource.Camera)}>
-                      Take Photo
-                    </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => pickNative(CameraSource.Photos)}>
-                      Choose from Gallery
-                    </Button>
-                  </>
-                ) : (
-                  <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                    <Upload className="h-4 w-4 mr-1" />
-                    Add Receipt Images
-                  </Button>
-                )}
-              </div>
               {files.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {files.map((f, i) => (
