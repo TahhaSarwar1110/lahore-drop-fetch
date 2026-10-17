@@ -1,0 +1,1 @@
+DROP TRIGGER IF EXISTS enforce_payment_before_confirm ON public.orders;

@@ -224,22 +224,14 @@ const ManagerOrderDetails = () => {
     return allItemsApproved() && order?.confirmed_at && isPaymentConfirmed();
   };
 
+  // Order flow: items reviewed -> order confirmed -> payment verified
   const canConfirmOrder = () => {
-    return allItemsApproved() && isPaymentVerifiedForApproval();
+    return allItemsApproved();
   };
 
   const handleConfirmOrder = async () => {
     if (!canConfirmOrder()) {
-      if (hasRejectedItems()) {
-        toast.error("Cannot confirm order with rejected items. Please ensure all items are approved.");
-      } else if (!isPaymentVerifiedForApproval() && order) {
-        const outstanding = getOutstandingAmount(order.order_total_pkr ?? 0, order.paid_amount_pkr);
-        toast.error(
-          outstanding > 0
-            ? `Payment short by Rs. ${outstanding.toLocaleString()}. Verify full payment before confirming.`
-            : "Payment must be verified before confirming the order."
-        );
-      }
+      toast.error("Cannot confirm order until all items are approved.");
       return;
     }
 
@@ -348,8 +340,8 @@ const ManagerOrderDetails = () => {
                   >
                     {hasRejectedItems() 
                       ? "Resolve Rejected Items First"
-                      : !isPaymentVerifiedForApproval()
-                      ? "Verify Payment First"
+                      : !allItemsApproved()
+                      ? "Review Items First"
                       : "Confirm Order"}
                   </Button>
                 )}
@@ -449,7 +441,8 @@ const ManagerOrderDetails = () => {
               </CardContent>
             </Card>
 
-            {/* Payment Verification - manager verifies the amount actually received */}
+            {/* Payment Verification - only after the order is confirmed */}
+            {order.confirmed_at && (
             <PaymentVerification
               orderId={order.id}
               orderTotal={order.order_total_pkr ?? 0}
@@ -463,6 +456,7 @@ const ManagerOrderDetails = () => {
               expenseStatus={order.expense_status}
               onUpdate={fetchOrderDetails}
             />
+            )}
 
             {/* Rider shopping expense review */}
             {order.order_assignments?.rider_id && (
