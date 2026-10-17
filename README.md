@@ -1,73 +1,72 @@
-# Welcome to your Lovable project
+# Tabedaar.com
 
-## Project info
+Your personal shopper in Pakistan. Tabedaar sources anything from fashion, food, gifts to groceries in Lahore and delivers it to your loved ones anywhere in the world.
 
-**URL**: https://lovable.dev/projects/dc852880-8d13-4e6b-95c8-cce4660ffa8d
+**Live site:** https://tabedaar.com
+**Support & replies:** contact@tabedaar.com
+**Office:** IP Building, Gulberg, Lahore, Pakistan
+**Hours:** 9:00 AM – 6:00 PM PKT
 
-## How can I edit this code?
+## Who uses the app
 
-There are several ways of editing your application.
+| Role | What they do |
+| --- | --- |
+| Customer | Place orders item by item, upload payment proof, pay any remaining balance, track delivery |
+| Manager | Review requested items, verify payments, record shopping expenses with receipts, assign riders |
+| Rider | Collect items with photo proof, capture the delivery payment screenshot, confirm delivery |
+| Admin | Manage staff accounts and roles, bank details, reporting exports, and the WhatsApp inbox |
 
-**Use Lovable**
+## Order lifecycle
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/dc852880-8d13-4e6b-95c8-cce4660ffa8d) and start prompting.
+Placed → Approved → Confirmed → Picked Up → Delivered
 
-Changes made via Lovable will be committed automatically to this repo.
+Money is settled before a rider can deliver: if the actual shopping expense is higher than the
+verified amount received, the customer pays the remaining balance; if it is lower, the manager
+refunds the difference with proof first. Every amount change is written to an audit trail.
 
-**Use your preferred IDE**
+Customers receive email (from contact@tabedaar.com), WhatsApp, in-app and push notifications at
+each stage.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Stack
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- React 18, TypeScript, Vite
+- Tailwind CSS with shadcn/ui components
+- Managed Postgres backend: database with row-level security, auth, file storage, edge functions
+- Capacitor for the Android and iPhone apps
 
-Follow these steps:
+## Getting started
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Scripts
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Production build into `dist/` |
+| `npm run build:dev` | Development-mode build |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint` | ESLint over the source |
+| `npm run test:attachments` | Storage-path tests |
+| `npm run capacitor:sync:before` | Regenerate native photo-permission settings before a Capacitor sync |
 
-**Use GitHub Codespaces**
+## Native apps
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The Android and iPhone shells live in `android/` and `ios/`.
 
-## What technologies are used for this project?
+```bash
+npm run build
+npx cap sync android   # or: npx cap sync ios
+npx cap open android   # Android Studio
+npx cap open ios       # Xcode (macOS only)
+```
 
-This project is built with:
+## Deploying
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/dc852880-8d13-4e6b-95c8-cce4660ffa8d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **Web:** run `npm run build` and upload the contents of `dist/` to the cPanel host. `.htaccess`
+  handles single-page routing. The GoDaddy A records point at the hosting IPs.
+- **Android:** build a signed AAB and upload it through Google Play Console.
+- **iPhone:** archive in Xcode and upload through App Store Connect.

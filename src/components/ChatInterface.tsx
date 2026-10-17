@@ -242,7 +242,7 @@ export const ChatInterface = () => {
             </Button>
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
-            <span>Powered by Lovable AI</span>
+            <span>Powered by Tabedaar AI</span>
             <span>{isLoading ? "AI is typing..." : "Press Enter to send"}</span>
           </div>
         </div>
