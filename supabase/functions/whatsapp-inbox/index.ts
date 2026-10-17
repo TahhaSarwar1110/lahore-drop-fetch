@@ -95,6 +95,24 @@ serve(async (req) => {
     }
 
     // ---------- List approved templates from Meta ----------
+    // ---------- Read-only template lookup by Meta template ID ----------
+    if (action === "template_lookup") {
+      const tid = String(body.template_id ?? "");
+      if (!/^\d{5,25}$/.test(tid)) return json({ error: "numeric template_id required" }, 400);
+      const tryGet = async (u: string) => {
+        const r = await fetch(u, { headers: { Authorization: `Bearer ${TOKEN}` } });
+        return { ok: r.ok, status: r.status, data: await r.json().catch(() => ({})) };
+      };
+      const tpl = await tryGet(`${GRAPH}/${tid}?fields=id,name,language,status,category,components`);
+      const phone = await tryGet(`${GRAPH}/${PHONE_ID}?fields=id,display_phone_number,verified_name,quality_rating,platform_type`);
+      const list = await tryGet(`${GRAPH}/${PHONE_ID}/message_templates?limit=5`);
+      return json({
+        template: tpl.ok ? tpl.data : { error: tpl.data?.error?.message, status: tpl.status },
+        phone: phone.ok ? phone.data : { error: phone.data?.error?.message, status: phone.status },
+        phone_templates_edge: list.ok ? { count: list.data?.data?.length } : { error: list.data?.error?.message, status: list.status },
+      });
+    }
+
     if (action === "list_templates") {
       const tryGet = async (u: string) => {
         const r = await fetch(u, { headers: { Authorization: `Bearer ${TOKEN}` } });
