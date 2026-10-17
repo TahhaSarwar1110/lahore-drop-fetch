@@ -293,6 +293,89 @@ export type Database = {
           },
         ]
       }
+      order_expense_receipts: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_url: string
+          id: string
+          order_id: string
+          rider_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          order_id: string
+          rider_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          order_id?: string
+          rider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_expense_receipts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_expense_receipts_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_financial_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          new_value: Json | null
+          note: string | null
+          old_value: Json | null
+          order_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          new_value?: Json | null
+          note?: string | null
+          old_value?: Json | null
+          order_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          new_value?: Json | null
+          note?: string | null
+          old_value?: Json | null
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_financial_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           approval_status: string | null
@@ -382,6 +465,7 @@ export type Database = {
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string | null
+          customer_balance_pkr: number | null
           delivered_at: string | null
           delivery_address: string
           delivery_charges: number
@@ -398,14 +482,36 @@ export type Database = {
           delivery_proof_name: string | null
           delivery_proof_url: string | null
           delivery_type: string
+          expense_notes: string | null
+          expense_rejection_reason: string | null
+          expense_status: string | null
+          expense_submitted_at: string | null
+          expense_submitted_by: string | null
+          expense_verified_at: string | null
+          expense_verified_by: string | null
           id: string
           manager_feedback: string | null
+          order_total_pkr: number | null
+          paid_amount_pkr: number
           payment_confirmed_at: string | null
           payment_confirmed_by: string | null
           payment_proof_name: string | null
           payment_proof_url: string | null
+          payment_rejection_reason: string | null
           payment_status: string | null
           payment_submitted_at: string | null
+          payment_verification: string
+          payment_verified_at: string | null
+          payment_verified_by: string | null
+          refund_completed_at: string | null
+          refund_completed_by: string | null
+          refund_method: string | null
+          refund_notes: string | null
+          refund_proof_name: string | null
+          refund_proof_url: string | null
+          refund_reference: string | null
+          refund_status: string
+          shopping_expense_pkr: number | null
           status: string
           total_weight_kg: number | null
           user_id: string
@@ -416,6 +522,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
+          customer_balance_pkr?: number | null
           delivered_at?: string | null
           delivery_address: string
           delivery_charges?: number
@@ -432,14 +539,36 @@ export type Database = {
           delivery_proof_name?: string | null
           delivery_proof_url?: string | null
           delivery_type?: string
+          expense_notes?: string | null
+          expense_rejection_reason?: string | null
+          expense_status?: string | null
+          expense_submitted_at?: string | null
+          expense_submitted_by?: string | null
+          expense_verified_at?: string | null
+          expense_verified_by?: string | null
           id?: string
           manager_feedback?: string | null
+          order_total_pkr?: number | null
+          paid_amount_pkr?: number
           payment_confirmed_at?: string | null
           payment_confirmed_by?: string | null
           payment_proof_name?: string | null
           payment_proof_url?: string | null
+          payment_rejection_reason?: string | null
           payment_status?: string | null
           payment_submitted_at?: string | null
+          payment_verification?: string
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
+          refund_completed_at?: string | null
+          refund_completed_by?: string | null
+          refund_method?: string | null
+          refund_notes?: string | null
+          refund_proof_name?: string | null
+          refund_proof_url?: string | null
+          refund_reference?: string | null
+          refund_status?: string
+          shopping_expense_pkr?: number | null
           status?: string
           total_weight_kg?: number | null
           user_id: string
@@ -450,6 +579,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string | null
+          customer_balance_pkr?: number | null
           delivered_at?: string | null
           delivery_address?: string
           delivery_charges?: number
@@ -466,14 +596,36 @@ export type Database = {
           delivery_proof_name?: string | null
           delivery_proof_url?: string | null
           delivery_type?: string
+          expense_notes?: string | null
+          expense_rejection_reason?: string | null
+          expense_status?: string | null
+          expense_submitted_at?: string | null
+          expense_submitted_by?: string | null
+          expense_verified_at?: string | null
+          expense_verified_by?: string | null
           id?: string
           manager_feedback?: string | null
+          order_total_pkr?: number | null
+          paid_amount_pkr?: number
           payment_confirmed_at?: string | null
           payment_confirmed_by?: string | null
           payment_proof_name?: string | null
           payment_proof_url?: string | null
+          payment_rejection_reason?: string | null
           payment_status?: string | null
           payment_submitted_at?: string | null
+          payment_verification?: string
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
+          refund_completed_at?: string | null
+          refund_completed_by?: string | null
+          refund_method?: string | null
+          refund_notes?: string | null
+          refund_proof_name?: string | null
+          refund_proof_url?: string | null
+          refund_reference?: string | null
+          refund_status?: string
+          shopping_expense_pkr?: number | null
           status?: string
           total_weight_kg?: number | null
           user_id?: string
@@ -899,17 +1051,50 @@ export type Database = {
         }
         Returns: boolean
       }
+      reopen_shopping_expense: {
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: undefined
+      }
       rider_assigned_to_order: {
         Args: { _order_id: string; _rider_id: string }
         Returns: boolean
+      }
+      submit_shopping_expense: {
+        Args: { p_amount: number; p_notes?: string; p_order_id: string }
+        Returns: undefined
       }
       update_order_status: {
         Args: { p_new_status: string; p_order_id: string }
         Returns: undefined
       }
+      update_refund_status: {
+        Args: {
+          p_method?: string
+          p_notes?: string
+          p_order_id: string
+          p_proof_name?: string
+          p_proof_url?: string
+          p_reference?: string
+          p_status: string
+        }
+        Returns: undefined
+      }
       user_owns_order: {
         Args: { _order_id: string; _user_id: string }
         Returns: boolean
+      }
+      verify_order_payment: {
+        Args: {
+          p_approved: boolean
+          p_order_id: string
+          p_paid_amount: number
+          p_reason?: string
+        }
+        Returns: undefined
+      }
+      verify_shopping_expense: {
+        Args: { p_approved: boolean; p_order_id: string; p_reason?: string }
+        Returns: undefined
       }
     }
     Enums: {
