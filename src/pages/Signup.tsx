@@ -9,6 +9,7 @@ import { CountryCodeSelect } from "@/components/CountryCodeSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { normalizePhoneDigits, phoneToSyntheticEmail } from "@/utils/phoneAuth";
 import logo from "@/assets/tabedaar-logo.png";
 
 const countryCodes = [
@@ -46,7 +47,6 @@ const createSignupSchema = (countryCode: string) => {
   
   return z.object({
     fullName: z.string().trim().min(2, "Name must be at least 2 characters"),
-    email: z.string().trim().email("Invalid email address"),
     phone: z.string().trim()
       .min(minLength, `Phone number must be ${minLength === maxLength ? minLength : `${minLength}-${maxLength}`} digits for ${countryName}`)
       .max(maxLength, `Phone number must be ${minLength === maxLength ? minLength : `${minLength}-${maxLength}`} digits for ${countryName}`)
@@ -57,7 +57,6 @@ const createSignupSchema = (countryCode: string) => {
 
 const Signup = () => {
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState("+92");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -75,19 +74,21 @@ const Signup = () => {
     try {
       const validatedData = signupSchema.parse({
         fullName,
-        email,
         phone: phone.replace(/^0+/, ''),
         password,
       });
 
+      // Phone-only signup: derive the account email from the phone number.
+      const accountEmail = phoneToSyntheticEmail(fullPhoneNumber);
+
       const { data, error } = await supabase.auth.signUp({
-        email: validatedData.email,
+        email: accountEmail,
         password: validatedData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: validatedData.fullName,
-            phone: fullPhoneNumber,
+            phone: `+${normalizePhoneDigits(fullPhoneNumber)}`,
           },
         },
       });
@@ -96,7 +97,7 @@ const Signup = () => {
         if (error.message.includes("already registered")) {
           toast({
             title: "Account exists",
-            description: "This email is already registered. Please login instead.",
+            description: "This mobile number is already registered. Please login instead.",
             variant: "destructive",
           });
         } else {
@@ -172,20 +173,7 @@ const Signup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="mobile-label">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="mobile-input"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="mobile-label">Phone Number</Label>
+                <Label htmlFor="phone" className="mobile-label">Mobile Number</Label>
                 <div className="flex gap-2">
                   <CountryCodeSelect
                     value={countryCode}
