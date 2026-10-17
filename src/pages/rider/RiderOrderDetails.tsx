@@ -232,6 +232,9 @@ const RiderOrderDetails = () => {
     !order ||
     order.delivery_type === "within_city" ||
     order.delivery_payment_status === "confirmed";
+  const settlementOk =
+    !order ||
+    canRiderDeliver(order.order_total_pkr, order.expense_status, order.customer_balance_pkr, order.refund_status);
 
   // Helper to render item data fields
   const renderItemDetails = (itemData: any, itemType: string) => {
@@ -396,7 +399,22 @@ const RiderOrderDetails = () => {
                 </Card>
               )}
 
-              {allItemsPicked && order.status !== "Delivered" && deliveryPaymentOk && (
+              {allItemsPicked && order.status !== "Delivered" && deliveryPaymentOk && !settlementOk && (
+                <Card className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
+                  <CardContent className="p-4">
+                    <p className="text-sm text-amber-800 dark:text-amber-200 break-words">
+                      <span className="font-semibold">Delivery on hold — payment not settled:</span>{" "}
+                      {order.expense_status !== "verified"
+                        ? "Submit your shopping expense with receipts and wait for the manager to verify it."
+                        : getAmountOwed(order.customer_balance_pkr) > 0
+                        ? `The customer must pay the remaining Rs. ${getAmountOwed(order.customer_balance_pkr).toLocaleString()} and the manager must verify it.`
+                        : `The manager must refund Rs. ${(order.customer_balance_pkr ?? 0).toLocaleString()} to the customer and mark it completed.`}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {allItemsPicked && order.status !== "Delivered" && deliveryPaymentOk && settlementOk && (
                 <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
