@@ -36,6 +36,14 @@ interface OrderDetails {
   status: string;
   delivery_type: string;
   delivery_payment_status: string;
+  order_total_pkr: number | null;
+  paid_amount_pkr: number;
+  shopping_expense_pkr: number | null;
+  expense_status: string | null;
+  expense_notes: string | null;
+  expense_rejection_reason: string | null;
+  customer_balance_pkr: number | null;
+  refund_status: string;
   profiles: {
     full_name: string;
     phone: string;
@@ -77,6 +85,14 @@ const RiderOrderDetails = () => {
           status,
           delivery_type,
           delivery_payment_status,
+          order_total_pkr,
+          paid_amount_pkr,
+          shopping_expense_pkr,
+          expense_status,
+          expense_notes,
+          expense_rejection_reason,
+          customer_balance_pkr,
+          refund_status,
           profiles (
             full_name,
             phone
