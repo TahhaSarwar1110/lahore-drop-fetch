@@ -233,7 +233,10 @@ const PlaceOrder = () => {
 
       // Calculate bundle pricing based on item count
       const { bundle, price: bundlePrice } = calculateBundlePrice(orderItems.length);
-      
+
+      // Snapshot the grand total (goods + service charges) for payment reconciliation
+      const orderTotalPkr = Math.round(calculateTotalPrice() + bundlePrice);
+
       // Create order with bundle pricing and delivery location
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
@@ -245,6 +248,7 @@ const PlaceOrder = () => {
           delivery_longitude: deliveryLocation?.lng,
           status: "Pending",
           additional_charges: bundlePrice,
+          order_total_pkr: orderTotalPkr,
           charges_description: bundle
             ? `Service charges (${bundle.name} - ${orderItems.length} items)`
             : "No service bundle applied",
