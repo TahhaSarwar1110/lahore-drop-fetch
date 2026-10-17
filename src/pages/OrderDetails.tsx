@@ -407,6 +407,7 @@ const OrderDetails = () => {
                 paymentProofUrl={order.payment_proof_url}
                 paymentSubmittedAt={order.payment_submitted_at}
                 paymentConfirmedAt={order.payment_confirmed_at}
+                amountDue={order.expense_status === "verified" && (order.customer_balance_pkr ?? 0) < 0 ? -(order.customer_balance_pkr as number) : 0}
                 onUpdate={() => {
                   supabase.auth.getUser().then(({ data: { user } }) => {
                     if (user && orderId) loadOrder(orderId, user.id);

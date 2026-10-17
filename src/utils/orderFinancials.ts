@@ -25,16 +25,35 @@ export const getRefundDue = (balance: number): number => Math.max(0, balance);
 /** Negative balance means the rider spent more than the customer paid. */
 export const hasUncoveredExpense = (balance: number): boolean => balance < 0;
 
-/** Financially settled = expense verified AND (no refund due OR refund completed). */
+/** Amount the customer still has to pay when the expense exceeded their payment. */
+export const getAmountOwed = (balance: number | null | undefined): number =>
+  balance === null || balance === undefined ? 0 : Math.max(0, -balance);
+
+/**
+ * Financially settled = expense verified AND balance is zero, or a positive
+ * balance has been refunded. A negative balance (customer owes) is never settled.
+ */
 export const isFinanciallySettled = (
   expenseStatus: ExpenseStatus | string | null | undefined,
   balance: number | null | undefined,
   refundStatus: RefundStatus | string | null | undefined
 ): boolean => {
   if (expenseStatus !== "verified" || balance === null || balance === undefined) return false;
-  if (balance <= 0) return true;
+  if (balance < 0) return false;
+  if (balance === 0) return true;
   return refundStatus === "completed";
 };
+
+/** Rider may deliver only after settlement (legacy orders without a total are exempt). */
+export const canRiderDeliver = (
+  orderTotal: number | null | undefined,
+  expenseStatus: ExpenseStatus | string | null | undefined,
+  balance: number | null | undefined,
+  refundStatus: RefundStatus | string | null | undefined
+): boolean =>
+  orderTotal === null || orderTotal === undefined
+    ? true
+    : isFinanciallySettled(expenseStatus, balance, refundStatus);
 
 export const PAYMENT_VERIFICATION_LABELS: Record<string, string> = {
   pending: "Pending Verification",

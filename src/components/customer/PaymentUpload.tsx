@@ -17,6 +17,7 @@ interface PaymentUploadProps {
   paymentProofUrl?: string | null;
   paymentSubmittedAt?: string | null;
   paymentConfirmedAt?: string | null;
+  amountDue?: number;
   onUpdate: () => void;
 }
 
@@ -26,6 +27,7 @@ export const PaymentUpload = ({
   paymentProofUrl,
   paymentSubmittedAt,
   paymentConfirmedAt,
+  amountDue,
   onUpdate,
 }: PaymentUploadProps) => {
   const [uploading, setUploading] = useState(false);
@@ -117,9 +119,20 @@ export const PaymentUpload = ({
 
         {paymentStatus === "pending" && (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Please transfer the total amount to the above bank account and upload the payment screenshot below.
-            </p>
+            {amountDue && amountDue > 0 ? (
+              <div className="bg-destructive/10 border border-destructive/30 p-3 rounded-lg">
+                <p className="text-sm font-semibold text-destructive">
+                  Remaining amount due: Rs. {amountDue.toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  The actual shopping cost was higher than your payment. Please transfer the remaining amount and upload the screenshot. Delivery starts after it is verified.
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Please transfer the total amount to the above bank account and upload the payment screenshot below.
+              </p>
+            )}
             
             <div className="space-y-2">
               <Label htmlFor="payment-proof">Payment Screenshot</Label>

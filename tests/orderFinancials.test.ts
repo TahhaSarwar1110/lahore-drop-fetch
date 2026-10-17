@@ -6,6 +6,8 @@ import {
   getRefundDue,
   hasUncoveredExpense,
   isFinanciallySettled,
+  getAmountOwed,
+  canRiderDeliver,
 } from "../src/utils/orderFinancials";
 
 describe("order financial reconciliation rules", () => {
@@ -44,7 +46,23 @@ describe("order financial reconciliation rules", () => {
     expect(balance).toBe(-2000);
     expect(hasUncoveredExpense(balance)).toBe(true);
     expect(getRefundDue(balance)).toBe(0);
-    expect(isFinanciallySettled("verified", balance, "none")).toBe(true);
+    expect(getAmountOwed(balance)).toBe(2000);
+    expect(isFinanciallySettled("verified", balance, "none")).toBe(false);
+    expect(canRiderDeliver(16000, "verified", balance, "none")).toBe(false);
+  });
+
+  it("lets the rider deliver once the top-up is verified (balance back to zero)", () => {
+    const balance = getCustomerBalance(18000, 18000);
+    expect(canRiderDeliver(16000, "verified", balance, "none")).toBe(true);
+  });
+
+  it("blocks delivery until the refund is completed", () => {
+    expect(canRiderDeliver(16000, "verified", 4000, "initiated")).toBe(false);
+    expect(canRiderDeliver(16000, "verified", 4000, "completed")).toBe(true);
+  });
+
+  it("blocks delivery while the expense is unverified", () => {
+    expect(canRiderDeliver(16000, "pending_review", null, "none")).toBe(false);
   });
 
   it("is not financially settled while a refund is pending or only initiated", () => {
