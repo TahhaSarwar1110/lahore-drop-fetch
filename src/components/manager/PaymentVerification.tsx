@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { StorageImage } from "@/components/StorageImage";
 import { toast } from "sonner";
-import { Banknote, ShieldCheck, ShieldX } from "lucide-react";
+import { Banknote, ShieldCheck, ShieldX, ExternalLink } from "lucide-react";
+import { openAttachment } from "@/utils/attachmentStorage";
 import { getOutstandingAmount, PAYMENT_VERIFICATION_LABELS } from "@/utils/orderFinancials";
 
 interface PaymentVerificationProps {
@@ -105,8 +106,12 @@ export const PaymentVerification = ({
               bucket="payment-proofs"
               src={paymentProofUrl}
               alt={paymentProofName || "Payment proof"}
-              className="max-h-48 rounded-md border"
+              className="max-h-96 w-auto rounded-md border"
             />
+            <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => void openAttachment(paymentProofUrl, "payment-proofs")}>
+              <ExternalLink className="h-4 w-4 mr-1" />
+              View Full Size
+            </Button>
             {paymentSubmittedAt && (
               <p className="text-xs text-muted-foreground mt-1">
                 Submitted {new Date(paymentSubmittedAt).toLocaleString()}
