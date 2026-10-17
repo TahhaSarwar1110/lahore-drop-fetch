@@ -89,6 +89,7 @@ export const OrderItemForm = ({ onAddItem, initialItem, submitLabel, onCancel }:
     Cloth: [
       { label: "Shop/Store Name", type: "text", placeholder: "Name of store", required: true },
       { label: "Item Description", type: "text", placeholder: "What you want to buy", required: true },
+      { label: "Dress Code", type: "text", placeholder: "Dress/suit code or article number", required: true },
       { label: "Brand", type: "text", placeholder: "Brand name (optional)" },
       { label: "Quantity", type: "number", placeholder: "1 (optional)", min: 1 },
       { label: "Expected Price (PKR)", type: "number", placeholder: "Price per item", required: true, min: 0 },

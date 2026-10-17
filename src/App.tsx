@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import PlaceOrder from "./pages/PlaceOrder";
 import OrderHistory from "./pages/OrderHistory";
 import OrderDetails from "./pages/OrderDetails";
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/place-order" element={<PlaceOrder />} />
           <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/order-details" element={<OrderDetails />} />
