@@ -1074,6 +1074,10 @@ export type Database = {
         Returns: boolean
       }
       can_read_order_attachment: { Args: { p_path: string }; Returns: boolean }
+      check_signup_contact: {
+        Args: { p_email: string; p_phone: string }
+        Returns: Json
+      }
       get_customer_ids_for_rider_orders: {
         Args: { _rider_id: string }
         Returns: string[]
@@ -1089,6 +1093,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_profile_phone: { Args: { raw: string }; Returns: string }
       reopen_shopping_expense: {
         Args: { p_order_id: string; p_reason?: string }
         Returns: undefined
