@@ -489,15 +489,24 @@ const ManagerOrderDetails = () => {
               />
             )}
 
-            {/* Financial settlement indicator */}
+            {/* Financial settlement indicator — rider delivery is blocked until settled */}
             {order.expense_status && (
               <Card className={isFinanciallySettled(order.expense_status, order.customer_balance_pkr, order.refund_status) ? "border-green-500 bg-green-500/5" : "border-yellow-500 bg-yellow-500/5"}>
-                <CardContent className="p-4">
-                  <p className="text-sm font-medium">
+                <CardContent className="p-4 space-y-1">
+                  <p className="text-sm font-medium break-words">
                     {isFinanciallySettled(order.expense_status, order.customer_balance_pkr, order.refund_status)
-                      ? "✅ Financially settled"
-                      : "⏳ Financially open — expense verification or refund still pending"}
+                      ? "✅ Payment settled — rider can proceed with delivery"
+                      : order.expense_status !== "verified"
+                      ? "⏳ Verify the rider's shopping expense first"
+                      : (order.customer_balance_pkr ?? 0) < 0
+                      ? `⏳ Customer owes Rs. ${Math.abs(order.customer_balance_pkr ?? 0).toLocaleString()} — delivery on hold`
+                      : `⏳ Refund Rs. ${(order.customer_balance_pkr ?? 0).toLocaleString()} to the customer with proof — delivery on hold`}
                   </p>
+                  {order.expense_status === "verified" && (order.customer_balance_pkr ?? 0) < 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      When the customer uploads the top-up, enter the <strong>total amount received so far</strong> (at least Rs. {(order.shopping_expense_pkr ?? 0).toLocaleString()}) in Payment Verification.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             )}
