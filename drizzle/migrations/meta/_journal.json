@@ -57,6 +57,13 @@
       "when": 1792263610538,
       "tag": "0007_order_payment_reconciliation",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792266887711,
+      "tag": "0008_payment_settlement_before_delivery",
+      "breakpoints": true
     }
   ]
 }
