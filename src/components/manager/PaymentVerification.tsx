@@ -63,6 +63,21 @@ export function PaymentVerification(props: PaymentVerificationProps) {
   const remainingToSettle = Math.max(0, settlementTarget - paidAmount);
   const settled = expenseVerified && paidAmount >= (shoppingExpense as number);
 
+  // Merge the legacy proof stored on the order with the proof history,
+  // so orders placed before proof history existed still show every payment.
+  const allProofs = (() => {
+    const list = proofs.map((p) => ({ ...p }));
+    if (paymentProofUrl && !list.some((p) => p.file_url === paymentProofUrl)) {
+      list.unshift({
+        id: "legacy",
+        file_url: paymentProofUrl,
+        file_name: paymentProofName || "Payment proof",
+        created_at: paymentSubmittedAt || new Date(0).toISOString(),
+      });
+    }
+    return list;
+  })();
+
   const parsedAmount = parseInt(amount.replace(/[^0-9]/g, ""), 10);
   const outstanding = Number.isFinite(parsedAmount) ? getOutstandingAmount(orderTotal, parsedAmount) : orderTotal;
 
