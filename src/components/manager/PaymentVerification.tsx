@@ -26,19 +26,20 @@ interface PaymentVerificationProps {
   onUpdate: () => void;
 }
 
-export const PaymentVerification = ({
-  orderId,
-  orderTotal,
-  paidAmount,
-  verification,
-  rejectionReason,
-  paymentProofUrl,
-  paymentProofName,
-  paymentSubmittedAt,
-  shoppingExpense,
-  expenseStatus,
-  onUpdate,
-}: PaymentVerificationProps) {
+export function PaymentVerification(props: PaymentVerificationProps) {
+  const {
+    orderId,
+    orderTotal,
+    paidAmount,
+    verification,
+    rejectionReason,
+    paymentProofUrl,
+    paymentProofName,
+    paymentSubmittedAt,
+    shoppingExpense,
+    expenseStatus,
+    onUpdate,
+  } = props;
   const [amount, setAmount] = useState<string>("");
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
