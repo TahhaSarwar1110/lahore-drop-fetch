@@ -51,12 +51,14 @@ const createSignupSchema = (countryCode: string) => {
       .min(minLength, `Phone number must be ${minLength === maxLength ? minLength : `${minLength}-${maxLength}`} digits for ${countryName}`)
       .max(maxLength, `Phone number must be ${minLength === maxLength ? minLength : `${minLength}-${maxLength}`} digits for ${countryName}`)
       .regex(/^\d+$/, "Phone number must contain only digits"),
+    email: z.string().trim().email("Enter a valid email address").optional().or(z.literal("")),
     password: z.string().min(6, "Password must be at least 6 characters"),
   });
 };
 
 const Signup = () => {
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState("+92");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -75,10 +77,13 @@ const Signup = () => {
       const validatedData = signupSchema.parse({
         fullName,
         phone: phone.replace(/^0+/, ''),
+        email: email.trim(),
         password,
       });
 
       // Phone-only signup: derive the account email from the phone number.
+      // The optional real email is stored on the profile for order emails,
+      // password-reset support and account recovery.
       const accountEmail = phoneToSyntheticEmail(fullPhoneNumber);
 
       const { data, error } = await supabase.auth.signUp({
@@ -89,6 +94,7 @@ const Signup = () => {
           data: {
             full_name: validatedData.fullName,
             phone: `+${normalizePhoneDigits(fullPhoneNumber)}`,
+            email: validatedData.email || undefined,
           },
         },
       });
@@ -191,6 +197,24 @@ const Signup = () => {
                     maxLength={countryCodes.find(c => c.code === countryCode)?.maxLength || 11}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="mobile-label">
+                  Email <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mobile-input"
+                  autoComplete="email"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Add an email to receive order updates and password-reset support.
+                </p>
               </div>
 
               <div className="space-y-2">

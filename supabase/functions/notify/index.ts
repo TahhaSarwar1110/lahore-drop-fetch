@@ -262,15 +262,22 @@ serve(async (req) => {
     // ---- resolve recipients server-side
     const shortId = order ? order.id.slice(0, 8) : "";
     let customerName = "a customer";
+    let customerEmailOverride: string | null = null;
     const recipients: { userId: string; audience: Audience }[] = [];
 
     if (order) {
       const { data: profile } = await admin
         .from("profiles")
-        .select("full_name")
+        .select("full_name, email")
         .eq("id", order.user_id)
         .maybeSingle();
       if (profile?.full_name) customerName = profile.full_name;
+      // Phone-only accounts sign in with a synthetic email; prefer the real
+      // email stored on the profile so order emails actually reach them.
+      const profileEmail = (profile as { email?: string | null } | null)?.email?.trim() ?? "";
+      if (profileEmail && !profileEmail.endsWith("@tabedaar.local")) {
+        customerEmailOverride = profileEmail;
+      }
     }
 
     for (const audience of recipe.audiences) {
@@ -565,8 +572,8 @@ serve(async (req) => {
     if (emailDefs && order) {
       try {
         const { data: u } = await admin.auth.admin.getUserById(order.user_id);
-        const to = u?.user?.email;
-        if (to) {
+        const to = customerEmailOverride || u?.user?.email;
+        if (to && !to.endsWith("@tabedaar.local")) {
           for (const d of emailDefs) {
             const key = `${d.title.toLowerCase().replace(/\s+/g, "-")}-${order.id}${d.once ? "" : "-" + version}`;
             const r = await sendTemplateEmail("order-update", to, {

@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 const profileSchema = z.object({
   fullName: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
   phone: z.string().trim().regex(/^\+?[0-9]{10,15}$/, "Enter a valid phone number, e.g. 03001234567"),
+  email: z.string().trim().email("Enter a valid email address").optional().or(z.literal("")),
 });
 
 const passwordSchema = z
@@ -36,6 +37,7 @@ const Profile = () => {
   const [roles, setRoles] = useState<string[]>([]);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
   const [address, setAddress] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -56,13 +58,14 @@ const Profile = () => {
       setMemberSince(user.created_at ? new Date(user.created_at).toLocaleDateString("en-PK", { dateStyle: "medium" }) : "");
 
       const [{ data: profile }, { data: details }, { data: lastOrder }, { data: roleRows }] = await Promise.all([
-        supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("full_name, phone, email").eq("id", user.id).maybeSingle(),
         supabase.from("user_details").select("permanent_address").eq("user_id", user.id).maybeSingle(),
         supabase.from("orders").select("delivery_address").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
       ]);
       setFullName(profile?.full_name ?? "");
       setPhone(profile?.phone ?? "");
+      setProfileEmail((profile as { email?: string | null } | null)?.email ?? "");
       setAddress(details?.permanent_address || lastOrder?.delivery_address || "");
       setRoles((roleRows ?? []).map((r) => r.role));
       setLoading(false);
@@ -72,15 +75,19 @@ const Profile = () => {
 
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = profileSchema.safeParse({ fullName, phone: phone.replace(/[\s-]/g, "") });
+    const parsed = profileSchema.safeParse({ fullName, phone: phone.replace(/[\s-]/g, ""), email: profileEmail.trim() });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
     setSavingProfile(true);
+    // Phone-only accounts sign in with a synthetic email; their real (optional)
+    // email lives on the profile so order emails reach them.
+    const updates: Record<string, string | null> = { full_name: parsed.data.fullName, phone: parsed.data.phone };
+    if (isSyntheticEmail(email)) updates.email = parsed.data.email || null;
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: parsed.data.fullName, phone: parsed.data.phone })
+      .update(updates)
       .eq("id", userId);
     setSavingProfile(false);
     if (error) toast.error("Could not save your details. Please try again.");
@@ -150,11 +157,25 @@ const Profile = () => {
                   <Label htmlFor="fullName">Full name</Label>
                   <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={100} />
                 </div>
-                {!isSyntheticEmail(email) && (
+                {!isSyntheticEmail(email) ? (
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" /> Email</Label>
                     <Input id="email" value={email} disabled />
                     <p className="text-xs text-muted-foreground">Contact support to change your email address.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="profileEmail" className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" /> Email <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                    <Input
+                      id="profileEmail"
+                      type="email"
+                      inputMode="email"
+                      value={profileEmail}
+                      onChange={(e) => setProfileEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      maxLength={254}
+                    />
+                    <p className="text-xs text-muted-foreground">Add an email to receive order updates and password-reset support.</p>
                   </div>
                 )}
                 <div className="space-y-2">
