@@ -57,13 +57,64 @@ interface Plan { template: string; key: string; params: string[] }
 /** Builds the template + params only if the database confirms the event really happened. */
 async function plan(db: Db, event: string, orderId: string, version: string | undefined, name: string): Promise<Plan | null> {
   const { data: o } = await db.from("orders")
-    .select("id, status, confirmed_at, payment_status, additional_charges, delivery_charges, delivery_payment_status, delivered_at")
+    .select("id, status, confirmed_at, payment_status, payment_verification, paid_amount_pkr, additional_charges, delivery_charges, delivery_payment_status, delivered_at")
     .eq("id", orderId).maybeSingle();
   if (!o) return null;
   const no = orderId.slice(0, 8);
   const goods = async () => (await itemsTotal(db, orderId)) + num(o.additional_charges);
 
+  // Shared loader for the review-finalized events: returns null until every
+  // item has a final (non-pending) decision recorded in the database.
+  const reviewedItems = async () => {
+    const { data: items } = await db.from("order_items")
+      .select("item_type, item_data, approval_status, manager_feedback")
+      .eq("order_id", orderId);
+    const all = items ?? [];
+    if (!all.length) return null;
+    if (all.some((i: { approval_status: string | null }) => !i.approval_status || i.approval_status === "pending")) return null;
+    const approved = all.filter((i: { approval_status: string }) => i.approval_status === "approved");
+    const rejected = all.filter((i: { approval_status: string }) => i.approval_status === "rejected");
+    const reasons = rejected
+      .map((i: { manager_feedback: string | null }) => (i.manager_feedback || "").trim())
+      .filter(Boolean)
+      .join(" | ");
+    return { approved, rejected, reasons };
+  };
+
   switch (event) {
+    case "items_reviewed": {
+      const r = await reviewedItems();
+      if (!r) return null;
+      return {
+        template: "tabedaar_items_reviewed",
+        key: `${orderId}:items_reviewed:${version || "v1"}`,
+        params: [
+          name, no,
+          clean(r.approved.length ? summarize(r.approved) : "None", 400),
+          clean(r.rejected.length ? summarize(r.rejected) : "None", 400),
+          clean(r.rejected.length ? r.reasons || "See order details" : "Not applicable", 400),
+        ],
+      };
+    }
+    case "payment_required_after_review": {
+      const r = await reviewedItems();
+      if (!r || !r.approved.length) return null; // nothing payable -> review message only
+      const payable = r.approved.reduce(
+        (s: number, i: { item_data: Record<string, unknown> }) => s + priceOf(i.item_data) * qtyOf(i.item_data),
+        0,
+      ) + num(o.additional_charges);
+      if (payable <= 0) return null;
+      return {
+        template: "tabedaar_payment_required_after_review",
+        key: `${orderId}:payment_required_after_review:${version || "v1"}`,
+        params: [
+          name, no,
+          clean(summarize(r.approved), 400),
+          clean(r.rejected.length ? summarize(r.rejected) : "None", 400),
+          rs(payable),
+        ],
+      };
+    }
     case "order_confirmed":
       if (!o.confirmed_at) return null;
       return { template: "tabedaar_payment_pending", key: `${orderId}:payment_pending:order`, params: [name, no, rs(await goods()), "Order payment"] };
