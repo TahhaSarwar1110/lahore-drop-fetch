@@ -9,15 +9,16 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { resolveLoginEmail } from "@/utils/phoneAuth";
 import logo from "@/assets/tabedaar-logo.png";
 
 const loginSchema = z.object({
-  email: z.string().trim().email("Invalid email address"),
+  identifier: z.string().trim().min(3, "Enter your mobile number or email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -57,10 +58,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const validatedData = loginSchema.parse({ email, password });
+      const validatedData = loginSchema.parse({ identifier, password });
 
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: validatedData.email,
+        email: resolveLoginEmail(validatedData.identifier),
         password: validatedData.password,
       });
 
@@ -69,7 +70,7 @@ const Login = () => {
         toast({
           title: "Login Failed",
           description: error.message === "Invalid login credentials" 
-            ? "Invalid email or password" 
+            ? "Invalid mobile number or password" 
             : error.message,
           variant: "destructive",
         });
@@ -177,13 +178,13 @@ const Login = () => {
           <CardContent className="px-5 pb-6">
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email" className="mobile-label">Email</Label>
+                <Label htmlFor="identifier" className="mobile-label">Mobile Number or Email</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="identifier"
+                  type="text"
+                  placeholder="e.g. 03001234567"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
                   className="mobile-input"
                 />
@@ -194,7 +195,7 @@ const Login = () => {
                   <Label htmlFor="password" className="mobile-label">Password</Label>
                   <button
                     type="button"
-                    onClick={() => { setForgotEmail(email); setForgotOpen(true); }}
+                    onClick={() => { setForgotEmail(identifier.includes("@") ? identifier : ""); setForgotOpen(true); }}
                     className="text-sm text-primary font-medium hover:underline"
                   >
                     Forgot password?

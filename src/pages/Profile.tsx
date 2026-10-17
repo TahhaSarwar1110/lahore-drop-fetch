@@ -4,6 +4,7 @@ import { ArrowLeft, User, Mail, Phone, MapPin, Lock, ShieldCheck } from "lucide-
 import { z } from "zod";
 import { toast } from "sonner";
 import { Header } from "@/components/Header";
+import { isSyntheticEmail } from "@/utils/phoneAuth";
 import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -149,11 +150,13 @@ const Profile = () => {
                   <Label htmlFor="fullName">Full name</Label>
                   <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={100} />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" /> Email</Label>
-                  <Input id="email" value={email} disabled />
-                  <p className="text-xs text-muted-foreground">Contact support to change your email address.</p>
-                </div>
+                {!isSyntheticEmail(email) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" /> Email</Label>
+                    <Input id="email" value={email} disabled />
+                    <p className="text-xs text-muted-foreground">Contact support to change your email address.</p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" /> Phone</Label>
                   <Input id="phone" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="03001234567" maxLength={16} />
