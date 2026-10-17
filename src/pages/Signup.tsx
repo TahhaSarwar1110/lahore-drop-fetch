@@ -213,7 +213,7 @@ const Signup = () => {
                   autoComplete="email"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Add an email to receive order updates and password-reset links.
+                  Add an email to receive order updates and password-reset support.
                 </p>
               </div>
 

@@ -175,7 +175,7 @@ const Profile = () => {
                       placeholder="you@example.com"
                       maxLength={254}
                     />
-                    <p className="text-xs text-muted-foreground">Add an email to receive order updates and password-reset links.</p>
+                    <p className="text-xs text-muted-foreground">Add an email to receive order updates and password-reset support.</p>
                   </div>
                 )}
                 <div className="space-y-2">
