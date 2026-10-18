@@ -419,19 +419,12 @@ const AssignRider = () => {
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button loading={loading} 
                   onClick={handleSubmit} 
                   disabled={loading || riders.length === 0 || !selectedRider || hasRejectedItems}
                   size="lg"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Assigning...
-                    </>
-                  ) : (
-                    "Assign Order"
-                  )}
+                  Assign Order
                 </Button>
               </div>
             </CardContent>

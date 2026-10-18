@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Loader2 } from "lucide-react";
+import { screenLoading } from "@/lib/screenLoading";
 
 import { cn } from "@/lib/utils";
 
@@ -45,6 +45,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const timer = React.useRef<ReturnType<typeof setTimeout>>();
     React.useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
     const busy = loading || pending || pressed;
+    React.useEffect(() => {
+      if (!busy) return;
+      return screenLoading.start();
+    }, [busy]);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
       if (loading || pending || disabled) { event.preventDefault(); return; }
       setPressed(true);
@@ -57,15 +61,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         void Promise.resolve(result).finally(() => setPending(false)).catch(console.error);
       }
     };
-    const content = (value: React.ReactNode) => <>
-      <span className={cn("inline-flex items-center justify-center gap-2", busy && "invisible")}>{value}</span>
-      {busy && <span className="absolute inset-0 flex items-center justify-center" aria-hidden="true"><Loader2 className="animate-spin motion-reduce:animate-none" /></span>}
-    </>;
     const Comp = asChild ? Slot : "button";
-    const renderedChildren = asChild && React.isValidElement<{ children?: React.ReactNode }>(children)
-      ? React.cloneElement(children, {}, content(children.props.children))
-      : content(children);
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} disabled={disabled || loading || pending} aria-busy={busy} onClick={handleClick}>{renderedChildren}</Comp>;
+    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} disabled={disabled || loading || pending} aria-busy={busy} onClick={handleClick}>{children}</Comp>;
   },
 );
 Button.displayName = "Button";

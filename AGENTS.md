@@ -1,7 +1,7 @@
 # Project architecture
 
 - Customer home queries only the signed-in customer's orders and separates active from closed history; public and staff home experiences stay unchanged.
-- Shared Button provides stable-size click feedback, Promise-aware loading and explicit loading states; do not infer pending work from disabled permissions.
+- Shared Button reports click feedback, Promise-aware loading and explicit loading states to the singleton ScreenLoader via reference-counted tokens; keep labels visible and do not infer pending work from disabled permissions, so concurrent actions share one screen overlay without premature dismissal.
 - Customer-declared payment amounts and proof history are saved atomically through submit_customer_payment; summaries may include pending declarations, but operational gates always use manager-verified funds.
 
 - Reconciled order readiness uses payment_verification and paid_amount_pkr against the order total; payment_status is a legacy fallback only, so stale upload flags cannot block verified orders.

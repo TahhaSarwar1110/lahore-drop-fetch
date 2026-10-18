@@ -369,18 +369,11 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
           >
             Cancel
           </Button>
-          <Button 
+          <Button loading={loading} 
             onClick={handleSubmit} 
             disabled={loading || riders.length === 0 || !selectedRider}
           >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Assigning...
-              </>
-            ) : (
-              "Assign Order"
-            )}
+            Assign Order
           </Button>
         </DialogFooter>
       </DialogContent>

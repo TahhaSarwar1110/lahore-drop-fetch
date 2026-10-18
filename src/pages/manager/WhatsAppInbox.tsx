@@ -350,8 +350,8 @@ export function InboxPanel() {
                           if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
                         }}
                       />
-                      <Button onClick={send} disabled={sending || !text.trim()} aria-label="Send">
-                        {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      <Button loading={sending} onClick={send} disabled={sending || !text.trim()} aria-label="Send">
+                        <Send className="h-4 w-4" />
                       </Button>
                     </div>
                   ) : (
@@ -373,8 +373,8 @@ export function InboxPanel() {
                           onChange={(e) => setTemplateParams((p) => p.map((v, j) => (j === i ? e.target.value : v)))}
                         />
                       ))}
-                      <Button onClick={send} disabled={sending} className="w-full">
-                        {sending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                      <Button loading={sending} onClick={send} disabled={sending} className="w-full">
+                        <Send className="mr-2 h-4 w-4" />
                         Send template
                       </Button>
                     </div>

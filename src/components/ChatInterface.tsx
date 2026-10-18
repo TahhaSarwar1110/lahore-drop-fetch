@@ -228,17 +228,13 @@ export const ChatInterface = () => {
               disabled={isLoading}
               className="flex-1 rounded-full"
             />
-            <Button
+            <Button loading={isLoading}
               onClick={() => sendMessage()}
               disabled={isLoading || !input.trim()}
               size="icon"
               className="rounded-full h-10 w-10 shadow-md"
             >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
+              <Send className="h-4 w-4" />
             </Button>
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground px-1">

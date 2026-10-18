@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 
@@ -113,16 +113,12 @@ export const AttachmentUpload = ({ orderId, onUploadComplete }: AttachmentUpload
 
       {/* Upload button */}
       {file && (
-        <Button
+        <Button loading={uploading}
           onClick={handleUpload}
           disabled={uploading}
           className="w-full"
         >
-          {uploading ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <Upload className="h-4 w-4 mr-2" />
-          )}
+          <Upload className="h-4 w-4 mr-2" />
           Upload
         </Button>
       )}
