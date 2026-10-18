@@ -66,7 +66,7 @@ export function CustomerHome({ userId }: { userId: string }) {
           <Badge variant={order.status === "Cancelled" ? "destructive" : "secondary"} className="whitespace-normal text-right">{order.status}</Badge>
         </div>
         <div className="flex items-center gap-3">
-          {image ? <StorageImage bucket="order-attachments" src={image} alt="Order item" className="h-16 w-16 shrink-0 rounded-md object-cover border" /> : <div className="h-16 w-16 shrink-0 rounded-md bg-muted flex items-center justify-center"><Package className="h-7 w-7 text-primary" /></div>}
+          {image ? <StorageImage bucket="order-images" src={image} alt="Order item" className="h-16 w-16 shrink-0 rounded-md object-cover border" /> : <div className="h-16 w-16 shrink-0 rounded-md bg-muted flex items-center justify-center"><Package className="h-7 w-7 text-primary" /></div>}
           <div className="min-w-0"><p className="font-medium text-sm truncate">{items.map(item => item.item_type).join(", ") || "Order items"}</p><p className="text-xs text-muted-foreground mt-1">{items.length} {items.length === 1 ? "item" : "items"}</p></div>
         </div>
         <p className="flex gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4 shrink-0 mt-0.5" /><span className="line-clamp-2 break-words">{order.delivery_address}</span></p>
