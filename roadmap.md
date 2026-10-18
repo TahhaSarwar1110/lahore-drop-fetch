@@ -18,3 +18,5 @@
 - [x] Replace button spinner feedback with a shared screen-wide processing loader
 - [x] Replace customer home with active and recent order grids
 - [x] Require customer payment amount with proof and update summary without bypassing verification
+- [ ] Raise Android minimum SDK to 24 for Play automatic protection and verify the release setting
+- [ ] Prepare Play Store screenshots, icon, feature graphic, listing text and publication checklist
