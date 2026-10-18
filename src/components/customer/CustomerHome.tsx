@@ -71,6 +71,7 @@ export function CustomerHome({ userId }: { userId: string }) {
         </div>
         <p className="flex gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4 shrink-0 mt-0.5" /><span className="line-clamp-2 break-words">{order.delivery_address}</span></p>
         <div className="border-t pt-3 space-y-2 text-sm"><div className="flex justify-between gap-2"><span className="text-muted-foreground">Order total</span><span className="font-semibold">Rs. {total.toLocaleString()}</span></div><div className="flex justify-between gap-2"><span className="text-muted-foreground">Outstanding</span><span>Rs. {payment.outstanding.toLocaleString()}</span></div></div>
+        {payment.pendingAmount > 0 && <p className="text-xs text-muted-foreground">Rs. {payment.pendingAmount.toLocaleString()} awaiting verification</p>}
         <Button variant="outline" className="w-full" onClick={() => navigate(`/order-details?orderId=${order.id}`)}>View Order<ArrowRight className="h-4 w-4" /></Button>
       </CardContent>
     </Card>;
