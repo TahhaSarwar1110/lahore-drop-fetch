@@ -388,7 +388,7 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
           </div>
           <DialogFooter>
             <Button loading={loading} type="submit" disabled={loading}>
-              "Create User"
+              Create User
             </Button>
           </DialogFooter>
         </form>

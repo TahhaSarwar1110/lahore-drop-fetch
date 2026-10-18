@@ -424,7 +424,7 @@ const AssignRider = () => {
                   disabled={loading || riders.length === 0 || !selectedRider || hasRejectedItems}
                   size="lg"
                 >
-                  "Assign Order"
+                  Assign Order
                 </Button>
               </div>
             </CardContent>

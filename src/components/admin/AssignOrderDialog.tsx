@@ -373,7 +373,7 @@ export const AssignOrderDialog = ({ orderId, currentRiderId, onAssigned, hasReje
             onClick={handleSubmit} 
             disabled={loading || riders.length === 0 || !selectedRider}
           >
-            "Assign Order"
+            Assign Order
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -73,7 +73,7 @@ export const EditUserRoleDialog = ({ userId, currentRoles, userName, onRoleUpdat
           </div>
           <DialogFooter>
             <Button loading={loading} type="submit" disabled={loading}>
-              "Update Role"
+              Update Role
             </Button>
           </DialogFooter>
         </form>
