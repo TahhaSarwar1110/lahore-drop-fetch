@@ -9,6 +9,8 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   userRoles: string[];
+  /** True once the role lookup has finished (or there is no session), so callers can branch on roles without flashing the default view. */
+  isRolesResolved: boolean;
 }
 
 export const useAuth = () => {
@@ -18,6 +20,7 @@ export const useAuth = () => {
     isAuthenticated: false,
     isLoading: true,
     userRoles: [],
+    isRolesResolved: false,
   });
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export const useAuth = () => {
             fetchUserRoles(session.user.id);
           }, 0);
         } else {
-          setAuthState(prev => ({ ...prev, userRoles: [] }));
+          setAuthState(prev => ({ ...prev, userRoles: [], isRolesResolved: true }));
         }
       }
     );
@@ -51,6 +54,7 @@ export const useAuth = () => {
         session: session,
         isAuthenticated: !!session,
         isLoading: false,
+        isRolesResolved: !session,
       }));
 
       if (session?.user) {
@@ -71,9 +75,10 @@ export const useAuth = () => {
       setAuthState(prev => ({
         ...prev,
         userRoles: roles.map(r => r.role),
+        isRolesResolved: true,
       }));
     } else {
-      setAuthState(prev => ({ ...prev, userRoles: [] }));
+      setAuthState(prev => ({ ...prev, userRoles: [], isRolesResolved: true }));
     }
   };
 
@@ -88,6 +93,7 @@ export const useAuth = () => {
         isAuthenticated: false,
         isLoading: false,
         userRoles: [],
+        isRolesResolved: true,
       });
     }
     return { error };
