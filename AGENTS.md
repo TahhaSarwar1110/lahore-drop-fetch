@@ -7,6 +7,7 @@
 - Reconciled order readiness uses payment_verification and paid_amount_pkr against the order total; payment_status is a legacy fallback only, so stale upload flags cannot block verified orders.
 
 - Keep iOS app icons in the native AppIcon asset catalog and Android icons in density-specific launcher resources, derived from the approved app icon; native launchers require platform-specific sizes and adaptive foreground safe areas.
+- Set Android minimum SDK in android/variables.gradle and inherit it in app/build.gradle; the release regression test protects Play automatic-protection compatibility without editing generated Capacitor files.
 - Keep legal and data-deletion information on public pages linked from the shared footer so customers can access them without signing in; deletion requests use the support contact unless an actual deletion workflow is implemented.
 - Admin user viewing, editing and deletion go through the manage-users function with server-verified admin authorization; saves use a service-role-only transactional RPC and deletion is blocked for self or linked operational history to prevent accidental loss of orders.
 - Admin account creation replaces the signup default through a service-role-only transactional role RPC after server-side admin authorization; direct signup relies on the existing customer trigger, never client-side role inserts.
