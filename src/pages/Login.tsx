@@ -193,13 +193,13 @@ const Login = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="mobile-label">Password</Label>
-                  <button
+                  <Button variant="link"
                     type="button"
                     onClick={() => { setForgotEmail(identifier.includes("@") ? identifier : ""); setForgotOpen(true); }}
-                    className="text-sm text-primary font-medium hover:underline"
+                    className="text-sm text-primary font-medium h-auto p-0"
                   >
                     Forgot password?
-                  </button>
+                  </Button>
                 </div>
                 <PasswordInput
                   id="password"

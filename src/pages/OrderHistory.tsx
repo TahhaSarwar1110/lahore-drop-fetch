@@ -203,12 +203,12 @@ const OrderHistory = () => {
                     className="pl-9 pr-9"
                   />
                   {searchQuery && (
-                    <button
+                    <Button variant="ghost" size="icon" aria-label="Clear search"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </Button>
                   )}
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>

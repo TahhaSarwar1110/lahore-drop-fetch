@@ -390,9 +390,9 @@ const OrderDetails = () => {
                       riderName={order.order_assignments.profiles.full_name}
                       riderPhone={order.order_assignments.profiles.phone}
                     >
-                      <button className="font-semibold text-primary hover:underline cursor-pointer">
+                      <Button variant="link" className="font-semibold h-auto p-0">
                         {order.order_assignments.profiles.full_name}
-                      </button>
+                      </Button>
                     </RiderContactDialog>
                     <p className="text-xs text-muted-foreground">Click name for contact details</p>
                   </div>
