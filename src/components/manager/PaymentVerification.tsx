@@ -44,16 +44,16 @@ export function PaymentVerification(props: PaymentVerificationProps) {
   const [amount, setAmount] = useState<string>("");
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
-  const [proofs, setProofs] = useState<{ id: string; file_url: string; file_name: string; created_at: string }[]>([]);
+  const [proofs, setProofs] = useState<{ id: string; file_url: string; file_name: string; created_at: string; submitted_amount_pkr?: number | null }[]>([]);
 
   const loadProofs = useCallback(async () => {
     const { data } = await supabase
       .from("order_payment_proofs")
-      .select("id, file_url, file_name, created_at")
+      .select("id, file_url, file_name, created_at, submitted_amount_pkr")
       .eq("order_id", orderId)
       .order("created_at", { ascending: true });
     setProofs(data ?? []);
-  }, [orderId]);
+  }, [orderId, paymentSubmittedAt]);
 
   useEffect(() => {
     void loadProofs();
@@ -182,6 +182,7 @@ export function PaymentVerification(props: PaymentVerificationProps) {
                     className="h-32 w-full object-cover rounded-md border"
                   />
                   <p className="text-xs text-muted-foreground">
+                    {proof.submitted_amount_pkr ? `Customer submitted: Rs. ${proof.submitted_amount_pkr.toLocaleString()} · ` : ""}
                     {index === 0 ? "First payment" : `Top-up ${index}`} · {new Date(proof.created_at).toLocaleString()}
                   </p>
                   <Button type="button" variant="outline" size="sm" onClick={() => void openAttachment(proof.file_url, "payment-proofs")}>
@@ -224,13 +225,13 @@ export function PaymentVerification(props: PaymentVerificationProps) {
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => submit(true)} disabled={saving} className="flex-1">
+              <Button onClick={() => submit(true)} disabled={saving} loading={saving} className="flex-1">
                 <ShieldCheck className="h-4 w-4 mr-1" />
                 {settled || (expenseVerified && Number.isFinite(parsedAmount) && paidAmount + parsedAmount >= (shoppingExpense as number))
                   ? "Verify & Mark Settlement Done"
                   : "Verify Payment"}
               </Button>
-              <Button variant="destructive" onClick={() => submit(false)} disabled={saving} className="flex-1">
+              <Button variant="destructive" onClick={() => submit(false)} disabled={saving} loading={saving} className="flex-1">
                 <ShieldX className="h-4 w-4 mr-1" />
                 Reject
               </Button>

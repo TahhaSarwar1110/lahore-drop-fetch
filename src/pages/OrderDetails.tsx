@@ -53,6 +53,7 @@ interface Order {
   additional_charges: number | null;
   order_total_pkr: number | null;
   paid_amount_pkr: number;
+  customer_submitted_amount_pkr: number;
   payment_verification: string;
   payment_rejection_reason: string | null;
   shopping_expense_pkr: number | null;
@@ -120,6 +121,7 @@ const OrderDetails = () => {
         additional_charges,
         order_total_pkr,
         paid_amount_pkr,
+        customer_submitted_amount_pkr,
         payment_verification,
         payment_rejection_reason,
         shopping_expense_pkr,
@@ -363,6 +365,7 @@ const OrderDetails = () => {
               <PaymentSummary
                 orderTotal={order.order_total_pkr}
                 paidAmount={order.paid_amount_pkr ?? 0}
+                submittedAmount={order.customer_submitted_amount_pkr ?? 0}
                 paymentVerification={order.payment_verification || "pending"}
                 paymentRejectionReason={order.payment_rejection_reason}
                 shoppingExpense={order.shopping_expense_pkr}
@@ -405,6 +408,7 @@ const OrderDetails = () => {
                 orderId={order.id}
                 paymentStatus={order.payment_status || "pending"}
                 paymentProofUrl={order.payment_proof_url}
+                submittedAmount={order.customer_submitted_amount_pkr ?? 0}
                 paymentSubmittedAt={order.payment_submitted_at}
                 paymentConfirmedAt={order.payment_confirmed_at}
                 amountDue={order.expense_status === "verified" && (order.customer_balance_pkr ?? 0) < 0 ? -(order.customer_balance_pkr as number) : 0}

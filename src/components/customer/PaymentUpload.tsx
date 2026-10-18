@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { isValidCustomerPaymentAmount } from "@/utils/orderFinancials";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Upload, CheckCircle, Clock, CreditCard, Image } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +20,7 @@ interface PaymentUploadProps {
   paymentSubmittedAt?: string | null;
   paymentConfirmedAt?: string | null;
   amountDue?: number;
+  submittedAmount?: number;
   onUpdate: () => void;
 }
 
@@ -28,11 +31,13 @@ export const PaymentUpload = ({
   paymentSubmittedAt,
   paymentConfirmedAt,
   amountDue,
+  submittedAmount = 0,
   onUpdate,
 }: PaymentUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [amount, setAmount] = useState("");
 
   const handleFiles = (files: File[]) => {
     const file = files[0];
@@ -45,6 +50,10 @@ export const PaymentUpload = ({
   const handleUploadPaymentProof = async () => {
     if (!selectedFile) {
       toast.error("Please select a payment screenshot");
+      return;
+    }
+    if (!isValidCustomerPaymentAmount(amount)) {
+      toast.error("Enter the amount paid in whole Pakistani rupees");
       return;
     }
 
@@ -62,38 +71,20 @@ export const PaymentUpload = ({
 
       if (uploadError) throw uploadError;
 
-      // Keep a history row so the manager can see every payment screenshot
-      // (first payment and any later top-ups) side by side.
-      const { error: proofError } = await supabase
-        .from("order_payment_proofs")
-        .insert({
-          order_id: orderId,
-          uploaded_by: user.id,
-          file_url: filePath,
-          file_name: selectedFile.name,
-        });
-      if (proofError) throw proofError;
-
-      const { error: updateError } = await supabase
-        .from("orders")
-        .update({
-          payment_proof_url: filePath,
-          payment_proof_name: selectedFile.name,
-          payment_status: "submitted",
-          payment_submitted_at: new Date().toISOString(),
-        })
-        .eq("id", orderId);
-
-      if (updateError) throw updateError;
+      const { error: submissionError } = await supabase.rpc("submit_customer_payment", {
+        p_order_id: orderId, p_amount: Number(amount), p_file_path: filePath, p_file_name: selectedFile.name,
+      });
+      if (submissionError) throw submissionError;
+      onUpdate();
 
       // Server resolves manager/admin recipients, de-duplicates and fans out to push
-      await triggerNotification({ event_type: "payment_submitted", order_id: orderId });
+      void triggerNotification({ event_type: "payment_submitted", order_id: orderId });
 
 
       toast.success("Payment proof uploaded successfully!");
       setSelectedFile(null);
       setPreviewUrl(null);
-      onUpdate();
+      setAmount("");
     } catch (error) {
       console.error("Error uploading payment proof:", error);
       toast.error("Failed to upload payment proof");
@@ -127,7 +118,7 @@ export const PaymentUpload = ({
       <CardContent className="space-y-4">
         <BankAccountDetails />
 
-        {paymentStatus === "pending" && (
+        {(paymentStatus === "pending" || paymentStatus === "rejected") && (
           <div className="space-y-3">
             {amountDue && amountDue > 0 ? (
               <div className="bg-destructive/10 border border-destructive/30 p-3 rounded-lg">
@@ -145,6 +136,10 @@ export const PaymentUpload = ({
             )}
             
             <div className="space-y-2">
+              <Label htmlFor="customer-paid-amount">Amount Paid (PKR)</Label>
+              <Input id="customer-paid-amount" inputMode="numeric" type="number" min="1" step="1" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="Enter this payment amount" required />
+            </div>
+            <div className="space-y-2">
               <Label>Payment Screenshot</Label>
               <ImageSourcePicker onFiles={handleFiles} cameraLabel="Take Photo" galleryLabel="Choose from Gallery" />
             </div>
@@ -161,7 +156,8 @@ export const PaymentUpload = ({
 
             <Button
               onClick={handleUploadPaymentProof}
-              disabled={uploading || !selectedFile}
+              disabled={uploading || !selectedFile || !isValidCustomerPaymentAmount(amount)}
+              loading={uploading}
               className="w-full"
             >
               {uploading ? (
@@ -176,6 +172,7 @@ export const PaymentUpload = ({
 
         {paymentStatus === "submitted" && (
           <div className="space-y-3">
+            {submittedAmount > 0 && <p className="text-sm font-medium">Submitted amount: Rs. {submittedAmount.toLocaleString()}</p>}
             <div className="bg-yellow-50 dark:bg-yellow-950 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
                 Your payment proof has been submitted and is awaiting confirmation from our team.

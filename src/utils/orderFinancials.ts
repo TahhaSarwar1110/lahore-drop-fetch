@@ -8,6 +8,16 @@ export type RefundStatus = "none" | "pending" | "initiated" | "completed" | "fai
 export const getOutstandingAmount = (orderTotal: number, paidAmount: number): number =>
   Math.max(0, orderTotal - paidAmount);
 
+/** Declared funds affect the customer display only; never operational readiness. */
+export const getCustomerPaymentDisplay = (target: number, verified: number, submitted: number, verification: string) => {
+  const pendingAmount = verification === "pending" ? Math.max(0, submitted) : 0;
+  const amountPaid = verified + pendingAmount;
+  return { amountPaid, pendingAmount, outstanding: getOutstandingAmount(target, amountPaid) };
+};
+
+export const isValidCustomerPaymentAmount = (value: string): boolean =>
+  /^\d+$/.test(value.trim()) && Number.isSafeInteger(Number(value)) && Number(value) > 0 && Number(value) <= 2147483647;
+
 /** An order may only be approved when verified payment covers the order total. */
 export const canApproveOrder = (
   orderTotal: number,
