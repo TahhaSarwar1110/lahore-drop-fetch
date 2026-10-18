@@ -1,5 +1,9 @@
 # Project architecture
 
+- Customer home queries only the signed-in customer's orders and separates active from closed history; public and staff home experiences stay unchanged.
+- Shared Button provides stable-size click feedback, Promise-aware loading and explicit loading states; do not infer pending work from disabled permissions.
+- Customer-declared payment amounts and proof history are saved atomically through submit_customer_payment; summaries may include pending declarations, but operational gates always use manager-verified funds.
+
 - Reconciled order readiness uses payment_verification and paid_amount_pkr against the order total; payment_status is a legacy fallback only, so stale upload flags cannot block verified orders.
 
 - Keep iOS app icons in the native AppIcon asset catalog and Android icons in density-specific launcher resources, derived from the approved app icon; native launchers require platform-specific sizes and adaptive foreground safe areas.

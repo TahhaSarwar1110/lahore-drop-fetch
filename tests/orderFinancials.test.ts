@@ -9,9 +9,24 @@ import {
   getAmountOwed,
   canRiderDeliver,
   hasVerifiedOrderPayment,
+  getCustomerPaymentDisplay,
+  isValidCustomerPaymentAmount,
 } from "../src/utils/orderFinancials";
 
 describe("order financial reconciliation rules", () => {
+  it("updates customer amount paid and outstanding immediately without enabling unverified orders", () => {
+    expect(getCustomerPaymentDisplay(7299, 0, 7299, "pending")).toEqual({ amountPaid: 7299, pendingAmount: 7299, outstanding: 0 });
+    expect(hasVerifiedOrderPayment(7299, 0, "pending", "submitted")).toBe(false);
+  });
+  it("adds a pending top-up once and excludes it after review", () => {
+    expect(getCustomerPaymentDisplay(18000, 16000, 2000, "pending").outstanding).toBe(0);
+    expect(getCustomerPaymentDisplay(18000, 18000, 2000, "verified").amountPaid).toBe(18000);
+    expect(getCustomerPaymentDisplay(18000, 16000, 2000, "rejected").outstanding).toBe(2000);
+  });
+  it("requires a positive whole-rupee customer payment", () => {
+    expect(isValidCustomerPaymentAmount("7299")).toBe(true);
+    for (const value of ["", "0", "-1", "1.5", "abc", "2147483648"]) expect(isValidCustomerPaymentAmount(value)).toBe(false);
+  });
   it("shows zero outstanding for the reported Rs. 7,299 verified payment", () => {
     expect(getOutstandingAmount(7299, 7299)).toBe(0);
   });

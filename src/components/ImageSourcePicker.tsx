@@ -100,7 +100,7 @@ export function ImageSourcePicker({
           variant="outline"
           className="flex-1"
           disabled={disabled}
-          onClick={() => (isNative ? void pickNative(CameraSource.Camera) : cameraInputRef.current?.click())}
+          onClick={() => (isNative ? pickNative(CameraSource.Camera) : cameraInputRef.current?.click())}
         >
           <Camera className="h-4 w-4 mr-2" />
           {cameraLabel}
@@ -110,7 +110,7 @@ export function ImageSourcePicker({
           variant="outline"
           className="flex-1"
           disabled={disabled}
-          onClick={() => (isNative ? void pickNative(CameraSource.Photos) : galleryInputRef.current?.click())}
+          onClick={() => (isNative ? pickNative(CameraSource.Photos) : galleryInputRef.current?.click())}
         >
           <ImageIcon className="h-4 w-4 mr-2" />
           {galleryLabel}

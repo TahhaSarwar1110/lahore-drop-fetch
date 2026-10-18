@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Wallet } from "lucide-react";
 import {
-  getOutstandingAmount,
+  getCustomerPaymentDisplay,
   getRefundDue,
   hasUncoveredExpense,
   PAYMENT_VERIFICATION_LABELS,
@@ -19,6 +19,7 @@ interface PaymentSummaryProps {
   expenseStatus: string | null;
   customerBalance: number | null;
   refundStatus: string;
+  submittedAmount?: number;
 }
 
 export const PaymentSummary = ({
@@ -30,10 +31,13 @@ export const PaymentSummary = ({
   expenseStatus,
   customerBalance,
   refundStatus,
+  submittedAmount = 0,
 }: PaymentSummaryProps) => {
   if (orderTotal === null || orderTotal === undefined) return null;
 
-  const outstanding = getOutstandingAmount(orderTotal, paidAmount);
+  const target = expenseStatus === "verified" && shoppingExpense !== null ? shoppingExpense : orderTotal;
+  const display = getCustomerPaymentDisplay(target, paidAmount, submittedAmount, paymentVerification);
+  const outstanding = display.outstanding;
   const refundDue = customerBalance !== null ? getRefundDue(customerBalance) : 0;
   const uncovered = customerBalance !== null && hasUncoveredExpense(customerBalance);
 
@@ -52,8 +56,13 @@ export const PaymentSummary = ({
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Amount Paid</span>
-          <span className="font-medium">Rs. {paidAmount.toLocaleString()}</span>
+          <span className="font-medium">Rs. {display.amountPaid.toLocaleString()}</span>
         </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Total Outstanding</span>
+          <span className="font-medium">Rs. {outstanding.toLocaleString()}</span>
+        </div>
+        {display.pendingAmount > 0 && <p className="text-xs text-muted-foreground">Rs. {display.pendingAmount.toLocaleString()} awaiting verification · Rs. {paidAmount.toLocaleString()} verified. Delivery remains subject to manager verification.</p>}
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Payment Status</span>
           <Badge
@@ -75,7 +84,7 @@ export const PaymentSummary = ({
               Outstanding amount: Rs. {outstanding.toLocaleString()}
             </p>
             <p className="text-muted-foreground text-xs mt-1">
-              Please pay the remaining amount so your order can be approved.
+              Please pay the remaining amount. Payments must be verified by our team.
             </p>
           </div>
         )}
@@ -110,7 +119,7 @@ export const PaymentSummary = ({
 
         {uncovered && (
           <p className="text-xs text-muted-foreground border-t pt-3">
-            The actual shopping cost exceeded the amount paid. Our team will contact you about the difference.
+            {display.pendingAmount > 0 ? "Your additional payment is awaiting manager verification before delivery." : "The actual shopping cost exceeded the verified amount paid. Please pay the difference before delivery."}
           </p>
         )}
       </CardContent>

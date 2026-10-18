@@ -628,6 +628,7 @@ const PlaceOrder = () => {
                     className="w-full mobile-button h-14 text-base bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-glow-accent"
                     size="lg"
                     disabled={loading || orderPlaced}
+                    loading={loading}
                   >
                     {loading ? "Placing Order..." : "Submit Order"}
                   </Button>

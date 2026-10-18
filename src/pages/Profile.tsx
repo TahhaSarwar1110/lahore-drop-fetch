@@ -196,7 +196,7 @@ const Profile = () => {
                     {address || "No address yet — it will appear here after your first order."}
                   </p>
                 </div>
-                <Button type="submit" disabled={savingProfile} className="w-full sm:w-auto">
+                <Button type="submit" disabled={savingProfile} loading={savingProfile} className="w-full sm:w-auto">
                   {savingProfile ? "Saving…" : "Save changes"}
                 </Button>
               </form>
@@ -220,7 +220,7 @@ const Profile = () => {
                   <Label htmlFor="confirm">Confirm new password</Label>
                   <PasswordInput id="confirm" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" />
                 </div>
-                <Button type="submit" disabled={savingPassword} className="w-full sm:w-auto">
+                <Button type="submit" disabled={savingPassword} loading={savingPassword} className="w-full sm:w-auto">
                   <ShieldCheck className="h-4 w-4 mr-2" />
                   {savingPassword ? "Updating…" : "Update password"}
                 </Button>

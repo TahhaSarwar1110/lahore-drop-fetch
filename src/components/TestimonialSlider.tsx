@@ -111,13 +111,14 @@ export const TestimonialSlider = () => {
         {/* Dots */}
         <div className="flex gap-2">
           {testimonials.map((_, index) => (
-            <button
+            <Button variant="ghost"
               key={index}
               onClick={() => {
                 setIsAutoPlaying(false);
                 setCurrentIndex(index);
               }}
-              className={`h-2 rounded-full transition-all duration-300 ${
+              aria-label={`Show testimonial ${index + 1}`}
+              className={`h-2 min-h-0 p-0 rounded-full transition-all duration-300 [&_svg]:size-2 ${
                 index === currentIndex
                   ? "w-8 bg-primary"
                   : "w-2 bg-border hover:bg-primary/50"

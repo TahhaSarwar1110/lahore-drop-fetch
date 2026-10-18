@@ -193,13 +193,13 @@ const Login = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="mobile-label">Password</Label>
-                  <button
+                  <Button variant="link"
                     type="button"
                     onClick={() => { setForgotEmail(identifier.includes("@") ? identifier : ""); setForgotOpen(true); }}
-                    className="text-sm text-primary font-medium hover:underline"
+                    className="text-sm text-primary font-medium h-auto p-0"
                   >
                     Forgot password?
-                  </button>
+                  </Button>
                 </div>
                 <PasswordInput
                   id="password"
@@ -211,7 +211,7 @@ const Login = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full mobile-button btn-cta" disabled={loading}>
+              <Button type="submit" className="w-full mobile-button btn-cta" disabled={loading} loading={loading}>
                 {loading ? "Logging in..." : "Login"}
               </Button>
 
@@ -247,7 +247,7 @@ const Login = () => {
                 className="mobile-input"
               />
             </div>
-            <Button type="submit" className="w-full mobile-button btn-cta" disabled={forgotLoading}>
+            <Button type="submit" className="w-full mobile-button btn-cta" disabled={forgotLoading} loading={forgotLoading}>
               {forgotLoading ? "Sending…" : "Send Reset Link"}
             </Button>
           </form>
