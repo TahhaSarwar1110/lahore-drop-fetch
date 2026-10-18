@@ -259,7 +259,7 @@ const Signup = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full mobile-button btn-cta" disabled={loading}>
+              <Button type="submit" className="w-full mobile-button btn-cta" disabled={loading} loading={loading}>
                 {loading ? "Creating Account..." : "Sign Up"}
               </Button>
 

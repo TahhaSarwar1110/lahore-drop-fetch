@@ -211,7 +211,7 @@ const Login = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full mobile-button btn-cta" disabled={loading}>
+              <Button type="submit" className="w-full mobile-button btn-cta" disabled={loading} loading={loading}>
                 {loading ? "Logging in..." : "Login"}
               </Button>
 
@@ -247,7 +247,7 @@ const Login = () => {
                 className="mobile-input"
               />
             </div>
-            <Button type="submit" className="w-full mobile-button btn-cta" disabled={forgotLoading}>
+            <Button type="submit" className="w-full mobile-button btn-cta" disabled={forgotLoading} loading={forgotLoading}>
               {forgotLoading ? "Sending…" : "Send Reset Link"}
             </Button>
           </form>
