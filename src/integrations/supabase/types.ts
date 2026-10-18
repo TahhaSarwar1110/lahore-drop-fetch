@@ -436,6 +436,7 @@ export type Database = {
           file_url: string
           id: string
           order_id: string
+          submitted_amount_pkr: number | null
           uploaded_by: string
         }
         Insert: {
@@ -444,6 +445,7 @@ export type Database = {
           file_url: string
           id?: string
           order_id: string
+          submitted_amount_pkr?: number | null
           uploaded_by: string
         }
         Update: {
@@ -452,6 +454,7 @@ export type Database = {
           file_url?: string
           id?: string
           order_id?: string
+          submitted_amount_pkr?: number | null
           uploaded_by?: string
         }
         Relationships: [
@@ -501,6 +504,7 @@ export type Database = {
           confirmed_by: string | null
           created_at: string | null
           customer_balance_pkr: number | null
+          customer_submitted_amount_pkr: number
           delivered_at: string | null
           delivery_address: string
           delivery_charges: number
@@ -558,6 +562,7 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string | null
           customer_balance_pkr?: number | null
+          customer_submitted_amount_pkr?: number
           delivered_at?: string | null
           delivery_address: string
           delivery_charges?: number
@@ -615,6 +620,7 @@ export type Database = {
           confirmed_by?: string | null
           created_at?: string | null
           customer_balance_pkr?: number | null
+          customer_submitted_amount_pkr?: number
           delivered_at?: string | null
           delivery_address?: string
           delivery_charges?: number
@@ -1101,6 +1107,15 @@ export type Database = {
       rider_assigned_to_order: {
         Args: { _order_id: string; _rider_id: string }
         Returns: boolean
+      }
+      submit_customer_payment: {
+        Args: {
+          p_amount: number
+          p_file_name: string
+          p_file_path: string
+          p_order_id: string
+        }
+        Returns: undefined
       }
       submit_shopping_expense: {
         Args: { p_amount: number; p_notes?: string; p_order_id: string }
