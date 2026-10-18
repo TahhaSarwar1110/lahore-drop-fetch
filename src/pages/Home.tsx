@@ -7,6 +7,7 @@ import {
   CreditCard,
   ShoppingBag as ShoppingBagIcon,
   Truck,
+  Loader2,
   ArrowRight,
   Users,
   Camera,
@@ -38,7 +39,7 @@ import heroBg from "@/assets/tabedar-hero-bg.jpg";
 import { CustomerHome } from "@/components/customer/CustomerHome";
 
 const Home = () => {
-  const { isAuthenticated, isRider, user, userRoles } = useAuth();
+  const { isAuthenticated, isRider, user, userRoles, isRolesResolved } = useAuth();
   const navigate = useNavigate();
 
   const scrollToSection = (id: string) => {
@@ -141,6 +142,17 @@ const Home = () => {
       description: "Get real-time updates and support via WhatsApp",
     },
   ];
+
+  // Signed-in customers go straight to their orders; hold the marketing page
+  // behind a brief loading state until the role lookup finishes, so the
+  // default home never flashes.
+  if (user && !isRolesResolved) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background" role="status" aria-label="Loading">
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (user && userRoles.includes("customer") && !userRoles.some(role => ["admin", "manager", "rider"].includes(role))) {
     return <CustomerHome userId={user.id} />;
