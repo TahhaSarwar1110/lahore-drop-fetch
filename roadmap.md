@@ -20,3 +20,4 @@
 - [x] Require customer payment amount with proof and update summary without bypassing verification
 - [x] Raise Android minimum SDK to 24 for Play automatic protection and verify the release setting
 - [x] Prepare Play Store screenshots, icon, feature graphic, listing text and publication checklist
+- [x] Update feature graphic with transparent uploaded logo and match web/Android/iOS icons
