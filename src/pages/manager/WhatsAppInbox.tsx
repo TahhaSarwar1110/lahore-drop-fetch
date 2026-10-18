@@ -269,10 +269,10 @@ export function InboxPanel() {
             <div className="flex-1 overflow-y-auto">
               {filtered.length === 0 && <p className="p-4 text-sm text-muted-foreground">No conversations yet.</p>}
               {filtered.map((c) => (
-                <button
+                <Button variant="ghost"
                   key={c.id}
                   onClick={() => setSelectedId(c.id)}
-                  className={`flex w-full items-start gap-3 border-b border-border p-3 text-left transition-colors hover:bg-muted ${c.id === selectedId ? "bg-muted" : ""}`}
+                  className={`flex h-auto w-full items-start gap-3 rounded-none border-b border-border p-3 text-left whitespace-normal transition-colors hover:bg-muted [&>span:first-child]:w-full ${c.id === selectedId ? "bg-muted" : ""}`}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
@@ -284,7 +284,7 @@ export function InboxPanel() {
                       {c.unread_count > 0 && <Badge className="shrink-0 bg-secondary text-secondary-foreground">{c.unread_count}</Badge>}
                     </div>
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           </aside>

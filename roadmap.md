@@ -15,6 +15,6 @@
 - [ ] Verify camera/gallery on physical iOS and Android devices — requires restored iOS Xcode project and rebuilt apps on the user's devices
 
 - [x] Correct verified payment heading, outstanding balance, and rider assignment across manager flow
-- [ ] Add button spinner feedback
-- [ ] Replace customer home with active and recent order grids
-- [ ] Require customer payment amount with proof and update summary without bypassing verification
+- [x] Add button spinner feedback
+- [x] Replace customer home with active and recent order grids
+- [x] Require customer payment amount with proof and update summary without bypassing verification
