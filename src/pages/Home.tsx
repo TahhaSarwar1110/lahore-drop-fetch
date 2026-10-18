@@ -35,9 +35,10 @@ import groceriesImg from "@/assets/category-grocery.jpg";
 import giftsImg from "@/assets/category-gift.jpg";
 import othersImg from "@/assets/category-others.jpg";
 import heroBg from "@/assets/tabedar-hero-bg.jpg";
+import { CustomerHome } from "@/components/customer/CustomerHome";
 
 const Home = () => {
-  const { isAuthenticated, isRider } = useAuth();
+  const { isAuthenticated, isRider, user, userRoles } = useAuth();
   const navigate = useNavigate();
 
   const scrollToSection = (id: string) => {
@@ -140,6 +141,10 @@ const Home = () => {
       description: "Get real-time updates and support via WhatsApp",
     },
   ];
+
+  if (user && userRoles.includes("customer") && !userRoles.some(role => ["admin", "manager", "rider"].includes(role))) {
+    return <CustomerHome userId={user.id} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
