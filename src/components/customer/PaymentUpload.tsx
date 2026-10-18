@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { isValidCustomerPaymentAmount } from "@/utils/orderFinancials";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, CheckCircle, Clock, CreditCard, Image } from "lucide-react";
+import { Upload, CheckCircle, Clock, CreditCard, Image } from "lucide-react";
 import { toast } from "sonner";
 import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 import { triggerNotification } from "@/utils/notify";
@@ -160,11 +160,7 @@ export const PaymentUpload = ({
               loading={uploading}
               className="w-full"
             >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Upload className="h-4 w-4 mr-2" />
-              )}
+              <Upload className="h-4 w-4 mr-2" />
               Submit Payment Proof
             </Button>
           </div>

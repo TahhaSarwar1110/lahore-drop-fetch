@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Truck, CheckCircle, Pencil } from "lucide-react";
+import { Truck, CheckCircle, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { sendNotificationEmail } from "@/utils/notificationHelper";
 import { triggerNotification } from "@/utils/notify";
@@ -179,8 +179,8 @@ export const DeliveryChargesInput = ({
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              <Button loading={saving} onClick={handleSave} disabled={saving}>
+                
                 {alreadySet ? "Update & Notify Customer" : "Share with Customer"}
               </Button>
               {alreadySet && (

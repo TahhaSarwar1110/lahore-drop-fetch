@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation, Loader2 } from "lucide-react";
+import { MapPin, Navigation } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
 import { toast } from "sonner";
@@ -221,18 +221,14 @@ export const LocationPickerMap = ({
           <MapPin className="inline h-4 w-4 mr-1" />
           {label}
         </div>
-        <Button
+        <Button loading={isLoadingLocation}
           type="button"
           variant="outline"
           size="sm"
           onClick={handleUseMyLocation}
           disabled={isLoadingLocation}
         >
-          {isLoadingLocation ? (
-            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-          ) : (
-            <Navigation className="h-4 w-4 mr-1" />
-          )}
+          <Navigation className="h-4 w-4 mr-1" />
           {isLoadingLocation ? "Getting Location..." : "Use My Location"}
         </Button>
       </div>

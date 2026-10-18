@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle, Clock, CreditCard, ExternalLink, Upload } from "lucide-react";
+import { CheckCircle, Clock, CreditCard, ExternalLink, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { triggerNotification } from "@/utils/notify";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
@@ -159,16 +159,12 @@ export const PaymentConfirmation = ({
               </p>
             )}
 
-            <Button
+            <Button loading={confirming}
               onClick={handleConfirmPayment}
               disabled={confirming}
               className="w-full"
             >
-              {confirming ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <CheckCircle className="h-4 w-4 mr-2" />
-              )}
+              <CheckCircle className="h-4 w-4 mr-2" />
               Confirm Payment Received
             </Button>
           </div>

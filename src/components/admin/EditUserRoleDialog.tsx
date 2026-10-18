@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Edit, Loader2 } from "lucide-react";
+import { Edit } from "lucide-react";
 import { userRequest } from "./UserDetailsDialog";
 
 interface EditUserRoleDialogProps {
@@ -72,15 +72,8 @@ export const EditUserRoleDialog = ({ userId, currentRoles, userName, onRoleUpdat
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                "Update Role"
-              )}
+            <Button loading={loading} type="submit" disabled={loading}>
+              "Update Role"
             </Button>
           </DialogFooter>
         </form>

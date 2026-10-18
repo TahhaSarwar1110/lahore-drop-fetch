@@ -268,17 +268,13 @@ export const OrderDetailsDialog = ({
                               }}
                               disabled={uploading === item.id}
                             />
-                            <Button
+                            <Button loading={uploading === item.id}
                               size="sm"
                               disabled={uploading === item.id}
                               asChild
                             >
                               <span>
-                                {uploading === item.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                ) : (
-                                  <Upload className="h-4 w-4 mr-2" />
-                                )}
+                                <Upload className="h-4 w-4 mr-2" />
                                 Upload Pickup Proof
                               </span>
                             </Button>

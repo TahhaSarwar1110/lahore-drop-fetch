@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { UserPlus, Loader2, Upload, X, FileText, Image } from "lucide-react";
+import { UserPlus, Upload, X, FileText, Image } from "lucide-react";
 
 interface CreateUserDialogProps {
   onUserCreated: () => void;
@@ -387,15 +387,8 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
             )}
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                "Create User"
-              )}
+            <Button loading={loading} type="submit" disabled={loading}>
+              "Create User"
             </Button>
           </DialogFooter>
         </form>

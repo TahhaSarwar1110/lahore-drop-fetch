@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, CheckCircle, Clock, Truck } from "lucide-react";
+import { Upload, CheckCircle, Clock, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { ImageSourcePicker } from "@/components/ImageSourcePicker";
 import { triggerNotification } from "@/utils/notify";
@@ -137,8 +137,8 @@ export const DeliveryPaymentUpload = ({
             {previewUrl && (
               <img src={previewUrl} alt="Preview" className="max-h-48 rounded-lg border" />
             )}
-            <Button onClick={handleUpload} disabled={uploading || !selectedFile} className="w-full">
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+            <Button loading={uploading} onClick={handleUpload} disabled={uploading || !selectedFile} className="w-full">
+              <Upload className="h-4 w-4 mr-2" />
               Submit Delivery Payment Proof
             </Button>
           </div>
