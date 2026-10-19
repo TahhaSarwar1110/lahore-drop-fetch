@@ -28,6 +28,7 @@ import { ArrowLeft, Trash2, Plus, Save, User } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { getItemTotalPrice } from "@/utils/orderPricing";
+import { RefundAccountForm } from "@/components/customer/RefundAccountForm";
 
 interface OrderItem {
   id: string;
@@ -37,6 +38,15 @@ interface OrderItem {
   approval_status: string | null;
   manager_feedback: string | null;
   approved_at: string | null;
+  manager_price_pkr: number | null;
+}
+
+interface ItemPickup {
+  order_item_id: string;
+  picked_at: string | null;
+  actual_paid_pkr: number | null;
+  pickup_proof_url: string | null;
+  receipt_url: string | null;
 }
 
 interface Order {
@@ -60,6 +70,12 @@ interface Order {
   expense_status: string | null;
   customer_balance_pkr: number | null;
   refund_status: string;
+  refund_proof_url: string | null;
+  refund_account_bank: string | null;
+  refund_account_title: string | null;
+  refund_account_number: string | null;
+  delivery_proof_url: string | null;
+  delivered_at: string | null;
   total_weight_kg: number | null;
   delivery_charges: number;
   delivery_charges_set_at: string | null;
@@ -86,6 +102,7 @@ const OrderDetails = () => {
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItems, setNewItems] = useState<FormOrderItem[]>([]);
   const [itemsToRemove, setItemsToRemove] = useState<string[]>([]);
+  const [pickups, setPickups] = useState<ItemPickup[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -128,6 +145,12 @@ const OrderDetails = () => {
         expense_status,
         customer_balance_pkr,
         refund_status,
+        refund_proof_url,
+        refund_account_bank,
+        refund_account_title,
+        refund_account_number,
+        delivery_proof_url,
+        delivered_at,
         total_weight_kg,
         delivery_charges,
         delivery_charges_set_at,
@@ -142,7 +165,8 @@ const OrderDetails = () => {
           image_url,
           approval_status,
           manager_feedback,
-          approved_at
+          approved_at,
+          manager_price_pkr
         )
       `)
       .eq("id", orderIdParam)
@@ -154,6 +178,17 @@ const OrderDetails = () => {
       toast.error("Failed to load order");
       navigate("/order-history");
       return;
+    }
+
+    const itemIds = (orderData?.order_items ?? []).map((i: { id: string }) => i.id);
+    if (itemIds.length) {
+      const { data: pickupData } = await supabase
+        .from("item_pickups")
+        .select("order_item_id, picked_at, actual_paid_pkr, pickup_proof_url, receipt_url")
+        .in("order_item_id", itemIds);
+      setPickups(pickupData ?? []);
+    } else {
+      setPickups([]);
     }
 
     // Fetch assignment separately
@@ -260,7 +295,7 @@ const OrderDetails = () => {
       (item) => item.approval_status === 'approved'
     );
     const approvedTotal = approvedItems.reduce(
-      (sum, item) => sum + getItemTotalPrice(item.item_data as Record<string, string>),
+      (sum, item) => sum + (item.manager_price_pkr ?? getItemTotalPrice(item.item_data as Record<string, string>)),
       0
     );
     const newItemsTotal = newItems.reduce(
@@ -421,6 +456,37 @@ const OrderDetails = () => {
             </div>
           )}
 
+          {order.expense_status === "verified" && (order.customer_balance_pkr ?? 0) > 0 && (
+            <div className="mb-6">
+              <RefundAccountForm
+                orderId={order.id}
+                refundDue={order.customer_balance_pkr as number}
+                refundStatus={order.refund_status || "pending"}
+                bank={order.refund_account_bank}
+                title={order.refund_account_title}
+                number={order.refund_account_number}
+                refundProofUrl={order.refund_proof_url}
+                onUpdate={() => {
+                  supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user && orderId) loadOrder(orderId, user.id);
+                  });
+                }}
+              />
+            </div>
+          )}
+
+          {order.delivery_proof_url && (
+            <Card className="mb-6">
+              <CardContent className="p-4 space-y-2">
+                <p className="font-semibold">Delivery Proof</p>
+                <StorageImage bucket="pickup-proofs" src={order.delivery_proof_url} alt="Delivery proof" className="max-h-64 rounded-md border object-cover" />
+                {order.delivered_at && (
+                  <p className="text-xs text-muted-foreground">Delivered {format(new Date(order.delivered_at), "PPp")}</p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Delivery Charges (out-of-city/country only, after manager has set them) */}
           {order.delivery_type && order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
             <div className="mb-6">
@@ -512,6 +578,53 @@ const OrderDetails = () => {
                       className="mt-3 rounded-lg max-h-48 object-cover"
                     />
                   )}
+
+                  {(() => {
+                    const pk = pickups.find((p) => p.order_item_id === item.id);
+                    return (
+                      <>
+                        {(item.manager_price_pkr != null || pk?.actual_paid_pkr != null) && (
+                          <div className="mt-3 grid gap-1 text-sm rounded-lg border p-3">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Your expected price</span>
+                              <span>PKR {getItemTotalPrice(item.item_data).toLocaleString()}</span>
+                            </div>
+                            {item.manager_price_pkr != null && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Verified price</span>
+                                <span className="font-semibold text-primary">PKR {item.manager_price_pkr.toLocaleString()}</span>
+                              </div>
+                            )}
+                            {pk?.actual_paid_pkr != null && (
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Actual paid at shop</span>
+                                <span className="font-semibold">PKR {pk.actual_paid_pkr.toLocaleString()}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {(pk?.pickup_proof_url || pk?.receipt_url) && (
+                          <div className="mt-3">
+                            <p className="text-sm font-medium mb-1">Shopping Proof</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              {pk?.pickup_proof_url && (
+                                <div>
+                                  <p className="text-xs text-muted-foreground mb-1">Picked item</p>
+                                  <StorageImage bucket="pickup-proofs" src={pk.pickup_proof_url} alt="Picked item" className="h-32 w-full rounded-md border object-cover" />
+                                </div>
+                              )}
+                              {pk?.receipt_url && (
+                                <div>
+                                  <p className="text-xs text-muted-foreground mb-1">Receipt</p>
+                                  <StorageImage bucket="pickup-proofs" src={pk.receipt_url} alt="Receipt" className="h-32 w-full rounded-md border object-cover" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
 
                   {item.manager_feedback && (
                     <div className="mt-3 p-3 bg-muted rounded-lg">
