@@ -78,6 +78,12 @@ export const DeliveryChargesInput = ({
 
       if (error) throw error;
 
+      const { data: order } = await supabase.from("orders").select("expense_status, customer_balance_pkr").eq("id", orderId).single();
+      const balance = order?.customer_balance_pkr ?? 0;
+      if (order?.expense_status === "verified" && balance !== 0) {
+        void triggerNotification({ event_type: balance < 0 ? "outstanding_payment_due" : "refund_due", order_id: orderId, event_version: `b${balance}` });
+      }
+
       await triggerNotification({
         event_type: "delivery_payment_requested",
         order_id: orderId,

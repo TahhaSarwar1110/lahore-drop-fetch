@@ -23,4 +23,4 @@
 - [x] Update feature graphic with transparent uploaded logo and match web/Android/iOS icons
 - [x] Item-level manager pricing, rider per-item amount + photo + receipt, bill verification, outstanding/refund notices, refund account + screenshot, Ready for Delivery gate, delivery proof for customer and manager
 - [ ] WhatsApp refund notice — waits on the "tabedaar_refund_due" template being approved in WhatsApp Manager
-- [ ] Separate goods totals and bundle/delivery charges; reconcile payments and refunds against goods expense plus charges.
+- [x] Separate goods totals and bundle/delivery charges; reconcile payments and refunds against goods expense plus charges.

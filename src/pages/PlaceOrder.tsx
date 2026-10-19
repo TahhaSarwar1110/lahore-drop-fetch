@@ -562,7 +562,7 @@ const PlaceOrder = () => {
                         <span className="text-sm font-medium">{orderItems.length}</span>
                       </div>
                       <div className="flex justify-between items-center py-2 border-b border-border/50">
-                        <span className="text-sm text-muted-foreground">Items Total</span>
+                        <span className="text-sm text-muted-foreground">Order Total</span>
                         <span className="text-sm font-bold">PKR {calculateTotalPrice().toLocaleString()}</span>
                       </div>
                       
@@ -571,7 +571,7 @@ const PlaceOrder = () => {
                         return bundle ? (
                           <div className="flex justify-between items-center py-2 border-b border-border/50">
                             <div>
-                              <span className="text-sm text-muted-foreground block">Service Charges</span>
+                              <span className="text-sm text-muted-foreground block">Delivery & Service Charges (Bundle)</span>
                               <span className="text-xs text-muted-foreground/70">
                                 {bundle.name} ({orderItems.length}/{bundle.items_allowed} items)
                               </span>

@@ -173,7 +173,7 @@ const RiderOrderDetails = () => {
   };
 
   const handleDeliveryProofUpload = async (file: File) => {
-    if (order && order.delivery_type !== "within_city" && order.delivery_payment_status !== "confirmed") {
+    if (order && order.order_total_pkr == null && order.delivery_type !== "within_city" && order.delivery_payment_status !== "confirmed") {
       toast.error("Delivery payment must be confirmed before marking as delivered");
       return;
     }

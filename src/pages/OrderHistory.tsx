@@ -333,6 +333,9 @@ const OrderHistory = () => {
                           </span>
                         </div>
                         <div className="flex gap-2">
+                          <p className="text-xs text-muted-foreground">Delivery & Service Charges: Rs. {(Number(order.additional_charges || 0) + Number(order.delivery_charges || 0)).toLocaleString()}</p>
+                        </div>
+                        <div className="flex gap-2">
                           <Button
                             variant="outline"
                             className="flex-1 h-10 rounded-xl text-sm"
