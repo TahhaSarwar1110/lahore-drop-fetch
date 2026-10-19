@@ -25,6 +25,7 @@ import {
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
+import { WhatsAppSupportButton } from "@/components/WhatsAppSupportButton";
 import { PricingBundles } from "@/components/PricingBundles";
 import { useAuth } from "@/hooks/useAuth";
 import { TestimonialSlider } from "@/components/TestimonialSlider";
@@ -444,6 +445,7 @@ const Home = () => {
       </main>
 
       <Footer />
+      <WhatsAppSupportButton />
       <AIBotButton />
     </div>
   );
