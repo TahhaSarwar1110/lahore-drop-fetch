@@ -56,6 +56,7 @@ const ResetPassword = () => {
       toast({ title: "Could not update password", description: error.message, variant: "destructive" });
       return;
     }
+    sessionStorage.removeItem("tabedaar_password_recovery");
     toast({ title: "Password updated", description: "You can now log in with your new password" });
     navigate("/login");
   };
