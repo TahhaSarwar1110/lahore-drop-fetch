@@ -26,7 +26,12 @@ export type NotificationEvent =
   | "order_delivered"
   | "order_cancelled"
   | "order_status_changed"
-  | "delivery_issue";
+  | "delivery_issue"
+  | "all_items_picked"
+  | "outstanding_payment_due"
+  | "refund_due"
+  | "refund_completed"
+  | "ready_for_delivery";
 
 interface NotifyParams {
   event_type: NotificationEvent;

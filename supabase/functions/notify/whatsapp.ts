@@ -148,7 +148,7 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
       return { template: "tabedaar_items_picked_up", key: `${orderId}:items_picked_up`, params: [name, no] };
     }
     case "outstanding_payment_due": {
-      const owed = -num(-(o.customer_balance_pkr ?? 0)) || Math.max(0, -(o.customer_balance_pkr ?? 0));
+      const owed = Math.max(0, -Number(o.customer_balance_pkr ?? 0));
       if (owed <= 0) return null;
       return { template: "tabedaar_payment_pending", key: `${orderId}:outstanding:${owed}`, params: [name, no, rs(owed), "Remaining shopping amount"] };
     }
