@@ -81,7 +81,7 @@ serve(async (req) => {
     // Fetch order to validate status and payment
     const { data: order, error: orderError } = await supabaseClient
       .from('orders')
-      .select('status, payment_status, order_total_pkr, paid_amount_pkr, payment_verification')
+      .select('status, payment_status, order_total_pkr, paid_amount_pkr, payment_verification, delivery_charges')
       .eq('id', order_id)
       .single();
 
@@ -103,7 +103,7 @@ serve(async (req) => {
 
     const paymentConfirmed = order.order_total_pkr == null
       ? order.payment_status === 'confirmed'
-      : order.payment_verification === 'verified' && order.paid_amount_pkr >= order.order_total_pkr;
+      : order.payment_verification === 'verified' && order.paid_amount_pkr >= order.order_total_pkr + Math.round(Number(order.delivery_charges || 0));
     if (!paymentConfirmed) {
       return new Response(JSON.stringify({ 
         error: 'Cannot assign rider: payment must be confirmed first.' 

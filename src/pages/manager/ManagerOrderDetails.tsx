@@ -218,7 +218,7 @@ const ManagerOrderDetails = () => {
 
   const isPaymentConfirmed = () => {
     if (!order) return false;
-    return hasVerifiedOrderPayment(order.order_total_pkr, order.paid_amount_pkr, order.payment_verification, order.payment_status);
+    return hasVerifiedOrderPayment(order.order_total_pkr, order.paid_amount_pkr, order.payment_verification, order.payment_status, Number(order.delivery_charges || 0));
   };
 
   const canAssignRider = () => {

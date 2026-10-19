@@ -38,10 +38,11 @@ export const hasVerifiedOrderPayment = (
   orderTotal: number | null | undefined,
   paidAmount: number,
   verification: string | null | undefined,
-  legacyStatus: string | null | undefined
+  legacyStatus: string | null | undefined,
+  deliveryCharges: number = 0
 ): boolean => orderTotal == null
   ? legacyStatus === "confirmed"
-  : canApproveOrder(orderTotal, paidAmount, verification);
+  : canApproveOrder(orderTotal + Math.round(deliveryCharges), paidAmount, verification);
 
 /** Customer balance = verified payment − verified shopping expense. */
 export const getCustomerBalance = (paidAmount: number, shoppingExpense: number, bundleCharges: number = 0, deliveryCharges: number = 0): number =>
