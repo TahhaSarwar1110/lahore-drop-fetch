@@ -95,6 +95,23 @@ const buildOrderSchema = (countryCode: string) => {
 };
 
 
+/**
+ * Shown on the order form: the amount collected now is an estimate, so the
+ * verified bill can still come out higher (customer tops up) or lower
+ * (customer is refunded) once the rider reports actual item costs.
+ */
+const BillingDisclaimer = () => (
+  <div className="flex gap-2.5 p-3 rounded-xl border border-secondary/25 bg-secondary/5">
+    <Info className="h-4 w-4 mt-0.5 shrink-0 text-secondary" aria-hidden="true" />
+    <p className="text-xs leading-relaxed text-foreground">
+      <span className="font-semibold">Please note:</span> the order total is an estimate. After shopping, the actual
+      item prices and delivery charges are verified, so the final bill can be{" "}
+      <span className="font-semibold">more or less than the amount you paid</span>. If it is more, you will be asked to
+      pay the remaining amount before delivery. If it is less, the extra balance will be refunded to your account.
+    </p>
+  </div>
+);
+
 const PlaceOrder = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -596,16 +613,7 @@ const PlaceOrder = () => {
                         </p>
                       )}
 
-                      <div className="flex gap-2.5 p-3 mt-2 rounded-xl border border-secondary/25 bg-secondary/5">
-                        <Info className="h-4 w-4 mt-0.5 shrink-0 text-secondary" aria-hidden="true" />
-                        <p className="text-xs leading-relaxed text-foreground">
-                          <span className="font-semibold">Please note:</span> the total bill shown above is an estimate.
-                          After shopping, the actual item prices and delivery charges are verified, so the final bill
-                          can be <span className="font-semibold">more or less than the amount you paid</span>. If it is
-                          more, you will be asked to pay the remaining amount before delivery. If it is less, the extra
-                          balance will be refunded to your account.
-                        </p>
-                      </div>
+                      <BillingDisclaimer />
                     </div>
                   </div>
                 </section>
@@ -621,6 +629,7 @@ const PlaceOrder = () => {
                       </p>
                     </div>
                   )}
+                  {orderItems.length === 0 && <BillingDisclaimer />}
                   {(!fullName || !phone || !deliveryAddress) && (
                     <div className="p-3 bg-muted border border-border rounded-xl">
                       <p className="text-xs text-foreground">
