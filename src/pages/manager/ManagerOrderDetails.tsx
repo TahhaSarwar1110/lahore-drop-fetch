@@ -15,7 +15,8 @@ import { ExpenseReview } from "@/components/manager/ExpenseReview";
 import { RefundManager } from "@/components/manager/RefundManager";
 import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput";
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
-import { hasVerifiedOrderPayment, isFinanciallySettled } from "@/utils/orderFinancials";
+import { hasVerifiedOrderPayment, isFinanciallySettled, canMarkReadyForDelivery } from "@/utils/orderFinancials";
+import { StorageImage } from "@/components/StorageImage";
 import { sendNotificationEmail } from "@/utils/notificationHelper";
 import { triggerNotification } from "@/utils/notify";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
@@ -30,6 +31,7 @@ interface OrderItem {
   approved_by: string | null;
   approved_at: string | null;
   image_url: string | null;
+  manager_price_pkr?: number | null;
 }
 
 interface Order {
@@ -63,6 +65,12 @@ interface Order {
   refund_reference: string | null;
   refund_notes: string | null;
   refund_proof_url: string | null;
+  refund_account_bank: string | null;
+  refund_account_title: string | null;
+  refund_account_number: string | null;
+  ready_for_delivery_at: string | null;
+  delivery_proof_url: string | null;
+  delivered_at: string | null;
   total_weight_kg: number | null;
   delivery_charges: number;
   delivery_charges_set_at: string | null;
@@ -193,6 +201,7 @@ const ManagerOrderDetails = () => {
       "Order Received": "bg-blue-500",
       "Shopper Assigned": "bg-purple-500",
       "Purchasing": "bg-orange-500",
+      "Ready for Delivery": "bg-emerald-600",
       "In Delivery": "bg-cyan-500",
       "Delivered": "bg-green-500",
     };
@@ -217,8 +226,26 @@ const ManagerOrderDetails = () => {
   };
 
   // Order flow: items reviewed -> order confirmed -> payment verified
+  const allPricesSet = () => orderItems.every(item => item.approval_status !== 'approved' || item.manager_price_pkr != null);
+
   const canConfirmOrder = () => {
-    return allItemsApproved();
+    return allItemsApproved() && allPricesSet();
+  };
+
+  const [markingReady, setMarkingReady] = useState(false);
+  const handleMarkReady = async () => {
+    try {
+      setMarkingReady(true);
+      const { error } = await supabase.rpc("mark_ready_for_delivery", { p_order_id: orderId as string });
+      if (error) throw error;
+      void triggerNotification({ event_type: "ready_for_delivery", order_id: orderId });
+      toast.success("Order marked Ready for Delivery — the rider can now deliver");
+      fetchOrderDetails();
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to mark ready for delivery");
+    } finally {
+      setMarkingReady(false);
+    }
   };
 
   const handleConfirmOrder = async () => {
@@ -269,7 +296,7 @@ const ManagerOrderDetails = () => {
       fetchOrderDetails();
     } catch (error) {
       console.error("Error confirming order:", error);
-      toast.error("Failed to confirm order");
+      toast.error((error as any)?.message || "Failed to confirm order");
     }
   };
 
@@ -334,6 +361,8 @@ const ManagerOrderDetails = () => {
                       ? "Resolve Rejected Items First"
                       : !allItemsApproved()
                       ? "Review Items First"
+                      : !allPricesSet()
+                      ? "Set Item Prices First"
                       : "Confirm Order"}
                   </Button>
                 )}
@@ -473,6 +502,7 @@ const ManagerOrderDetails = () => {
                 refundReference={order.refund_reference}
                 refundNotes={order.refund_notes}
                 refundProofUrl={order.refund_proof_url}
+                refundAccount={{ bank: order.refund_account_bank, title: order.refund_account_title, number: order.refund_account_number }}
                 onUpdate={fetchOrderDetails}
               />
             )}
@@ -483,17 +513,42 @@ const ManagerOrderDetails = () => {
                 <CardContent className="p-4 space-y-1">
                   <p className="text-sm font-medium break-words">
                     {isFinanciallySettled(order.expense_status, order.customer_balance_pkr, order.refund_status)
-                      ? "✅ Payment settled — rider can proceed with delivery"
+                      ? order.ready_for_delivery_at ? "✅ Payment settled — released for delivery" : "✅ Payment settled — mark the order Ready for Delivery"
                       : order.expense_status !== "verified"
                       ? "⏳ Verify the rider's shopping expense first"
                       : (order.customer_balance_pkr ?? 0) < 0
                       ? `⏳ Customer owes Rs. ${Math.abs(order.customer_balance_pkr ?? 0).toLocaleString()} — delivery on hold`
                       : `⏳ Refund Rs. ${(order.customer_balance_pkr ?? 0).toLocaleString()} to the customer with proof — delivery on hold`}
                   </p>
+                  {canMarkReadyForDelivery(order.expense_status, order.customer_balance_pkr, order.refund_status) && (
+                    order.ready_for_delivery_at ? (
+                      <p className="text-sm text-green-700 dark:text-green-300">
+                        🚚 Ready for Delivery since {new Date(order.ready_for_delivery_at).toLocaleString()}
+                      </p>
+                    ) : (
+                      <Button className="mt-2" onClick={handleMarkReady} disabled={markingReady}>
+                        Mark Ready for Delivery
+                      </Button>
+                    )
+                  )}
                   {order.expense_status === "verified" && (order.customer_balance_pkr ?? 0) < 0 && (
                     <p className="text-xs text-muted-foreground">
                       When the customer uploads the top-up, enter the <strong>total amount received so far</strong> (at least Rs. {(order.shopping_expense_pkr ?? 0).toLocaleString()}) in Payment Verification.
                     </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {order.delivery_proof_url && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Delivery Proof</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <StorageImage bucket="pickup-proofs" src={order.delivery_proof_url} alt="Delivery proof" className="max-h-64 rounded-md border object-cover" />
+                  {order.delivered_at && (
+                    <p className="text-xs text-muted-foreground">Delivered {new Date(order.delivered_at).toLocaleString()}</p>
                   )}
                 </CardContent>
               </Card>
