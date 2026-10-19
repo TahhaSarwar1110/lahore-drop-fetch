@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AIBotButton } from "@/components/AIBotButton";
+import { WhatsAppSupportButton } from "@/components/WhatsAppSupportButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -90,5 +91,5 @@ export function CustomerHome({ userId }: { userId: string }) {
         <section className="mb-12"><div className="flex items-center gap-2 mb-5"><Clock className="h-5 w-5 text-secondary" /><h2 className="text-xl font-semibold">Active Orders</h2><Badge variant="outline">{groups.active.length}</Badge></div>{groups.active.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">{groups.active.map(renderOrder)}</div> : <div className="py-10 border-y text-center text-muted-foreground"><Package className="h-8 w-8 mx-auto mb-3" /><p>No active orders</p></div>}</section>
         <section><div className="flex flex-wrap items-center justify-between gap-3 mb-5"><div className="flex items-center gap-2"><History className="h-5 w-5 text-primary" /><h2 className="text-xl font-semibold">Recent Order History</h2></div><Button variant="ghost" onClick={() => navigate("/order-history")}>View All<ArrowRight className="h-4 w-4" /></Button></div>{groups.history.length ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">{groups.history.map(renderOrder)}</div> : <div className="py-10 border-y text-center text-muted-foreground">No completed or cancelled orders yet</div>}</section>
       </>}
-    </div></main><Footer /><AIBotButton /></div>;
+    </div></main><Footer /><WhatsAppSupportButton /><AIBotButton /></div>;
 }

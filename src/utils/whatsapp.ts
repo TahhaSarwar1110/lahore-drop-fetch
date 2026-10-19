@@ -33,7 +33,7 @@ export const buildWhatsAppUrl = (phone: string, message?: string): string => {
 };
 
 /** Official Tabedaar.com business WhatsApp number (digits only, with country code). */
-export const BUSINESS_WHATSAPP_NUMBER = "923044693863";
+export const BUSINESS_WHATSAPP_NUMBER = "923013267622";
 
 /** Display form of the business number, e.g. for tel: labels. */
-export const BUSINESS_PHONE_DISPLAY = "+92 304 4693863";
+export const BUSINESS_PHONE_DISPLAY = "+92 301 3267622";
