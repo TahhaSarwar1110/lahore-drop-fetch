@@ -64,7 +64,6 @@ const RiderOrderDetails = () => {
   const [items, setItems] = useState<OrderItem[]>([]);
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState<string | null>(null);
   const [deliveringOrder, setDeliveringOrder] = useState(false);
 
   useEffect(() => {
@@ -569,7 +568,7 @@ const RiderOrderDetails = () => {
                           {/* Pickup Status / Actions */}
                           {item.approval_status === "rejected" ? (
                             <p className="text-sm text-muted-foreground border-t pt-2">Rejected item — do not buy.</p>
-                          ) : item.pickup && (item.pickup.actual_paid_pkr != null || !canEditPurchases || order.order_total_pkr == null) && !(canEditPurchases && order.expense_status === "rejected") ? (
+                          ) : item.pickup && !(canEditPurchases && order.order_total_pkr != null && (item.pickup.actual_paid_pkr == null || order.expense_status === "rejected")) ? (
                             <div className="pt-2 border-t space-y-2">
                               <p className="text-xs text-muted-foreground">
                                 Picked at: {new Date(item.pickup.picked_at).toLocaleString()}
