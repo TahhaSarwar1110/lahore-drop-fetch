@@ -20,7 +20,7 @@ const ResetPassword = () => {
   useEffect(() => {
     // Recovery links arrive with type=recovery in the URL hash
     const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
+    if (hash.includes("type=recovery") || sessionStorage.getItem("tabedaar_password_recovery") === "1") {
       setIsRecovery(true);
       setChecking(false);
       return;

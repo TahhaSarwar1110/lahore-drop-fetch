@@ -134,7 +134,9 @@ const Login = () => {
     }
     setForgotLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      // Inside the mobile app the origin is a local address the email link can't open,
+      // so always send people to the public website's reset page.
+      redirectTo: `${/^https?:\/\/(localhost|127\.0\.0\.1)|^capacitor:/.test(window.location.origin) ? "https://tabedaar.com" : window.location.origin}/reset-password`,
     });
     setForgotLoading(false);
     if (error) {
