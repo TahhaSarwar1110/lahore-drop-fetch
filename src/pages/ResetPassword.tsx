@@ -20,7 +20,7 @@ const ResetPassword = () => {
   useEffect(() => {
     // Recovery links arrive with type=recovery in the URL hash
     const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
+    if (hash.includes("type=recovery") || sessionStorage.getItem("tabedaar_password_recovery") === "1") {
       setIsRecovery(true);
       setChecking(false);
       return;
@@ -56,6 +56,7 @@ const ResetPassword = () => {
       toast({ title: "Could not update password", description: error.message, variant: "destructive" });
       return;
     }
+    sessionStorage.removeItem("tabedaar_password_recovery");
     toast({ title: "Password updated", description: "You can now log in with your new password" });
     navigate("/login");
   };
