@@ -15,7 +15,7 @@ import { ExpenseReview } from "@/components/manager/ExpenseReview";
 import { RefundManager } from "@/components/manager/RefundManager";
 import { DeliveryChargesInput } from "@/components/manager/DeliveryChargesInput";
 import { DeliveryPaymentConfirmation } from "@/components/manager/DeliveryPaymentConfirmation";
-import { hasVerifiedOrderPayment, isFinanciallySettled, canMarkReadyForDelivery } from "@/utils/orderFinancials";
+import { hasVerifiedOrderPayment, isFinanciallySettled, canMarkReadyForDelivery, getSettlementTotal } from "@/utils/orderFinancials";
 import { StorageImage } from "@/components/StorageImage";
 import { sendNotificationEmail } from "@/utils/notificationHelper";
 import { triggerNotification } from "@/utils/notify";
@@ -475,6 +475,9 @@ const ManagerOrderDetails = () => {
               paymentSubmittedAt={order.payment_submitted_at}
               shoppingExpense={order.shopping_expense_pkr}
               expenseStatus={order.expense_status}
+              bundleCharges={Number(order.additional_charges || 0)}
+              deliveryCharges={Number(order.delivery_charges || 0)}
+              chargesDescription={order.charges_description}
               onUpdate={fetchOrderDetails}
             />
             )}
@@ -533,7 +536,7 @@ const ManagerOrderDetails = () => {
                   )}
                   {order.expense_status === "verified" && (order.customer_balance_pkr ?? 0) < 0 && (
                     <p className="text-xs text-muted-foreground">
-                      When the customer uploads the top-up, enter the <strong>total amount received so far</strong> (at least Rs. {(order.shopping_expense_pkr ?? 0).toLocaleString()}) in Payment Verification.
+                      Verify only the new top-up amount. The total verified payments must cover Rs. {getSettlementTotal(order.shopping_expense_pkr ?? 0, Number(order.additional_charges || 0), Number(order.delivery_charges || 0)).toLocaleString()}, including delivery/service charges.
                     </p>
                   )}
                 </CardContent>
@@ -569,7 +572,7 @@ const ManagerOrderDetails = () => {
             )}
 
             {/* Delivery Payment verification */}
-            {order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
+            {order.order_total_pkr == null && order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
               <DeliveryPaymentConfirmation
                 orderId={order.id}
                 userId={order.user_id}

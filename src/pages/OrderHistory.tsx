@@ -34,6 +34,8 @@ interface Order {
   status: string;
   created_at: string;
   additional_charges: number | null;
+  order_total_pkr: number | null;
+  delivery_charges: number;
   order_items: {
     id: string;
     item_type: string;
@@ -42,6 +44,7 @@ interface Order {
     approval_status: string | null;
     manager_feedback: string | null;
     approved_at: string | null;
+    manager_price_pkr: number | null;
   }[];
 }
 
@@ -93,6 +96,8 @@ const OrderHistory = () => {
         status,
         created_at,
         additional_charges,
+        order_total_pkr,
+        delivery_charges,
         order_items (
           id,
           item_type,
@@ -100,7 +105,8 @@ const OrderHistory = () => {
           image_url,
           approval_status,
           manager_feedback,
-          approved_at
+          approved_at,
+          manager_price_pkr
         )
       `)
       .eq("user_id", userId)
@@ -130,10 +136,9 @@ const OrderHistory = () => {
   const calculateTotalPrice = (order: Order) => {
     const itemsTotal = order.order_items
       .filter((item) => item.approval_status !== "rejected")
-      .reduce((total, item) => total + getItemTotalPrice(item.item_data), 0);
+      .reduce((total, item) => total + (item.manager_price_pkr ?? getItemTotalPrice(item.item_data)), 0);
 
-    const deliveryCharges = order.additional_charges || 0;
-    return itemsTotal + deliveryCharges;
+    return order.order_total_pkr == null ? itemsTotal : Math.max(0, order.order_total_pkr - Math.round(Number(order.additional_charges || 0)));
   };
 
   const filteredOrders = useMemo(() => {
@@ -238,7 +243,7 @@ const OrderHistory = () => {
                       <TableHead className="font-semibold">Date</TableHead>
                       <TableHead className="font-semibold">Address</TableHead>
                       <TableHead className="font-semibold text-center">Items</TableHead>
-                      <TableHead className="font-semibold text-right">Total</TableHead>
+                      <TableHead className="font-semibold text-right">Order Total / Charges</TableHead>
                       <TableHead className="font-semibold text-center">Status</TableHead>
                       <TableHead className="font-semibold text-center">Actions</TableHead>
                     </TableRow>
@@ -267,6 +272,7 @@ const OrderHistory = () => {
                           </TableCell>
                           <TableCell className="text-right text-sm font-semibold text-primary">
                             PKR {calculateTotalPrice(order).toLocaleString()}
+                            <p className="text-xs font-normal text-muted-foreground">Charges: Rs. {(Number(order.additional_charges || 0) + Number(order.delivery_charges || 0)).toLocaleString()}</p>
                           </TableCell>
                           <TableCell className="text-center">
                             <Badge className={`${getStatusColor(order.status)} text-xs`}>

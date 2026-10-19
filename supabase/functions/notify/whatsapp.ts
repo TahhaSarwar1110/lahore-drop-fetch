@@ -46,10 +46,10 @@ const summarize = (items: { item_type: string; item_data: Record<string, unknown
 type Db = any;
 
 async function itemsTotal(db: Db, orderId: string) {
-  const { data } = await db.from("order_items").select("item_data, approval_status").eq("order_id", orderId);
+  const { data } = await db.from("order_items").select("item_data, approval_status, manager_price_pkr").eq("order_id", orderId);
   return (data ?? [])
     .filter((i: { approval_status: string }) => i.approval_status !== "rejected")
-    .reduce((s: number, i: { item_data: Record<string, unknown> }) => s + priceOf(i.item_data) * qtyOf(i.item_data), 0);
+    .reduce((s: number, i: { item_data: Record<string, unknown>; manager_price_pkr: number | null }) => s + (i.manager_price_pkr ?? priceOf(i.item_data) * qtyOf(i.item_data)), 0);
 }
 
 interface Plan { template: string; key: string; params: string[] }
@@ -67,7 +67,7 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
   // item has a final (non-pending) decision recorded in the database.
   const reviewedItems = async () => {
     const { data: items } = await db.from("order_items")
-      .select("item_type, item_data, approval_status, manager_feedback")
+      .select("item_type, item_data, approval_status, manager_feedback, manager_price_pkr")
       .eq("order_id", orderId);
     const all = items ?? [];
     if (!all.length) return null;
@@ -100,9 +100,9 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
       const r = await reviewedItems();
       if (!r || !r.approved.length) return null; // nothing payable -> review message only
       const payable = r.approved.reduce(
-        (s: number, i: { item_data: Record<string, unknown> }) => s + priceOf(i.item_data) * qtyOf(i.item_data),
+        (s: number, i: { item_data: Record<string, unknown>; manager_price_pkr: number | null }) => s + (i.manager_price_pkr ?? priceOf(i.item_data) * qtyOf(i.item_data)),
         0,
-      ) + num(o.additional_charges);
+      ) + num(o.additional_charges) + num(o.delivery_charges);
       if (payable <= 0) return null;
       return {
         template: "tabedaar_payment_required_after_review",
@@ -117,7 +117,7 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
     }
     case "order_confirmed":
       if (!o.confirmed_at) return null;
-      return { template: "tabedaar_payment_pending", key: `${orderId}:payment_pending:order`, params: [name, no, rs(await goods()), "Order payment"] };
+      return { template: "tabedaar_payment_pending", key: `${orderId}:payment_pending:order`, params: [name, no, rs((await goods()) + num(o.delivery_charges)), "Order payment"] };
     case "delivery_payment_requested":
       if (o.delivery_payment_status !== "pending" || num(o.delivery_charges) <= 0) return null;
       return { template: "tabedaar_payment_pending", key: `${orderId}:payment_pending:delivery`, params: [name, no, rs(num(o.delivery_charges)), "Delivery charges"] };
@@ -150,7 +150,7 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
     case "outstanding_payment_due": {
       const owed = Math.max(0, -Number(o.customer_balance_pkr ?? 0));
       if (owed <= 0) return null;
-      return { template: "tabedaar_payment_pending", key: `${orderId}:outstanding:${owed}`, params: [name, no, rs(owed), "Remaining shopping amount"] };
+      return { template: "tabedaar_payment_pending", key: `${orderId}:outstanding:${owed}`, params: [name, no, rs(owed), "Shopping and delivery/service balance"] };
     }
     case "refund_due": {
       const due = num(o.customer_balance_pkr);

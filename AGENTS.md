@@ -5,6 +5,7 @@
 - Customer-declared payment amounts and proof history are saved atomically through submit_customer_payment; summaries may include pending declarations, but operational gates always use manager-verified funds.
 
 - Reconciled order readiness uses payment_verification and paid_amount_pkr against the order total; payment_status is a legacy fallback only, so stale upload flags cannot block verified orders.
+- Keep the initial payable snapshot backward-compatible (goods plus bundle); display Order Total as snapshot minus bundle. Settlement RPCs and triggers compare verified payment with goods shopping expense plus bundle and third-party delivery charges once; reconciled orders use one payment-proof flow, while legacy orders retain separate delivery payments.
 
 - Keep iOS app icons in the native AppIcon asset catalog and Android icons in density-specific launcher resources, derived from the approved app icon; native launchers require platform-specific sizes and adaptive foreground safe areas.
 - Set Android minimum SDK in android/variables.gradle and inherit it in app/build.gradle; the release regression test protects Play automatic-protection compatibility without editing generated Capacitor files.

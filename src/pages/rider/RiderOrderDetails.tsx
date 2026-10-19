@@ -44,6 +44,8 @@ interface OrderDetails {
   delivery_type: string;
   delivery_payment_status: string;
   order_total_pkr: number | null;
+  additional_charges: number;
+  delivery_charges: number;
   paid_amount_pkr: number;
   shopping_expense_pkr: number | null;
   expense_status: string | null;
@@ -93,6 +95,8 @@ const RiderOrderDetails = () => {
           delivery_type,
           delivery_payment_status,
           order_total_pkr,
+          additional_charges,
+          delivery_charges,
           paid_amount_pkr,
           shopping_expense_pkr,
           expense_status,
@@ -224,7 +228,7 @@ const RiderOrderDetails = () => {
   const releasedForDelivery = !order || order.order_total_pkr == null || !!order.ready_for_delivery_at;
   const deliveryPaymentOk =
     !order ||
-    order.delivery_type === "within_city" ||
+    order.order_total_pkr != null || order.delivery_type === "within_city" ||
     order.delivery_payment_status === "confirmed";
   const settlementOk =
     !order ||
@@ -352,8 +356,9 @@ const RiderOrderDetails = () => {
                   <CardContent className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Order Total</span>
-                      <span className="font-medium">Rs. {order.order_total_pkr.toLocaleString()}</span>
+                      <span className="font-medium">Rs. {Math.max(0, order.order_total_pkr - Math.round(Number(order.additional_charges || 0))).toLocaleString()}</span>
                     </div>
+                    <div className="flex justify-between gap-3"><span className="text-muted-foreground">Delivery & Service Charges</span><span className="font-medium shrink-0">Rs. {(Number(order.additional_charges || 0) + Number(order.delivery_charges || 0)).toLocaleString()}</span></div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Received from Customer</span>
                       <span className="font-medium">Rs. {(order.paid_amount_pkr ?? 0).toLocaleString()}</span>
