@@ -21,3 +21,5 @@
 - [x] Raise Android minimum SDK to 24 for Play automatic protection and verify the release setting
 - [x] Prepare Play Store screenshots, icon, feature graphic, listing text and publication checklist
 - [x] Update feature graphic with transparent uploaded logo and match web/Android/iOS icons
+- [x] Item-level manager pricing, rider per-item amount + photo + receipt, bill verification, outstanding/refund notices, refund account + screenshot, Ready for Delivery gate, delivery proof for customer and manager
+- [ ] WhatsApp refund notice — waits on the "tabedaar_refund_due" template being approved in WhatsApp Manager
