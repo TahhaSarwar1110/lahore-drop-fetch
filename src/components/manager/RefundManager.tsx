@@ -11,6 +11,7 @@ import { StorageImage } from "@/components/StorageImage";
 import { toast } from "sonner";
 import { HandCoins, Upload } from "lucide-react";
 import { REFUND_STATUS_LABELS } from "@/utils/orderFinancials";
+import { triggerNotification } from "@/utils/notify";
 
 interface RefundManagerProps {
   orderId: string;
@@ -20,6 +21,7 @@ interface RefundManagerProps {
   refundReference: string | null;
   refundNotes: string | null;
   refundProofUrl: string | null;
+  refundAccount?: { bank: string | null; title: string | null; number: string | null };
   onUpdate: () => void;
 }
 
@@ -31,6 +33,7 @@ export const RefundManager = ({
   refundReference,
   refundNotes,
   refundProofUrl,
+  refundAccount,
   onUpdate,
 }: RefundManagerProps) => {
   const [method, setMethod] = useState(refundMethod || "");
@@ -66,6 +69,9 @@ export const RefundManager = ({
         p_proof_name: proofName,
       });
       if (error) throw error;
+      if (status === "completed") {
+        void triggerNotification({ event_type: "refund_completed", order_id: orderId });
+      }
       toast.success(`Refund marked as ${REFUND_STATUS_LABELS[status]}`);
       setProofFile(null);
       onUpdate();
@@ -92,6 +98,19 @@ export const RefundManager = ({
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Refund Due to Customer</span>
           <span className="font-semibold">Rs. {balance.toLocaleString()}</span>
+        </div>
+
+        <div className="rounded-md border p-3 text-sm space-y-1">
+          <p className="font-medium">Customer Refund Account</p>
+          {refundAccount?.number ? (
+            <>
+              <p><span className="text-muted-foreground">Bank / Wallet:</span> {refundAccount.bank}</p>
+              <p><span className="text-muted-foreground">Account Title:</span> {refundAccount.title}</p>
+              <p className="break-all"><span className="text-muted-foreground">Account / IBAN:</span> {refundAccount.number}</p>
+            </>
+          ) : (
+            <p className="text-muted-foreground">The customer has not shared refund account details yet.</p>
+          )}
         </div>
 
         {refundProofUrl && (
@@ -130,7 +149,7 @@ export const RefundManager = ({
               <Textarea id="refund-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="refund-proof">Refund Proof (image)</Label>
+              <Label htmlFor="refund-proof">Refund Payment Screenshot (shown to the customer)</Label>
               <Input
                 id="refund-proof"
                 type="file"

@@ -7,6 +7,8 @@ import { triggerNotification } from "@/utils/notify";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { getItemTotalPrice } from "@/utils/orderPricing";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X } from "lucide-react";
@@ -20,6 +22,7 @@ interface OrderItem {
   approved_by: string | null;
   approved_at: string | null;
   image_url: string | null;
+  manager_price_pkr?: number | null;
 }
 
 interface OrderItemApprovalProps {
@@ -33,6 +36,7 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
   const [feedbackMap, setFeedbackMap] = useState<Record<string, string>>({});
   const [statusMap, setStatusMap] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [priceMap, setPriceMap] = useState<Record<string, string>>({});
 
   // Initialize feedback and status maps with existing data from items
   useEffect(() => {
@@ -44,11 +48,26 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
       }
       initialStatus[item.id] = item.approval_status;
     });
+    const initialPrice: Record<string, string> = {};
+    items.forEach(item => {
+      initialPrice[item.id] = item.manager_price_pkr != null ? String(item.manager_price_pkr) : "";
+    });
+    setPriceMap(initialPrice);
     setFeedbackMap(initialFeedback);
     setStatusMap(initialStatus);
   }, [items]);
 
+  const parsePrice = (id: string) => {
+    const n = parseInt((priceMap[id] || "").replace(/[^0-9]/g, ""), 10);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
+  const originalPrice = (item: OrderItem) => item.manager_price_pkr ?? null;
+
   const handleApprove = (itemId: string) => {
+    if (!parsePrice(itemId)) {
+      toast.error("Enter the verified price for this item before approving");
+      return;
+    }
     setStatusMap(prev => ({ ...prev, [itemId]: "approved" }));
     toast.success("Item marked as approved. Click 'Save Changes' to confirm.");
   };
@@ -72,42 +91,28 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
       // Track which items were modified
       const modifiedItemsList: OrderItem[] = [];
 
-      // Save all items with changed status or feedback
-      const updates = items.map(async (item) => {
+      // Save each changed item through the server (sequential: each recalculates the order total)
+      for (const item of items) {
         const newStatus = statusMap[item.id];
         const newFeedback = feedbackMap[item.id] || null;
-        
-        // Check if anything changed
+        const newPrice = parsePrice(item.id);
         const statusChanged = newStatus !== item.approval_status;
         const feedbackChanged = newFeedback !== item.manager_feedback;
-        
+        const priceChanged = newPrice !== originalPrice(item);
+        if (!statusChanged && !feedbackChanged && !priceChanged) continue;
+        if (newStatus === "rejected" && !newFeedback) throw new Error("Feedback is required for rejected items");
+        if (newStatus === "approved" && !newPrice) throw new Error("Enter the verified price for every approved item");
+        const { error } = await supabase.rpc("review_order_item", {
+          p_item_id: item.id,
+          p_status: newStatus,
+          p_feedback: newFeedback ?? "",
+          p_manager_price: newPrice as number,
+        });
+        if (error) throw error;
         if (statusChanged || feedbackChanged) {
-          // Validate rejection has feedback
-          if (newStatus === "rejected" && !newFeedback) {
-            throw new Error("Feedback is required for rejected items");
-          }
-
-          const { error } = await supabase
-            .from("order_items")
-            .update({
-              approval_status: newStatus,
-              approved_by: user.id,
-              approved_at: new Date().toISOString(),
-              manager_feedback: newFeedback,
-            })
-            .eq("id", item.id);
-
-          if (error) throw error;
-          
-          modifiedItemsList.push({
-            ...item,
-            approval_status: newStatus,
-            manager_feedback: newFeedback,
-          });
+          modifiedItemsList.push({ ...item, approval_status: newStatus, manager_feedback: newFeedback });
         }
-      });
-
-      await Promise.all(updates);
+      }
 
       // Send notifications for each modified item
       for (const item of modifiedItemsList) {
@@ -195,7 +200,8 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
   const hasChanges = items.some((item) => {
     const statusChanged = statusMap[item.id] !== item.approval_status;
     const feedbackChanged = (feedbackMap[item.id] || null) !== item.manager_feedback;
-    return statusChanged || feedbackChanged;
+    const priceChanged = parsePrice(item.id) !== originalPrice(item);
+    return statusChanged || feedbackChanged || priceChanged;
   });
 
   return (
@@ -313,9 +319,32 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
                 )}
               </div>
 
+              {/* Verified price */}
+              {isLocked ? (
+                item.manager_price_pkr != null && (
+                  <div className="flex justify-between text-sm border-t pt-3">
+                    <span className="font-semibold">Manager Verified Price</span>
+                    <span className="font-bold text-primary">PKR {item.manager_price_pkr.toLocaleString()}</span>
+                  </div>
+                )
+              ) : null}
+
               {/* Feedback Section - Only show if not locked */}
               {!isLocked && (
                 <div className="space-y-3 pt-4 border-t">
+                  <div>
+                    <Label htmlFor={`price-${item.id}`}>Manager Verified Price (PKR, total for this item)</Label>
+                    <Input
+                      id={`price-${item.id}`}
+                      inputMode="numeric"
+                      value={priceMap[item.id] || ""}
+                      onChange={(e) => setPriceMap(prev => ({ ...prev, [item.id]: e.target.value.replace(/[^0-9]/g, "") }))}
+                      placeholder={`Customer expected: ${getItemTotalPrice(item.item_data).toLocaleString()}`}
+                      className="mt-1"
+                      disabled={isSaving}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Required to approve. The order total is updated from these prices.</p>
+                  </div>
                   <div>
                     <Label htmlFor={`feedback-${item.id}`}>
                       Manager Feedback {item.approval_status === "pending" && "(Optional for approval, Required for rejection)"}

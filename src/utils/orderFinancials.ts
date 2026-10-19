@@ -94,3 +94,22 @@ export const REFUND_STATUS_LABELS: Record<string, string> = {
   completed: "Refunded",
   failed: "Refund Failed",
 };
+
+/** Goods total from manager-verified item prices (rejected items excluded). */
+export const getManagerItemsTotal = (
+  items: { approval_status?: string | null; manager_price_pkr?: number | null }[]
+): number =>
+  items
+    .filter((i) => i.approval_status === "approved")
+    .reduce((sum, i) => sum + (i.manager_price_pkr ?? 0), 0);
+
+/** Rider shopping bill = sum of actual amounts paid per item. */
+export const getShoppingBill = (pickups: { actual_paid_pkr?: number | null }[]): number =>
+  pickups.reduce((sum, p) => sum + (p.actual_paid_pkr ?? 0), 0);
+
+/** Manager may release the order for delivery only once money is settled. */
+export const canMarkReadyForDelivery = (
+  expenseStatus: string | null | undefined,
+  balance: number | null | undefined,
+  refundStatus: string | null | undefined
+): boolean => isFinanciallySettled(expenseStatus, balance, refundStatus);

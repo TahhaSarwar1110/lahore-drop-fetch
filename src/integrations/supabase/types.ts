@@ -49,31 +49,43 @@ export type Database = {
       }
       item_pickups: {
         Row: {
+          actual_paid_pkr: number | null
           created_at: string | null
           id: string
           order_item_id: string
           picked_at: string | null
           pickup_proof_name: string | null
           pickup_proof_url: string | null
+          receipt_name: string | null
+          receipt_url: string | null
           rider_id: string
+          updated_at: string | null
         }
         Insert: {
+          actual_paid_pkr?: number | null
           created_at?: string | null
           id?: string
           order_item_id: string
           picked_at?: string | null
           pickup_proof_name?: string | null
           pickup_proof_url?: string | null
+          receipt_name?: string | null
+          receipt_url?: string | null
           rider_id: string
+          updated_at?: string | null
         }
         Update: {
+          actual_paid_pkr?: number | null
           created_at?: string | null
           id?: string
           order_item_id?: string
           picked_at?: string | null
           pickup_proof_name?: string | null
           pickup_proof_url?: string | null
+          receipt_name?: string | null
+          receipt_url?: string | null
           rider_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -387,6 +399,7 @@ export type Database = {
           item_data: Json
           item_type: string
           manager_feedback: string | null
+          manager_price_pkr: number | null
           order_id: string
           pickup_latitude: number | null
           pickup_longitude: number | null
@@ -401,6 +414,7 @@ export type Database = {
           item_data: Json
           item_type: string
           manager_feedback?: string | null
+          manager_price_pkr?: number | null
           order_id: string
           pickup_latitude?: number | null
           pickup_longitude?: number | null
@@ -415,6 +429,7 @@ export type Database = {
           item_data?: Json
           item_type?: string
           manager_feedback?: string | null
+          manager_price_pkr?: number | null
           order_id?: string
           pickup_latitude?: number | null
           pickup_longitude?: number | null
@@ -542,6 +557,11 @@ export type Database = {
           payment_verification: string
           payment_verified_at: string | null
           payment_verified_by: string | null
+          ready_for_delivery_at: string | null
+          ready_for_delivery_by: string | null
+          refund_account_bank: string | null
+          refund_account_number: string | null
+          refund_account_title: string | null
           refund_completed_at: string | null
           refund_completed_by: string | null
           refund_method: string | null
@@ -600,6 +620,11 @@ export type Database = {
           payment_verification?: string
           payment_verified_at?: string | null
           payment_verified_by?: string | null
+          ready_for_delivery_at?: string | null
+          ready_for_delivery_by?: string | null
+          refund_account_bank?: string | null
+          refund_account_number?: string | null
+          refund_account_title?: string | null
           refund_completed_at?: string | null
           refund_completed_by?: string | null
           refund_method?: string | null
@@ -658,6 +683,11 @@ export type Database = {
           payment_verification?: string
           payment_verified_at?: string | null
           payment_verified_by?: string | null
+          ready_for_delivery_at?: string | null
+          ready_for_delivery_by?: string | null
+          refund_account_bank?: string | null
+          refund_account_number?: string | null
+          refund_account_title?: string | null
           refund_completed_at?: string | null
           refund_completed_by?: string | null
           refund_method?: string | null
@@ -1099,14 +1129,36 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_ready_for_delivery: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
       normalize_profile_phone: { Args: { raw: string }; Returns: string }
       reopen_shopping_expense: {
         Args: { p_order_id: string; p_reason?: string }
         Returns: undefined
       }
+      review_order_item: {
+        Args: {
+          p_feedback: string
+          p_item_id: string
+          p_manager_price: number
+          p_status: string
+        }
+        Returns: undefined
+      }
       rider_assigned_to_order: {
         Args: { _order_id: string; _rider_id: string }
         Returns: boolean
+      }
+      save_refund_account: {
+        Args: {
+          p_bank: string
+          p_number: string
+          p_order_id: string
+          p_title: string
+        }
+        Returns: undefined
       }
       submit_customer_payment: {
         Args: {
@@ -1116,6 +1168,17 @@ export type Database = {
           p_order_id: string
         }
         Returns: undefined
+      }
+      submit_item_purchase: {
+        Args: {
+          p_amount: number
+          p_item_id: string
+          p_pickup_name: string
+          p_pickup_path: string
+          p_receipt_name: string
+          p_receipt_path: string
+        }
+        Returns: boolean
       }
       submit_shopping_expense: {
         Args: { p_amount: number; p_notes?: string; p_order_id: string }

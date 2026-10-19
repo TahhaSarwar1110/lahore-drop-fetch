@@ -113,6 +113,13 @@
       "when": 1792309915521,
       "tag": "0015_customer_payment_declared_amount",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792442358546,
+      "tag": "0016_item_pricing_purchases_ready_for_delivery",
+      "breakpoints": true
     }
   ]
 }
