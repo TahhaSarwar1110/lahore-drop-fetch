@@ -57,7 +57,7 @@ interface Plan { template: string; key: string; params: string[] }
 /** Builds the template + params only if the database confirms the event really happened. */
 async function plan(db: Db, event: string, orderId: string, version: string | undefined, name: string): Promise<Plan | null> {
   const { data: o } = await db.from("orders")
-    .select("id, status, confirmed_at, payment_status, payment_verification, paid_amount_pkr, additional_charges, delivery_charges, delivery_payment_status, delivered_at")
+    .select("id, status, confirmed_at, payment_status, payment_verification, paid_amount_pkr, customer_balance_pkr, additional_charges, delivery_charges, delivery_payment_status, delivered_at")
     .eq("id", orderId).maybeSingle();
   if (!o) return null;
   const no = orderId.slice(0, 8);
@@ -147,6 +147,17 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
       if (!count) return null;
       return { template: "tabedaar_items_picked_up", key: `${orderId}:items_picked_up`, params: [name, no] };
     }
+    case "outstanding_payment_due": {
+      const owed = -num(-(o.customer_balance_pkr ?? 0)) || Math.max(0, -(o.customer_balance_pkr ?? 0));
+      if (owed <= 0) return null;
+      return { template: "tabedaar_payment_pending", key: `${orderId}:outstanding:${owed}`, params: [name, no, rs(owed), "Remaining shopping amount"] };
+    }
+    case "refund_due": {
+      const due = num(o.customer_balance_pkr);
+      if (due <= 0) return null;
+      // Requires the "tabedaar_refund_due" template (name, order, amount) approved in WhatsApp Manager.
+      return { template: "tabedaar_refund_due", key: `${orderId}:refund_due:${due}`, params: [name, no, rs(due)] };
+    }
     case "order_delivered":
       if (o.status !== "delivered" && !o.delivered_at) return null;
       return { template: "tabedaar_order_delivered", key: `${orderId}:order_delivered`, params: [name, no, rs((await goods()) + num(o.delivery_charges))] };
@@ -158,6 +169,7 @@ export const WHATSAPP_EVENTS = new Set([
   "items_reviewed", "payment_required_after_review",
   "order_confirmed", "delivery_payment_requested", "payment_confirmed",
   "delivery_payment_confirmed", "rider_assigned", "order_picked_up", "order_delivered",
+  "outstanding_payment_due", "refund_due",
 ]);
 
 /** Never throws. */

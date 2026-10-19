@@ -163,6 +163,31 @@ const RECIPES: Record<string, Recipe> = {
     title: "Order status updated",
     message: "Your order #{order} status changed to {status}.",
   },
+  all_items_picked: {
+    audiences: ["manager", "admin"],
+    title: "All items picked",
+    message: "All items are picked for order #{order}. Please verify the total paid bill (Rs. {amount}).",
+  },
+  outstanding_payment_due: {
+    audiences: ["customer"],
+    title: "Remaining payment required",
+    message: "The actual shopping bill for order #{order} is higher than your payment. Please pay the remaining Rs. {amount} so we can proceed with delivery.",
+  },
+  refund_due: {
+    audiences: ["customer"],
+    title: "Refund on the way",
+    message: "The actual shopping bill for order #{order} was lower than your payment. Your balance of Rs. {amount} will be refunded to the account details you share in the order.",
+  },
+  refund_completed: {
+    audiences: ["customer"],
+    title: "Refund completed",
+    message: "Your refund of Rs. {amount} for order #{order} has been sent. The payment screenshot is in your order details.",
+  },
+  ready_for_delivery: {
+    audiences: ["customer", "rider"],
+    title: "Ready for delivery",
+    message: "Payment for order #{order} is settled and it is ready for delivery.",
+  },
   delivery_issue: {
     audiences: ["manager", "admin"],
     title: "Delivery issue",
@@ -231,12 +256,14 @@ serve(async (req) => {
       id: string;
       user_id: string;
       status: string;
+      customer_balance_pkr: number | null;
+      shopping_expense_pkr: number | null;
     } | null = null;
 
     if (body.order_id) {
       const { data } = await admin
         .from("orders")
-        .select("id, user_id, status")
+        .select("id, user_id, status, customer_balance_pkr, shopping_expense_pkr")
         .eq("id", body.order_id)
         .maybeSingle();
       order = data ?? null;
@@ -317,6 +344,25 @@ serve(async (req) => {
       order_id: body.order_id,
       count: unique.length,
     });
+
+    // Money events use authoritative amounts from the order, never the caller's.
+    const serverAmount = (() => {
+      if (!order) return null;
+      const bal = order.customer_balance_pkr ?? 0;
+      switch (body.event_type) {
+        case "all_items_picked": return (order.shopping_expense_pkr ?? 0).toLocaleString("en-PK");
+        case "outstanding_payment_due": return bal < 0 ? Math.abs(bal).toLocaleString("en-PK") : null;
+        case "refund_due":
+        case "refund_completed": return bal > 0 ? bal.toLocaleString("en-PK") : null;
+        default: return undefined;
+      }
+    })();
+    if (serverAmount === null) {
+      return new Response(JSON.stringify({ success: true, skipped: "state_not_met" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (serverAmount !== undefined) body.amount = serverAmount;
 
     const render = (tpl: string) =>
       tpl
@@ -566,6 +612,10 @@ serve(async (req) => {
       delivery_payment_confirmed: [{ title: "Delivery payment confirmed", message: "Your delivery payment for order #{order} has been confirmed." }],
       rider_assigned: [{ title: "Rider assigned", message: "A rider has been assigned to your order #{order} and will pick up your items soon." }],
       order_picked_up: [{ title: "Items picked up", message: "Our rider has picked up the items for your order #{order}. They are on their way to you.", once: true }],
+      outstanding_payment_due: [{ title: "Remaining payment required", message: "The actual shopping bill for your order #{order} came to more than you paid. Please open your order and pay the remaining Rs. {amount} so we can proceed with delivery. You can see the rider's item photos and receipts in the order." }],
+      refund_due: [{ title: "Refund on the way", message: "The actual shopping bill for your order #{order} was lower than your payment. Your balance of Rs. {amount} will be refunded - please open your order and share your bank or wallet account details." }],
+      refund_completed: [{ title: "Refund completed", message: "Your refund of Rs. {amount} for order #{order} has been sent. You can see the payment screenshot in your order details." }],
+      ready_for_delivery: [{ title: "Ready for delivery", message: "Payment for your order #{order} is settled and your items are ready for delivery." }],
       order_delivered: [{ title: "Order delivered", message: "Your order #{order} has been delivered. Thank you for choosing Tabedaar.com!" }],
     };
     const emailDefs = EMAILS[body.event_type];
@@ -590,6 +640,24 @@ serve(async (req) => {
         }
       } catch (e) {
         log("email_failed", { event_type: body.event_type, message: String((e as Error)?.message ?? e) });
+      }
+    }
+
+    // Staff email (shared inbox forwards to managers) when the rider finished shopping.
+    if (body.event_type === "all_items_picked" && order) {
+      try {
+        const r = await sendTemplateEmail("order-update", "contact@tabedaar.com", {
+          templateData: {
+            name: "Manager",
+            title: "All items picked - verify bill",
+            message: render("All items are picked against order #{order}. Please verify the total paid bill of Rs. {amount}."),
+            orderLink: `https://tabedaar.com/manager/orders/${order.id}`,
+          },
+          idempotencyKey: `all-items-picked-${order.id}-${order.shopping_expense_pkr ?? 0}`,
+        });
+        log("staff_email_sent", { sent: r.sent });
+      } catch (e) {
+        log("staff_email_failed", { message: String((e as Error)?.message ?? e) });
       }
     }
 
