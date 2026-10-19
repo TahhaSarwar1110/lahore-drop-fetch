@@ -595,6 +595,17 @@ const PlaceOrder = () => {
                           * Delivery charges will be billed separately after your goods are purchased and weighed.
                         </p>
                       )}
+
+                      <div className="flex gap-2.5 p-3 mt-2 rounded-xl border border-secondary/25 bg-secondary/5">
+                        <Info className="h-4 w-4 mt-0.5 shrink-0 text-secondary" aria-hidden="true" />
+                        <p className="text-xs leading-relaxed text-foreground">
+                          <span className="font-semibold">Please note:</span> the total bill shown above is an estimate.
+                          After shopping, the actual item prices and delivery charges are verified, so the final bill
+                          can be <span className="font-semibold">more or less than the amount you paid</span>. If it is
+                          more, you will be asked to pay the remaining amount before delivery. If it is less, the extra
+                          balance will be refunded to your account.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </section>
