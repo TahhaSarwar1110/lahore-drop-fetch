@@ -277,6 +277,12 @@ const TrackOrder = () => {
           : null,
       },
       {
+        key: "ready_for_delivery",
+        label: ["Ready for Delivery", "In Delivery", "Delivered"].includes(orderData.status) ? "Ready for Delivery" : "Payment Settlement Pending",
+        isCompleted: ["Ready for Delivery", "In Delivery", "Delivered"].includes(orderData.status),
+        timestamp: getHistoryTimestamp("Ready for Delivery"),
+      },
+      {
         key: "delivered",
         label: isDelivered ? "Order Delivered" : "Delivery Pending",
         isCompleted: isDelivered,
