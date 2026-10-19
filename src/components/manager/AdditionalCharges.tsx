@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign } from "lucide-react";
+import { triggerNotification } from "@/utils/notify";
 
 interface AdditionalChargesProps {
   orderId: string;
@@ -41,6 +42,12 @@ export const AdditionalCharges = ({
 
       if (error) throw error;
 
+      const { data: order } = await supabase.from("orders").select("expense_status, customer_balance_pkr").eq("id", orderId).single();
+      const balance = order?.customer_balance_pkr ?? 0;
+      if (order?.expense_status === "verified" && balance !== 0) {
+        void triggerNotification({ event_type: balance < 0 ? "outstanding_payment_due" : "refund_due", order_id: orderId, event_version: `b${balance}` });
+      }
+
       toast.success("Additional charges updated successfully");
       onUpdate();
     } catch (error) {
@@ -56,10 +63,10 @@ export const AdditionalCharges = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <DollarSign className="h-5 w-5" />
-          Additional Service Charges
+          Delivery & Service Charges (Bundle)
         </CardTitle>
         <CardDescription>
-          Add any extra charges for this order
+          {currentDescription || "Applied pricing bundle"}
         </CardDescription>
       </CardHeader>
       <CardContent>

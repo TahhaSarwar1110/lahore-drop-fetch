@@ -8,6 +8,14 @@ export type RefundStatus = "none" | "pending" | "initiated" | "completed" | "fai
 export const getOutstandingAmount = (orderTotal: number, paidAmount: number): number =>
   Math.max(0, orderTotal - paidAmount);
 
+/** The stored initial payable includes the bundle; the displayed Order Total is goods only. */
+export const getGoodsOrderTotal = (initialPayable: number, bundleCharges: number = 0): number =>
+  Math.max(0, initialPayable - Math.round(bundleCharges));
+
+/** Bundle and third-party delivery charges are separate from goods and counted once. */
+export const getSettlementTotal = (goods: number, bundleCharges: number = 0, deliveryCharges: number = 0): number =>
+  goods + Math.round(bundleCharges) + Math.round(deliveryCharges);
+
 /** Declared funds affect the customer display only; never operational readiness. */
 export const getCustomerPaymentDisplay = (target: number, verified: number, submitted: number, verification: string) => {
   const pendingAmount = verification === "pending" ? Math.max(0, submitted) : 0;
@@ -30,14 +38,15 @@ export const hasVerifiedOrderPayment = (
   orderTotal: number | null | undefined,
   paidAmount: number,
   verification: string | null | undefined,
-  legacyStatus: string | null | undefined
+  legacyStatus: string | null | undefined,
+  deliveryCharges: number = 0
 ): boolean => orderTotal == null
   ? legacyStatus === "confirmed"
-  : canApproveOrder(orderTotal, paidAmount, verification);
+  : canApproveOrder(orderTotal + Math.round(deliveryCharges), paidAmount, verification);
 
 /** Customer balance = verified payment − verified shopping expense. */
-export const getCustomerBalance = (paidAmount: number, shoppingExpense: number): number =>
-  paidAmount - shoppingExpense;
+export const getCustomerBalance = (paidAmount: number, shoppingExpense: number, bundleCharges: number = 0, deliveryCharges: number = 0): number =>
+  paidAmount - getSettlementTotal(shoppingExpense, bundleCharges, deliveryCharges);
 
 /** Refund is due only when the balance is positive. */
 export const getRefundDue = (balance: number): number => Math.max(0, balance);

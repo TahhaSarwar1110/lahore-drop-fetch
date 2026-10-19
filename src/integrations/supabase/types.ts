@@ -1134,6 +1134,10 @@ export type Database = {
         Returns: undefined
       }
       normalize_profile_phone: { Args: { raw: string }; Returns: string }
+      order_settlement_total: {
+        Args: { p_bundle: number; p_delivery: number; p_goods: number }
+        Returns: number
+      }
       reopen_shopping_expense: {
         Args: { p_order_id: string; p_reason?: string }
         Returns: undefined

@@ -388,7 +388,7 @@ const OrderDetails = () => {
               </p>
               {calculateTotal() > 0 && (
                 <p className="text-sm font-medium">
-                  Order Total (incl. service charges): <span className="text-primary text-lg">PKR {(calculateTotal() + (order.additional_charges || 0)).toLocaleString()}</span>
+                  Order Total: <span className="text-primary text-lg">PKR {calculateTotal().toLocaleString()}</span>
                 </p>
               )}
             </div>
@@ -407,6 +407,8 @@ const OrderDetails = () => {
                 expenseStatus={order.expense_status}
                 customerBalance={order.customer_balance_pkr}
                 refundStatus={order.refund_status || "none"}
+                bundleCharges={Number(order.additional_charges || 0)}
+                deliveryCharges={Number(order.delivery_charges || 0)}
               />
             </div>
           )}
@@ -488,7 +490,7 @@ const OrderDetails = () => {
           )}
 
           {/* Delivery Charges (out-of-city/country only, after manager has set them) */}
-          {order.delivery_type && order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
+          {order.order_total_pkr == null && order.delivery_type && order.delivery_type !== "within_city" && order.delivery_charges_set_at && (
             <div className="mb-6">
               <DeliveryPaymentUpload
                 orderId={order.id}

@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StorageImage } from "@/components/StorageImage";
 import { getItemTotalPrice } from "@/utils/orderPricing";
-import { getCustomerPaymentDisplay } from "@/utils/orderFinancials";
+import { getCustomerPaymentDisplay, getGoodsOrderTotal, getSettlementTotal } from "@/utils/orderFinancials";
 import { splitCustomerOrders } from "@/utils/customerOrders";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -25,6 +25,9 @@ interface CustomerOrder {
   customer_submitted_amount_pkr: number;
   payment_verification: string;
   additional_charges: number | null;
+  delivery_charges: number;
+  shopping_expense_pkr: number | null;
+  expense_status: string | null;
   order_items: { item_type: string; item_data: Json; approval_status: string | null; image_url: string | null }[];
 }
 
@@ -37,7 +40,7 @@ export function CustomerHome({ userId }: { userId: string }) {
     setLoading(true);
     setError(false);
     const { data, error: queryError } = await supabase.from("orders")
-      .select("id,status,created_at,delivery_address,order_total_pkr,paid_amount_pkr,customer_submitted_amount_pkr,payment_verification,additional_charges,order_items(item_type,item_data,approval_status,image_url)")
+      .select("id,status,created_at,delivery_address,order_total_pkr,paid_amount_pkr,customer_submitted_amount_pkr,payment_verification,additional_charges,delivery_charges,shopping_expense_pkr,expense_status,order_items(item_type,item_data,approval_status,image_url)")
       .eq("user_id", userId).order("created_at", { ascending: false });
     if (queryError) setError(true);
     else setOrders(data ?? []);
@@ -56,8 +59,10 @@ export function CustomerHome({ userId }: { userId: string }) {
   const groups = splitCustomerOrders(orders);
   const renderOrder = (order: CustomerOrder) => {
     const items = order.order_items.filter(item => item.approval_status !== "rejected");
-    const total = order.order_total_pkr ?? items.reduce((sum, item) => sum + getItemTotalPrice(item.item_data as Record<string, string>), 0) + (order.additional_charges ?? 0);
-    const payment = getCustomerPaymentDisplay(total, order.paid_amount_pkr, order.customer_submitted_amount_pkr, order.payment_verification);
+    const charges = Number(order.additional_charges ?? 0) + Number(order.delivery_charges ?? 0);
+    const total = order.order_total_pkr == null ? items.reduce((sum, item) => sum + getItemTotalPrice(item.item_data as Record<string, string>), 0) : getGoodsOrderTotal(order.order_total_pkr, Number(order.additional_charges ?? 0));
+    const target = getSettlementTotal(order.expense_status === "verified" && order.shopping_expense_pkr != null ? order.shopping_expense_pkr : total, Number(order.additional_charges ?? 0), Number(order.delivery_charges ?? 0));
+    const payment = getCustomerPaymentDisplay(target, order.paid_amount_pkr, order.customer_submitted_amount_pkr, order.payment_verification);
     const image = items.find(item => item.image_url)?.image_url;
     return <Card key={order.id} className="rounded-lg overflow-hidden">
       <CardContent className="p-5 space-y-4">
@@ -71,6 +76,7 @@ export function CustomerHome({ userId }: { userId: string }) {
         </div>
         <p className="flex gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4 shrink-0 mt-0.5" /><span className="line-clamp-2 break-words">{order.delivery_address}</span></p>
         <div className="border-t pt-3 space-y-2 text-sm"><div className="flex justify-between gap-2"><span className="text-muted-foreground">Order total</span><span className="font-semibold">Rs. {total.toLocaleString()}</span></div><div className="flex justify-between gap-2"><span className="text-muted-foreground">Outstanding</span><span>Rs. {payment.outstanding.toLocaleString()}</span></div></div>
+        <div className="flex justify-between gap-2 text-sm"><span className="text-muted-foreground">Delivery & Service Charges</span><span className="shrink-0">Rs. {charges.toLocaleString()}</span></div>
         {payment.pendingAmount > 0 && <p className="text-xs text-muted-foreground">Rs. {payment.pendingAmount.toLocaleString()} awaiting verification</p>}
         <Button variant="outline" className="w-full" onClick={() => navigate(`/order-details?orderId=${order.id}`)}>View Order<ArrowRight className="h-4 w-4" /></Button>
       </CardContent>

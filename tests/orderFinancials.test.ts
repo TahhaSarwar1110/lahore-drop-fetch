@@ -14,6 +14,10 @@ import {
 } from "../src/utils/orderFinancials";
 
 describe("order financial reconciliation rules", () => {
+  it("requires separate delivery charges in verified assignment payment without doubling the bundle", () => {
+    expect(hasVerifiedOrderPayment(12699, 12699, "verified", "confirmed", 500)).toBe(false);
+    expect(hasVerifiedOrderPayment(12699, 13199, "verified", "confirmed", 500)).toBe(true);
+  });
   it("updates customer amount paid and outstanding immediately without enabling unverified orders", () => {
     expect(getCustomerPaymentDisplay(7299, 0, 7299, "pending")).toEqual({ amountPaid: 7299, pendingAmount: 7299, outstanding: 0 });
     expect(hasVerifiedOrderPayment(7299, 0, "pending", "submitted")).toBe(false);

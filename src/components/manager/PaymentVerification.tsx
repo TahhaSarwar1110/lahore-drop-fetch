@@ -10,7 +10,7 @@ import { StorageImage } from "@/components/StorageImage";
 import { toast } from "sonner";
 import { Banknote, ShieldCheck, ShieldX, ExternalLink } from "lucide-react";
 import { openAttachment } from "@/utils/attachmentStorage";
-import { getOutstandingAmount, PAYMENT_VERIFICATION_LABELS } from "@/utils/orderFinancials";
+import { getOutstandingAmount, getGoodsOrderTotal, getSettlementTotal, PAYMENT_VERIFICATION_LABELS } from "@/utils/orderFinancials";
 import { triggerNotification } from "@/utils/notify";
 
 interface PaymentVerificationProps {
@@ -24,6 +24,9 @@ interface PaymentVerificationProps {
   paymentSubmittedAt: string | null;
   shoppingExpense?: number | null;
   expenseStatus?: string | null;
+  bundleCharges?: number;
+  deliveryCharges?: number;
+  chargesDescription?: string | null;
   onUpdate: () => void;
 }
 
@@ -39,6 +42,9 @@ export function PaymentVerification(props: PaymentVerificationProps) {
     paymentSubmittedAt,
     shoppingExpense,
     expenseStatus,
+    bundleCharges = 0,
+    deliveryCharges = 0,
+    chargesDescription,
     onUpdate,
   } = props;
   const [amount, setAmount] = useState<string>("");
@@ -60,9 +66,10 @@ export function PaymentVerification(props: PaymentVerificationProps) {
   }, [loadProofs]);
 
   const expenseVerified = expenseStatus === "verified" && typeof shoppingExpense === "number";
-  const settlementTarget = expenseVerified ? shoppingExpense : orderTotal;
+  const goodsTotal = getGoodsOrderTotal(orderTotal, bundleCharges);
+  const settlementTarget = getSettlementTotal(expenseVerified ? shoppingExpense : goodsTotal, bundleCharges, deliveryCharges);
   const remainingToSettle = Math.max(0, settlementTarget - paidAmount);
-  const settled = expenseVerified && paidAmount >= (shoppingExpense as number);
+  const settled = expenseVerified && paidAmount >= settlementTarget;
 
   // Merge the legacy proof stored on the order with the proof history,
   // so orders placed before proof history existed still show every payment.
@@ -80,7 +87,7 @@ export function PaymentVerification(props: PaymentVerificationProps) {
   })();
 
   const parsedAmount = parseInt(amount.replace(/[^0-9]/g, ""), 10);
-  const outstanding = getOutstandingAmount(orderTotal, paidAmount);
+  const outstanding = getOutstandingAmount(settlementTarget, paidAmount);
 
   const submit = async (approved: boolean) => {
     if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
@@ -136,7 +143,7 @@ export function PaymentVerification(props: PaymentVerificationProps) {
         <div className="grid gap-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Order Total</span>
-            <span className="font-medium">Rs. {orderTotal.toLocaleString()}</span>
+            <span className="font-medium">Rs. {goodsTotal.toLocaleString()}</span>
           </div>
           {expenseVerified && (
             <div className="flex justify-between">
@@ -144,6 +151,13 @@ export function PaymentVerification(props: PaymentVerificationProps) {
               <span className="font-medium">Rs. {(shoppingExpense as number).toLocaleString()}</span>
             </div>
           )}
+          <div className="flex justify-between gap-3">
+            <span className="text-muted-foreground">Delivery & Service Charges (Bundle)</span>
+            <span className="font-medium shrink-0">Rs. {bundleCharges.toLocaleString()}</span>
+          </div>
+          {chargesDescription && <p className="text-xs text-muted-foreground">{chargesDescription}</p>}
+          {deliveryCharges > 0 && <div className="flex justify-between gap-3"><span className="text-muted-foreground">Additional Delivery Charges</span><span className="font-medium shrink-0">Rs. {deliveryCharges.toLocaleString()}</span></div>}
+          <div className="flex justify-between gap-3"><span className="text-muted-foreground">{expenseVerified ? "Total Settlement Bill" : "Total Payable"}</span><span className="font-medium shrink-0">Rs. {settlementTarget.toLocaleString()}</span></div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Verified Amount Received</span>
             <span className="font-medium">Rs. {paidAmount.toLocaleString()}</span>
@@ -156,7 +170,7 @@ export function PaymentVerification(props: PaymentVerificationProps) {
               </div>
             ) : (
               <p className="text-xs text-green-700 dark:text-green-300">
-                Payment fully covers the shopping expense — settlement can be marked done.
+                Payment covers shopping and delivery/service charges. Any excess must be refunded before delivery.
               </p>
             )
           ) : (
@@ -227,9 +241,7 @@ export function PaymentVerification(props: PaymentVerificationProps) {
             <div className="flex gap-2">
               <Button onClick={() => submit(true)} disabled={saving} loading={saving} className="flex-1">
                 <ShieldCheck className="h-4 w-4 mr-1" />
-                {settled || (expenseVerified && Number.isFinite(parsedAmount) && paidAmount + parsedAmount >= (shoppingExpense as number))
-                  ? "Verify & Mark Settlement Done"
-                  : "Verify Payment"}
+                Verify Payment
               </Button>
               <Button variant="destructive" onClick={() => submit(false)} disabled={saving} loading={saving} className="flex-1">
                 <ShieldX className="h-4 w-4 mr-1" />

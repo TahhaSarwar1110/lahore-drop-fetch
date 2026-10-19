@@ -120,6 +120,13 @@
       "when": 1792442358546,
       "tag": "0016_item_pricing_purchases_ready_for_delivery",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792445175692,
+      "tag": "0017_include_separate_charges_in_settlement",
+      "breakpoints": true
     }
   ]
 }
