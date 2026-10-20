@@ -126,7 +126,7 @@ export const ItemPurchaseForm = ({ orderId, itemId, initialAmount, onSaved }: It
           </div>
         )}
         {photos.length < MAX_PHOTOS && (
-          <ImageSourcePicker onFiles={addPhotos} disabled={saving} cameraLabel="Take Photo" galleryLabel="Gallery" />
+          <ImageSourcePicker multiple onFiles={addPhotos} disabled={saving} cameraLabel="Take Photo" galleryLabel="Gallery" />
         )}
       </div>
       <Button onClick={save} disabled={saving} className="w-full">

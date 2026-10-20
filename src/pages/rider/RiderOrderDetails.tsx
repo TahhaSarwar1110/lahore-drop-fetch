@@ -14,7 +14,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CustomerContactCard } from "@/components/rider/CustomerContactCard";
 import { ItemPurchaseForm } from "@/components/rider/ItemPurchaseForm";
-import { REFUND_STATUS_LABELS, EXPENSE_STATUS_LABELS, canRiderDeliver, getAmountOwed } from "@/utils/orderFinancials";
+import { getPickupProofs } from "@/utils/pickupProofs";
+import { REFUND_STATUS_LABELS, EXPENSE_STATUS_LABELS, canRiderDeliver, canSkipReadyForDelivery, getAmountOwed } from "@/utils/orderFinancials";
 
 interface OrderItem {
   id: string;
@@ -32,6 +33,9 @@ interface OrderItem {
     pickup_proof_name: string | null;
     actual_paid_pkr: number | null;
     receipt_url: string | null;
+    proof_files: { path: string; name: string }[] | null;
+    not_available: boolean;
+    unavailable_reason: string | null;
   };
 }
 
@@ -54,6 +58,8 @@ interface OrderDetails {
   customer_balance_pkr: number | null;
   refund_status: string;
   ready_for_delivery_at: string | null;
+  delivery_proof_url: string | null;
+  delivery_proof_name: string | null;
   profiles: {
     full_name: string;
     phone: string;
@@ -105,6 +111,8 @@ const RiderOrderDetails = () => {
           customer_balance_pkr,
           refund_status,
           ready_for_delivery_at,
+          delivery_proof_url,
+          delivery_proof_name,
           profiles (
             full_name,
             phone
@@ -114,7 +122,7 @@ const RiderOrderDetails = () => {
         .single();
 
       if (orderError) throw orderError;
-      setOrder(orderData);
+      setOrder(orderData as any);
 
       // Fetch order items
       const { data: itemsData, error: itemsError } = await supabase
@@ -139,7 +147,7 @@ const RiderOrderDetails = () => {
         pickup: pickupsData?.find(p => p.order_item_id === item.id),
       })) || [];
 
-      setItems(itemsWithPickups);
+      setItems(itemsWithPickups as any);
     } catch (error) {
       console.error("Error fetching order details:", error);
       toast.error("Failed to load order details");
@@ -193,28 +201,39 @@ const RiderOrderDetails = () => {
 
 
 
-      // Update order status to Delivered with proof
       const { error: updateError } = await supabase
         .from("orders")
-        .update({
-          status: "Delivered",
-          delivery_proof_url: fileName,
-          delivery_proof_name: file.name,
-          delivered_at: new Date().toISOString(),
-        })
-        .eq("id", orderId);
-
+        .update({ delivery_proof_url: fileName, delivery_proof_name: file.name })
+        .eq("id", orderId as string);
       if (updateError) throw updateError;
+      toast.success("Delivery proof uploaded. Tap Mark as Delivered to finish.");
+      await fetchOrderDetails();
+    } catch (error) {
+      console.error("Error uploading delivery proof:", error);
+      toast.error((error as any)?.message || "Failed to upload delivery proof");
+    } finally {
+      setDeliveringOrder(false);
+    }
+  };
 
+  const [markingDelivered, setMarkingDelivered] = useState(false);
+  const handleMarkDelivered = async () => {
+    if (!order?.delivery_proof_url) return toast.error("Upload the delivery proof first");
+    try {
+      setMarkingDelivered(true);
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: "Delivered", delivered_at: new Date().toISOString() })
+        .eq("id", orderId as string);
+      if (error) throw error;
       await triggerNotification({ event_type: "order_delivered", order_id: orderId });
-
       toast.success("Order marked as delivered successfully!");
       navigate("/orders");
     } catch (error) {
       console.error("Error marking order as delivered:", error);
       toast.error((error as any)?.message || "Failed to mark order as delivered");
     } finally {
-      setDeliveringOrder(false);
+      setMarkingDelivered(false);
     }
   };
 
@@ -225,7 +244,7 @@ const RiderOrderDetails = () => {
   const activeItems = items.filter(item => item.approval_status !== "rejected");
   const allItemsPicked = activeItems.length > 0 && activeItems.every(item => item.pickup && (item.pickup.actual_paid_pkr != null || order?.order_total_pkr == null));
   const canEditPurchases = !order?.expense_status || order.expense_status === "rejected";
-  const releasedForDelivery = !order || order.order_total_pkr == null || !!order.ready_for_delivery_at;
+  const releasedForDelivery = !order || order.order_total_pkr == null || !!order.ready_for_delivery_at || canSkipReadyForDelivery(order.expense_status, order.customer_balance_pkr);
   const deliveryPaymentOk =
     !order ||
     order.order_total_pkr != null || order.delivery_type === "within_city" ||
@@ -417,7 +436,7 @@ const RiderOrderDetails = () => {
                         ? "Waiting for the manager to verify the shopping bill."
                         : getAmountOwed(order.customer_balance_pkr) > 0
                         ? `The customer must pay the remaining Rs. ${getAmountOwed(order.customer_balance_pkr).toLocaleString()} and the manager must verify it.`
-                        : `The manager must refund Rs. ${(order.customer_balance_pkr ?? 0).toLocaleString()} to the customer and mark it completed.`}
+                        : "Waiting for the manager."}
                     </p>
                   </CardContent>
                 </Card>
@@ -436,7 +455,9 @@ const RiderOrderDetails = () => {
               {allItemsPicked && order.status !== "Delivered" && order.status !== "In Delivery" && deliveryPaymentOk && settlementOk && releasedForDelivery && order.order_total_pkr != null && (
                 <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
                   <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <p className="text-sm text-green-800 dark:text-green-200 font-medium">Ready for Delivery — start when you leave.</p>
+                    <p className="text-sm text-green-800 dark:text-green-200 font-medium break-words">
+                      {order.ready_for_delivery_at ? "Ready for Delivery — start when you leave." : `Bill verified — a Rs. ${(order.customer_balance_pkr ?? 0).toLocaleString()} refund is owed to the customer, which the manager will handle. You can start delivery.`}
+                    </p>
                     <Button onClick={handleStartDelivery} disabled={startingDelivery}>Start Delivery</Button>
                   </CardContent>
                 </Card>
@@ -444,25 +465,26 @@ const RiderOrderDetails = () => {
 
               {allItemsPicked && order.status !== "Delivered" && deliveryPaymentOk && settlementOk && releasedForDelivery && (order.status === "In Delivery" || order.order_total_pkr == null) && (
                 <Card className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-2">
-                        <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
-                        <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                          All items picked! Upload delivery proof to complete the order.
-                        </p>
-                      </div>
-                      <ImageSourcePicker
-                        className="w-full sm:w-auto"
-                        onFiles={(files) => {
-                          const file = files[0];
-                          if (file) handleDeliveryProofUpload(file);
-                        }}
-                        disabled={deliveringOrder}
-                        cameraLabel="Take Photo"
-                        galleryLabel="Gallery"
-                      />
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Check className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
+                      <p className="text-sm text-green-800 dark:text-green-200 font-medium">
+                        {order.delivery_proof_url ? "Delivery proof uploaded. Mark the order as delivered." : "Step 1: upload a delivery proof photo."}
+                      </p>
                     </div>
+                    {order.delivery_proof_url && (
+                      <StorageImage bucket="pickup-proofs" src={order.delivery_proof_url} alt="Delivery proof" className="h-40 w-full sm:w-64 object-cover rounded-md border" />
+                    )}
+                    <ImageSourcePicker
+                      className="w-full sm:w-auto"
+                      onFiles={(files) => { const file = files[0]; if (file) handleDeliveryProofUpload(file); }}
+                      disabled={deliveringOrder || markingDelivered}
+                      cameraLabel={order.delivery_proof_url ? "Retake Photo" : "Take Photo"}
+                      galleryLabel="Gallery"
+                    />
+                    <Button className="w-full sm:w-auto" onClick={handleMarkDelivered} disabled={!order.delivery_proof_url || markingDelivered || deliveringOrder}>
+                      Mark as Delivered
+                    </Button>
                   </CardContent>
                 </Card>
               )}
@@ -514,7 +536,9 @@ const RiderOrderDetails = () => {
                                 )}
                               </div>
                             </div>
-                            {item.pickup ? (
+                            {item.pickup?.not_available ? (
+                              <Badge variant="destructive" className="flex-shrink-0">Not Available</Badge>
+                            ) : item.pickup ? (
                               <Badge className="bg-green-500 flex-shrink-0">
                                 <Check className="h-3 w-3 mr-1" />
                                 Picked
@@ -579,19 +603,16 @@ const RiderOrderDetails = () => {
                                 Picked at: {new Date(item.pickup.picked_at).toLocaleString()}
                                 {item.pickup.actual_paid_pkr != null && ` · Paid Rs. ${item.pickup.actual_paid_pkr.toLocaleString()}`}
                               </p>
+                              {item.pickup.not_available && item.pickup.unavailable_reason && (
+                                <p className="text-sm text-destructive break-words">Not available: {item.pickup.unavailable_reason}</p>
+                              )}
                               <div className="flex flex-wrap gap-3">
-                                {item.pickup.pickup_proof_url && (
-                                  <a href="#" onClick={(event) => { event.preventDefault(); if (item.pickup?.pickup_proof_url) void openAttachment(item.pickup.pickup_proof_url, "pickup-proofs"); }}
+                                {getPickupProofs(item.pickup).map((pf, i) => (
+                                  <a key={pf.path} href="#" onClick={(event) => { event.preventDefault(); void openAttachment(pf.path, "pickup-proofs"); }}
                                     className="text-xs text-primary hover:underline flex items-center gap-1">
-                                    <ImageIcon className="h-3 w-3" /> View item photo
+                                    <ImageIcon className="h-3 w-3" /> Proof {i + 1}
                                   </a>
-                                )}
-                                {item.pickup.receipt_url && (
-                                  <a href="#" onClick={(event) => { event.preventDefault(); if (item.pickup?.receipt_url) void openAttachment(item.pickup.receipt_url, "pickup-proofs"); }}
-                                    className="text-xs text-primary hover:underline flex items-center gap-1">
-                                    <ImageIcon className="h-3 w-3" /> View receipt
-                                  </a>
-                                )}
+                                ))}
                               </div>
                             </div>
                           ) : canEditPurchases ? (
