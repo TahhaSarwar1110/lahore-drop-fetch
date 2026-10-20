@@ -23,8 +23,9 @@ interface ItemPurchase {
   name: string;
   managerPrice: number | null;
   actualPaid: number | null;
-  pickupUrl: string | null;
-  receiptUrl: string | null;
+  proofs: { path: string; name: string }[];
+  notAvailable: boolean;
+  unavailableReason: string | null;
 }
 
 interface ExpenseReviewProps {

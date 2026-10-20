@@ -48,6 +48,9 @@ interface ItemPickup {
   actual_paid_pkr: number | null;
   pickup_proof_url: string | null;
   receipt_url: string | null;
+  proof_files?: unknown;
+  not_available?: boolean;
+  unavailable_reason?: string | null;
 }
 
 interface Order {
