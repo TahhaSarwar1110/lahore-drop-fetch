@@ -8,6 +8,8 @@ import {
   isFinanciallySettled,
   getAmountOwed,
   canRiderDeliver,
+  canSkipReadyForDelivery,
+  getItemPaidAmount,
   hasVerifiedOrderPayment,
   getCustomerPaymentDisplay,
   isValidCustomerPaymentAmount,
@@ -87,8 +89,9 @@ describe("order financial reconciliation rules", () => {
     expect(canRiderDeliver(16000, "verified", balance, "none")).toBe(true);
   });
 
-  it("blocks delivery until the refund is completed", () => {
-    expect(canRiderDeliver(16000, "verified", 4000, "initiated")).toBe(false);
+  it("lets the rider deliver while a refund is still owed to the customer", () => {
+    expect(canRiderDeliver(16000, "verified", 4000, "pending")).toBe(true);
+    expect(canRiderDeliver(16000, "verified", 4000, "initiated")).toBe(true);
     expect(canRiderDeliver(16000, "verified", 4000, "completed")).toBe(true);
   });
 
@@ -106,5 +109,16 @@ describe("order financial reconciliation rules", () => {
   it("is never settled before the expense is verified", () => {
     expect(isFinanciallySettled("pending_review", 4000, "completed")).toBe(false);
     expect(isFinanciallySettled(null, null, "none")).toBe(false);
+  });
+
+  it("refund-owed orders skip the manager Ready mark; zero or owed balances do not", () => {
+    expect(canSkipReadyForDelivery("verified", 301)).toBe(true);
+    expect(canSkipReadyForDelivery("verified", 0)).toBe(false);
+    expect(canSkipReadyForDelivery("verified", -300)).toBe(false);
+    expect(canSkipReadyForDelivery("pending_review", 301)).toBe(false);
+  });
+  it("records a not-available item at Rs. 0", () => {
+    expect(getItemPaidAmount(true, 4500)).toBe(0);
+    expect(getItemPaidAmount(false, 4500)).toBe(4500);
   });
 });
