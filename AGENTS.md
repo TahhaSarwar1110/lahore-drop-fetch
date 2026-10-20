@@ -1,6 +1,6 @@
 # Project architecture
 
-- Mobile password login resolves existing profile contacts only inside phone-login; keep privileged lookup and publishable password-validation clients separate, return tokens only after Auth validation, and never expose registered emails through anonymous lookups.
+- Password login resolves mobile and email profile contacts only inside phone-login, including legacy phone-alias accounts; keep privileged lookup and publishable password-validation clients separate and never expose emails before authentication. New registrations prefer real Auth email when supplied and retain synthetic aliases for phone-only accounts; no-session signup requires email confirmation.
 
 - Customer home queries only the signed-in customer's orders and separates active from closed history; public and staff home experiences stay unchanged.
 - Shared Button reports click feedback, Promise-aware loading and explicit loading states to the singleton ScreenLoader via reference-counted tokens; keep labels visible and do not infer pending work from disabled permissions, so concurrent actions share one screen overlay without premature dismissal.

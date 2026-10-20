@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { resolveLoginEmail } from "@/utils/phoneAuth";
 import logo from "@/assets/tabedaar-logo.png";
 
 const loginSchema = z.object({
@@ -62,14 +61,9 @@ const Login = () => {
 
       // Older accounts use real auth emails, while new accounts use phone aliases.
       // Resolve mobile contacts privately on the server, not via a public email lookup.
-      const { data, error } = validatedData.identifier.includes("@")
-        ? await supabase.auth.signInWithPassword({
-            email: resolveLoginEmail(validatedData.identifier),
-            password: validatedData.password,
-          })
-        : await (async () => {
+      const { data, error } = await (async () => {
             const { data: tokens, error: loginError } = await supabase.functions.invoke("phone-login", {
-              body: { phone: validatedData.identifier, password: validatedData.password },
+              body: { identifier: validatedData.identifier, password: validatedData.password },
             });
             if (loginError || !tokens?.access_token || !tokens?.refresh_token) {
               return { data: { session: null }, error: { message: "Invalid login credentials" } };
@@ -82,7 +76,7 @@ const Login = () => {
         toast({
           title: "Login Failed",
           description: error.message === "Invalid login credentials" 
-            ? "Invalid mobile number or password" 
+            ? "Invalid mobile number, email or password" 
             : error.message,
           variant: "destructive",
         });
