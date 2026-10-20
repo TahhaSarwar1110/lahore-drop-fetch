@@ -57,6 +57,7 @@ const sections = [
     title: "8. Acceptable Use",
     paragraphs: [
       "Do not request prohibited or unlawful goods, upload content you are not entitled to share, submit false payment proof, interfere with the service, or attempt to access another person's account or order. We may refuse requests that cannot lawfully or safely be fulfilled.",
+      "Items purchased by our riders or team members on your behalf belong entirely to you and have nothing to do with the company beyond the shopping facility itself. Tabedaar's purpose is only to provide the shopping and delivery facility; any bad, improper, or illegal use of a purchased item after purchase is solely the customer's responsibility, and Tabedaar will not be responsible for it.",
     ],
   },
   {
@@ -80,7 +81,7 @@ const TermsOfService = () => (
     <main className="flex-1 py-12">
       <div className="container mx-auto px-4 max-w-3xl">
         <h1 className="text-3xl font-bold mb-2">Terms of Service</h1>
-        <p className="text-muted-foreground text-sm mb-8">Last updated: 15 October 2026</p>
+        <p className="text-muted-foreground text-sm mb-8">Last updated: 20 October 2026</p>
         <div className="space-y-8">
           {sections.map((section) => (
             <section key={section.title}>
