@@ -24,3 +24,4 @@
 - [x] Item-level manager pricing, rider per-item amount + photo + receipt, bill verification, outstanding/refund notices, refund account + screenshot, Ready for Delivery gate, delivery proof for customer and manager
 - [ ] WhatsApp refund notice — waits on the "tabedaar_refund_due" template being approved in WhatsApp Manager
 - [x] Separate goods totals and bundle/delivery charges; reconcile payments and refunds against goods expense plus charges.
+- [x] Repair mobile login for existing email-created accounts without exposing registered email addresses; verified reported account reaches Rider Dashboard.
