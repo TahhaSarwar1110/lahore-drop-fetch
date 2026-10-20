@@ -25,4 +25,5 @@
 - [ ] WhatsApp refund notice — waits on the "tabedaar_refund_due" template being approved in WhatsApp Manager
 - [x] Separate goods totals and bundle/delivery charges; reconcile payments and refunds against goods expense plus charges.
 - [x] Repair mobile login for existing email-created accounts without exposing registered email addresses; verified reported account reaches Rider Dashboard.
-- [ ] Allow mobile-only, email-only, or both at registration and either saved contact at login for old and new accounts.
+- [x] Allow mobile-only, email-only, or both at registration and either saved contact at login for old and new accounts; verified all new registration/login combinations.
+- [ ] Remove four Contact Registration Test accounts — requesting account is a manager, so admin-authorized deletion is required.
