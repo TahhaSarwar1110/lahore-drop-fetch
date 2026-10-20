@@ -82,7 +82,16 @@ export const canRiderDeliver = (
 ): boolean =>
   orderTotal === null || orderTotal === undefined
     ? true
-    : isFinanciallySettled(expenseStatus, balance, refundStatus);
+    : expenseStatus === "verified" && balance !== null && balance !== undefined && balance >= 0;
+
+/** A refund owed to the customer lets the rider start delivery without the manager's Ready mark. */
+export const canSkipReadyForDelivery = (
+  expenseStatus: string | null | undefined,
+  balance: number | null | undefined
+): boolean => expenseStatus === "verified" && (balance ?? 0) > 0;
+
+/** Not-available items are always recorded at Rs. 0. */
+export const getItemPaidAmount = (notAvailable: boolean, amount: number): number => (notAvailable ? 0 : amount);
 
 export const PAYMENT_VERIFICATION_LABELS: Record<string, string> = {
   pending: "Pending Verification",
@@ -120,5 +129,5 @@ export const getShoppingBill = (pickups: { actual_paid_pkr?: number | null }[]):
 export const canMarkReadyForDelivery = (
   expenseStatus: string | null | undefined,
   balance: number | null | undefined,
-  refundStatus: string | null | undefined
-): boolean => isFinanciallySettled(expenseStatus, balance, refundStatus);
+  _refundStatus?: string | null | undefined
+): boolean => expenseStatus === "verified" && balance !== null && balance !== undefined && balance >= 0;
