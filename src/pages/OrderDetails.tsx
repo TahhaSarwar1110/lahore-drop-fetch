@@ -1,3 +1,4 @@
+import { getPickupProofs } from "@/utils/pickupProofs";
 import { StorageImage } from "@/components/StorageImage";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -184,7 +185,7 @@ const OrderDetails = () => {
     if (itemIds.length) {
       const { data: pickupData } = await supabase
         .from("item_pickups")
-        .select("order_item_id, picked_at, actual_paid_pkr, pickup_proof_url, receipt_url")
+        .select("order_item_id, picked_at, actual_paid_pkr, pickup_proof_url, pickup_proof_name, receipt_url, receipt_name, proof_files, not_available, unavailable_reason")
         .in("order_item_id", itemIds);
       setPickups(pickupData ?? []);
     } else {
@@ -605,22 +606,16 @@ const OrderDetails = () => {
                             )}
                           </div>
                         )}
-                        {(pk?.pickup_proof_url || pk?.receipt_url) && (
+                        {pk?.not_available && (
+                          <p className="mt-3 text-sm text-destructive break-words">Not available at the shop{pk.unavailable_reason ? `: ${pk.unavailable_reason}` : ""} — charged Rs. 0</p>
+                        )}
+                        {getPickupProofs(pk).length > 0 && (
                           <div className="mt-3">
                             <p className="text-sm font-medium mb-1">Shopping Proof</p>
-                            <div className="grid grid-cols-2 gap-2">
-                              {pk?.pickup_proof_url && (
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Picked item</p>
-                                  <StorageImage bucket="pickup-proofs" src={pk.pickup_proof_url} alt="Picked item" className="h-32 w-full rounded-md border object-cover" />
-                                </div>
-                              )}
-                              {pk?.receipt_url && (
-                                <div>
-                                  <p className="text-xs text-muted-foreground mb-1">Receipt</p>
-                                  <StorageImage bucket="pickup-proofs" src={pk.receipt_url} alt="Receipt" className="h-32 w-full rounded-md border object-cover" />
-                                </div>
-                              )}
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {getPickupProofs(pk).map((f, i) => (
+                                <StorageImage key={f.path} bucket="pickup-proofs" src={f.path} alt={`Proof ${i + 1}`} className="h-32 w-full rounded-md border object-cover" />
+                              ))}
                             </div>
                           </div>
                         )}
