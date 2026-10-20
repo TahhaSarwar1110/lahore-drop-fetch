@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { normalizePhoneDigits, phoneToSyntheticEmail } from "@/utils/phoneAuth";
+import { createContactSignupSchema } from "@/utils/signupValidation";
 import logo from "@/assets/tabedaar-logo.png";
 
 const countryCodes = [
@@ -45,15 +46,7 @@ const createSignupSchema = (countryCode: string) => {
   const country = countryCodes.find(c => c.code === countryCode);
   const countryName = country?.country || "selected country";
   
-  return z.object({
-    fullName: z.string().trim().min(2, "Name must be at least 2 characters"),
-    phone: z.string().trim()
-      .min(minLength, `Phone number must be ${minLength === maxLength ? minLength : `${minLength}-${maxLength}`} digits for ${countryName}`)
-      .max(maxLength, `Phone number must be ${minLength === maxLength ? minLength : `${minLength}-${maxLength}`} digits for ${countryName}`)
-      .regex(/^\d+$/, "Phone number must contain only digits"),
-    email: z.string().trim().email("Enter a valid email address").optional().or(z.literal("")),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-  });
+  return createContactSignupSchema(minLength, maxLength, countryName);
 };
 
 const Signup = () => {
@@ -81,16 +74,16 @@ const Signup = () => {
         password,
       });
 
-      // Phone-only signup: derive the account email from the phone number.
-      // The optional real email is stored on the profile for order emails,
-      // password-reset support and account recovery.
-      const accountEmail = phoneToSyntheticEmail(fullPhoneNumber);
+      const realEmail = validatedData.email?.toLowerCase() || "";
+      const normalizedPhone = validatedData.phone ? `+${normalizePhoneDigits(fullPhoneNumber)}` : "";
+      // Prefer a real auth email when supplied; preserve phone-only aliases.
+      const accountEmail = realEmail || phoneToSyntheticEmail(fullPhoneNumber);
 
       // Server-side uniqueness pre-check so the customer gets a clear
       // message before account creation is attempted.
       const { data: availability } = await supabase.rpc("check_signup_contact", {
-        p_phone: `+${normalizePhoneDigits(fullPhoneNumber)}`,
-        p_email: validatedData.email || null,
+        p_phone: normalizedPhone || null,
+        p_email: realEmail || null,
       });
       const taken = availability as { phone_taken?: boolean; email_taken?: boolean } | null;
       if (taken?.phone_taken) {
@@ -117,8 +110,8 @@ const Signup = () => {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: validatedData.fullName,
-            phone: `+${normalizePhoneDigits(fullPhoneNumber)}`,
-            email: validatedData.email || undefined,
+            phone: normalizedPhone,
+            email: realEmail || undefined,
           },
         },
       });
@@ -143,13 +136,16 @@ const Signup = () => {
             variant: "destructive",
           });
         }
-      } else if (data.user) {
+      } else if (data.session) {
         // The signup trigger assigns the default customer role server-side.
         toast({
           title: "Success!",
           description: "Account created successfully! Redirecting...",
         });
         setTimeout(() => navigate("/place-order"), 1500);
+      } else if (data.user) {
+        toast({ title: "Check your email", description: "Confirm your email address using the link we sent, then log in." });
+        navigate("/login");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -209,7 +205,7 @@ const Signup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="mobile-label">Mobile Number</Label>
+                <Label htmlFor="phone" className="mobile-label">Mobile Number <span className="text-muted-foreground font-normal">(optional with email)</span></Label>
                 <div className="flex gap-2">
                   <CountryCodeSelect
                     value={countryCode}
@@ -222,7 +218,6 @@ const Signup = () => {
                     placeholder={countryCodes.find(c => c.code === countryCode)?.placeholder || "Phone number"}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                    required
                     className="mobile-input flex-1"
                     maxLength={countryCodes.find(c => c.code === countryCode)?.maxLength || 11}
                   />
@@ -231,7 +226,7 @@ const Signup = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="mobile-label">
-                  Email <span className="text-muted-foreground font-normal">(optional)</span>
+                  Email <span className="text-muted-foreground font-normal">(optional with mobile)</span>
                 </Label>
                 <Input
                   id="email"

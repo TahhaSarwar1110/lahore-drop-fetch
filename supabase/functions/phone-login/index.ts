@@ -4,9 +4,10 @@ import { z } from "npm:zod@3";
 import { normalizeLoginPhone, phoneLoginCandidates } from "../_shared/phone-login.ts";
 
 const Body = z.object({
-  phone: z.string().trim().min(7).max(30).regex(/^[+\d\s()-]+$/),
+  phone: z.string().trim().min(7).max(30).regex(/^[+\d\s()-]+$/).optional(),
+  identifier: z.string().trim().min(3).max(254).optional(),
   password: z.string().min(6).max(128),
-});
+}).refine(data => Boolean(data.phone || data.identifier));
 
 Deno.serve(async (req) => {
   const respond = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
@@ -19,9 +20,13 @@ Deno.serve(async (req) => {
   try {
     const parsed = Body.safeParse(await req.json());
     if (!parsed.success) return respond({ error: "Invalid mobile number or password" }, 400);
-    const { phone, password } = parsed.data;
-    const digits = normalizeLoginPhone(phone);
-    if (digits.length < 7 || digits.length > 15) return respond({ error: "Invalid mobile number or password" }, 400);
+    const { password } = parsed.data;
+    const identifier = parsed.data.identifier || parsed.data.phone || "";
+    const isEmail = identifier.includes("@");
+    const digits = isEmail ? "" : normalizeLoginPhone(identifier);
+    if (isEmail ? !z.string().email().safeParse(identifier).success : (!/^[+\d\s()-]+$/.test(identifier) || digits.length < 7 || digits.length > 15)) {
+      return respond({ error: "Invalid mobile number or email or password" }, 400);
+    }
 
     const url = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -30,13 +35,15 @@ Deno.serve(async (req) => {
 
     // This client never signs in and never acquires a user's session.
     const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
-    const { data: profiles, error: lookupError } = await admin.from("profiles")
-      .select("id").in("phone", phoneLoginCandidates(phone)).limit(2);
+    const query = admin.from("profiles").select("id");
+    const { data: profiles, error: lookupError } = await (isEmail
+      ? query.ilike("email", identifier.toLowerCase().replace(/[\\%_]/g, "\\$&"))
+      : query.in("phone", phoneLoginCandidates(identifier))).limit(2);
     if (lookupError) return respond({ error: "Login temporarily unavailable" }, 503);
 
     // Unknown or ambiguous contacts still take the Auth password-validation path.
     // Never return a contact lookup result or a registered email to anonymous callers.
-    let email = `${digits}@tabedaar.local`;
+    let email = isEmail ? identifier.toLowerCase() : `${digits}@tabedaar.local`;
     let expectedUserId: string | undefined;
     if (profiles?.length === 1) {
       const { data, error } = await admin.auth.admin.getUserById(profiles[0].id);
@@ -50,7 +57,8 @@ Deno.serve(async (req) => {
     // Auth validates the password and applies its normal account/rate-limit rules.
     const auth = createClient(url, publicKey, { auth: { persistSession: false, autoRefreshToken: false } });
     const { data, error } = await auth.auth.signInWithPassword({ email, password });
-    if (error || !data.session || !expectedUserId || data.user?.id !== expectedUserId) {
+    if (error || !data.session || (profiles?.length ?? 0) > 1 ||
+        (expectedUserId ? data.user?.id !== expectedUserId : !isEmail)) {
       return respond({ error: "Invalid mobile number or password" }, 400);
     }
     return respond({ access_token: data.session.access_token, refresh_token: data.session.refresh_token });
