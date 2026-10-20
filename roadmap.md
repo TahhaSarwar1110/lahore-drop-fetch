@@ -27,3 +27,4 @@
 - [x] Repair mobile login for existing email-created accounts without exposing registered email addresses; verified reported account reaches Rider Dashboard.
 - [x] Allow mobile-only, email-only, or both at registration and either saved contact at login for old and new accounts; verified all new registration/login combinations.
 - [ ] Remove four Contact Registration Test accounts — requesting account is a manager, so admin-authorized deletion is required.
+- [x] Rider: multiple proofs per item, not-available items at Rs. 0, separate Mark as Delivered, refund-owed orders deliverable without waiting
