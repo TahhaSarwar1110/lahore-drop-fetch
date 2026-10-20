@@ -81,7 +81,7 @@ const TermsOfService = () => (
     <main className="flex-1 py-12">
       <div className="container mx-auto px-4 max-w-3xl">
         <h1 className="text-3xl font-bold mb-2">Terms of Service</h1>
-        <p className="text-muted-foreground text-sm mb-8">Last updated: 15 October 2026</p>
+        <p className="text-muted-foreground text-sm mb-8">Last updated: 20 October 2026</p>
         <div className="space-y-8">
           {sections.map((section) => (
             <section key={section.title}>
