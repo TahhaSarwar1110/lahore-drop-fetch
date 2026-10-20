@@ -52,39 +52,48 @@ export type Database = {
           actual_paid_pkr: number | null
           created_at: string | null
           id: string
+          not_available: boolean
           order_item_id: string
           picked_at: string | null
           pickup_proof_name: string | null
           pickup_proof_url: string | null
+          proof_files: Json
           receipt_name: string | null
           receipt_url: string | null
           rider_id: string
+          unavailable_reason: string | null
           updated_at: string | null
         }
         Insert: {
           actual_paid_pkr?: number | null
           created_at?: string | null
           id?: string
+          not_available?: boolean
           order_item_id: string
           picked_at?: string | null
           pickup_proof_name?: string | null
           pickup_proof_url?: string | null
+          proof_files?: Json
           receipt_name?: string | null
           receipt_url?: string | null
           rider_id: string
+          unavailable_reason?: string | null
           updated_at?: string | null
         }
         Update: {
           actual_paid_pkr?: number | null
           created_at?: string | null
           id?: string
+          not_available?: boolean
           order_item_id?: string
           picked_at?: string | null
           pickup_proof_name?: string | null
           pickup_proof_url?: string | null
+          proof_files?: Json
           receipt_name?: string | null
           receipt_url?: string | null
           rider_id?: string
+          unavailable_reason?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1172,6 +1181,16 @@ export type Database = {
           p_order_id: string
         }
         Returns: undefined
+      }
+      submit_item_pickup: {
+        Args: {
+          p_amount: number
+          p_item_id: string
+          p_not_available?: boolean
+          p_proofs: Json
+          p_reason?: string
+        }
+        Returns: boolean
       }
       submit_item_purchase: {
         Args: {

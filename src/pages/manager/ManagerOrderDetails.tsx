@@ -521,7 +521,7 @@ const ManagerOrderDetails = () => {
                       ? "⏳ Verify the rider's shopping expense first"
                       : (order.customer_balance_pkr ?? 0) < 0
                       ? `⏳ Customer owes Rs. ${Math.abs(order.customer_balance_pkr ?? 0).toLocaleString()} — delivery on hold`
-                      : `⏳ Refund Rs. ${(order.customer_balance_pkr ?? 0).toLocaleString()} to the customer with proof — delivery on hold`}
+                      : `💸 Refund Rs. ${(order.customer_balance_pkr ?? 0).toLocaleString()} to the customer with proof — the rider can deliver meanwhile`}
                   </p>
                   {canMarkReadyForDelivery(order.expense_status, order.customer_balance_pkr, order.refund_status) && (
                     order.ready_for_delivery_at ? (

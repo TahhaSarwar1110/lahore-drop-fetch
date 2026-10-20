@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { getPickupProofs } from "@/utils/pickupProofs";
 import { StorageImage } from "@/components/StorageImage";
 import { toast } from "sonner";
 import { Receipt, ShieldCheck, ShieldX, Undo2 } from "lucide-react";
@@ -22,8 +23,9 @@ interface ItemPurchase {
   name: string;
   managerPrice: number | null;
   actualPaid: number | null;
-  pickupUrl: string | null;
-  receiptUrl: string | null;
+  proofs: { path: string; name: string }[];
+  notAvailable: boolean;
+  unavailableReason: string | null;
 }
 
 interface ExpenseReviewProps {
@@ -72,7 +74,7 @@ export const ExpenseReview = ({
       const { data: pickups } = active.length
         ? await supabase
             .from("item_pickups")
-            .select("order_item_id, actual_paid_pkr, pickup_proof_url, receipt_url")
+            .select("order_item_id, actual_paid_pkr, pickup_proof_url, pickup_proof_name, receipt_url, receipt_name, proof_files, not_available, unavailable_reason")
             .in("order_item_id", active.map((i) => i.id))
         : { data: [] as any[] };
       setPurchases(
@@ -83,8 +85,9 @@ export const ExpenseReview = ({
             name: itemName(i.item_data as Record<string, unknown>, i.item_type),
             managerPrice: i.manager_price_pkr,
             actualPaid: p?.actual_paid_pkr ?? null,
-            pickupUrl: p?.pickup_proof_url ?? null,
-            receiptUrl: p?.receipt_url ?? null,
+            proofs: getPickupProofs(p),
+            notAvailable: !!p?.not_available,
+            unavailableReason: p?.unavailable_reason ?? null,
           };
         })
       );
@@ -151,20 +154,14 @@ export const ExpenseReview = ({
               </span>
             </span>
           </div>
-          {(p.pickupUrl || p.receiptUrl) && (
-            <div className="grid grid-cols-2 gap-2">
-              {p.pickupUrl && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Item photo</p>
-                  <StorageImage bucket="pickup-proofs" src={p.pickupUrl} alt="Picked item" className="h-28 w-full object-cover rounded-md border" />
-                </div>
-              )}
-              {p.receiptUrl && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Receipt</p>
-                  <StorageImage bucket="pickup-proofs" src={p.receiptUrl} alt="Receipt" className="h-28 w-full object-cover rounded-md border" />
-                </div>
-              )}
+          {p.notAvailable && (
+            <p className="text-sm text-destructive break-words">Not available{p.unavailableReason ? `: ${p.unavailableReason}` : ""} (Rs. 0)</p>
+          )}
+          {p.proofs.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {p.proofs.map((f: { path: string }, i: number) => (
+                <StorageImage key={f.path} bucket="pickup-proofs" src={f.path} alt={`Proof ${i + 1}`} className="h-28 w-full object-cover rounded-md border" />
+              ))}
             </div>
           )}
         </div>

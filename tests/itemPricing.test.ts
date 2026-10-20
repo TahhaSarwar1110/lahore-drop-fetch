@@ -19,11 +19,11 @@ describe("item-level pricing and settlement", () => {
     expect(balance).toBe(-399);
     expect(canMarkReadyForDelivery("verified", balance, "none")).toBe(false);
   });
-  it("includes separate delivery once and permits release only after any refund", () => {
+  it("includes separate delivery once and permits release without waiting for a refund", () => {
     expect(getSettlementTotal(10900, 1499, 500)).toBe(12899);
     expect(getCustomerBalance(12899, 10900, 1499, 500)).toBe(0);
     expect(canMarkReadyForDelivery("verified", 0, "none")).toBe(true);
-    expect(canMarkReadyForDelivery("verified", 301, "pending")).toBe(false);
+    expect(canMarkReadyForDelivery("verified", 301, "pending")).toBe(true);
     expect(canMarkReadyForDelivery("verified", 301, "completed")).toBe(true);
   });
   it("order goods total uses manager prices and excludes rejected items", () => {
@@ -44,10 +44,10 @@ describe("item-level pricing and settlement", () => {
     expect(canMarkReadyForDelivery("verified", -300, "none")).toBe(false);
   });
 
-  it("bill below payment needs a completed refund before ready for delivery", () => {
+  it("bill below payment can be released before the refund completes", () => {
     const balance = getCustomerBalance(8000, 7500);
     expect(balance).toBe(500);
-    expect(canMarkReadyForDelivery("verified", balance, "pending")).toBe(false);
+    expect(canMarkReadyForDelivery("verified", balance, "pending")).toBe(true);
     expect(canMarkReadyForDelivery("verified", balance, "completed")).toBe(true);
   });
 
