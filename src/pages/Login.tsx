@@ -60,10 +60,22 @@ const Login = () => {
     try {
       const validatedData = loginSchema.parse({ identifier, password });
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: resolveLoginEmail(validatedData.identifier),
-        password: validatedData.password,
-      });
+      // Older accounts use real auth emails, while new accounts use phone aliases.
+      // Resolve mobile contacts privately on the server, not via a public email lookup.
+      const { data, error } = validatedData.identifier.includes("@")
+        ? await supabase.auth.signInWithPassword({
+            email: resolveLoginEmail(validatedData.identifier),
+            password: validatedData.password,
+          })
+        : await (async () => {
+            const { data: tokens, error: loginError } = await supabase.functions.invoke("phone-login", {
+              body: { phone: validatedData.identifier, password: validatedData.password },
+            });
+            if (loginError || !tokens?.access_token || !tokens?.refresh_token) {
+              return { data: { session: null }, error: { message: "Invalid login credentials" } };
+            }
+            return supabase.auth.setSession({ access_token: tokens.access_token, refresh_token: tokens.refresh_token });
+          })();
 
       if (error) {
         setLoading(false);
@@ -119,6 +131,8 @@ const Login = () => {
           description: error.errors[0].message,
           variant: "destructive",
         });
+      } else {
+        toast({ title: "Login Failed", description: "Could not log in. Please try again.", variant: "destructive" });
       }
     } finally {
       setLoading(false);
