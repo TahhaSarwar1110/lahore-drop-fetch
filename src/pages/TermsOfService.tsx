@@ -57,6 +57,7 @@ const sections = [
     title: "8. Acceptable Use",
     paragraphs: [
       "Do not request prohibited or unlawful goods, upload content you are not entitled to share, submit false payment proof, interfere with the service, or attempt to access another person's account or order. We may refuse requests that cannot lawfully or safely be fulfilled.",
+      "Items purchased by our riders or team members on your behalf belong entirely to you and have nothing to do with the company beyond the shopping facility itself. Tabedaar's purpose is only to provide the shopping and delivery facility; any bad, improper, or illegal use of a purchased item after purchase is solely the customer's responsibility, and Tabedaar will not be responsible for it.",
     ],
   },
   {
