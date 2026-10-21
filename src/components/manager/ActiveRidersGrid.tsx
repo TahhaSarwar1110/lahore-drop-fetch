@@ -28,6 +28,7 @@ export const ActiveRidersGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRider, setSelectedRider] = useState<RiderWithOrder | null>(null);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
+  const [ordersDialogRider, setOrdersDialogRider] = useState<RiderWithOrder | null>(null);
 
   useEffect(() => {
     fetchActiveRiders();
