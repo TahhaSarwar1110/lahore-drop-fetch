@@ -25,6 +25,7 @@ import { PaymentSummary } from "@/components/customer/PaymentSummary";
 import { DeliveryPaymentUpload } from "@/components/customer/DeliveryPaymentUpload";
 import { RiderContactDialog } from "@/components/customer/RiderContactDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { RiderRatingBadge, RiderReviewForm, useRiderRating } from "@/components/RiderRating";
 import { ArrowLeft, Trash2, Plus, Save, User } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -435,9 +436,13 @@ const OrderDetails = () => {
                         {order.order_assignments.profiles.full_name}
                       </Button>
                     </RiderContactDialog>
+                    <RiderRatingBadge summary={riderRating.summary} className="block" />
                     <p className="text-xs text-muted-foreground">Click name for contact details</p>
                   </div>
                 </div>
+                {order.status === "Delivered" && (
+                  <RiderReviewForm orderId={order.id} onSaved={riderRating.reload} />
+                )}
               </CardContent>
             </Card>
           )}
