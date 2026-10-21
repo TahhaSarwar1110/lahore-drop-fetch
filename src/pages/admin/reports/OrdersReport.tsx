@@ -220,7 +220,7 @@ const OrdersReport = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredOrders.slice(0, 50).map((order) => {
+                  {filteredOrders.map((order) => {
                     const totalValue = order.order_items?.reduce((sum, item) => {
                       const price = parseFloat(
                         item.item_data?.["Price (PKR)"] ||
@@ -274,11 +274,7 @@ const OrdersReport = () => {
           )}
         </div>
 
-        {filteredOrders.length > 50 && (
-          <p className="text-sm text-muted-foreground text-center">
-            Showing 50 of {filteredOrders.length} orders
-          </p>
-        )}
+
       </div>
     </ReportsLayout>
   );

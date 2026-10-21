@@ -82,8 +82,7 @@ const SalesReport = () => {
 
   const topCustomers = Object.entries(customerSpending)
     .map(([id, data]) => ({ id, ...data }))
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
+    .sort((a, b) => b.total - a.total);
 
   // Chart data
   const chartData = revenueByDay.slice(-14).map(item => ({

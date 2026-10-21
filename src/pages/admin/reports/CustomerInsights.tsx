@@ -240,7 +240,7 @@ const CustomerInsights = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {customerData.slice(0, 20).map((customer) => (
+                  {customerData.map((customer) => (
                     <TableRow key={customer.id}>
                       <TableCell className="font-medium">{customer.name}</TableCell>
                       <TableCell>
