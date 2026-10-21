@@ -30,5 +30,5 @@
 - [x] Rider: multiple proofs per item, not-available items at Rs. 0, separate Mark as Delivered, refund-owed orders deliverable without waiting
 - [x] Add pagination across web data tables without changing search, sorting or exports
 - [x] Replace manager active-rider cards with a paginated data table and verify signed-in flow
-- [ ] Add admin financial totals for received sales, actual spending, completed refunds and charges
-- [ ] Add separate admin report for pending refunds and outstanding customer payments; verify calculations and signed-in views
+- [x] Add admin financial totals for received sales, actual spending, completed refunds and charges
+- [x] Add separate admin report for pending refunds and outstanding customer payments; verify calculations and signed-in views
