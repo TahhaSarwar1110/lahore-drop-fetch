@@ -45,6 +45,19 @@ export const getCompletedRefundsFromEvents = (events: ReportFinancialEvent[]) =>
 };
 
 export const getReportOrderFinancials = (order: ReportFinancialOrder) => {
+  if (!isReportableOrder(order)) {
+    return {
+      received: 0,
+      shopping: 0,
+      service: 0,
+      delivery: 0,
+      charges: 0,
+      completedRefund: 0,
+      pendingRefund: 0,
+      outstanding: 0,
+      target: null as number | null,
+    };
+  }
   const received = Math.max(0, order.paid_amount_pkr || 0);
   const shopping = Math.max(0, order.shopping_expense_pkr ?? 0);
   const service = Math.round(order.additional_charges ?? 0);
