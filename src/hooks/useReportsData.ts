@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfDay, subDays, startOfWeek, startOfMonth, format } from "date-fns";
-import { getCompletedRefundsFromEvents, getReportFinancialTotals, type ReportFinancialOrder, type ReportFinancialEvent } from "@/utils/reportFinancials";
+import { getCompletedRefundsFromEvents, getReportFinancialTotals, isReportableOrder, type ReportFinancialOrder, type ReportFinancialEvent } from "@/utils/reportFinancials";
 
 export interface OrderWithDetails extends ReportFinancialOrder {
   id: string;
@@ -139,17 +139,21 @@ export const useReportsData = () => {
     return itemsTotal + (order.additional_charges || 0);
   };
 
-  const totalRevenue = orders
+  const reportableOrders = orders.filter(isReportableOrder);
+
+  const totalRevenue = reportableOrders
     .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const totalRevenueThisMonth = ordersThisMonth
+    .filter(isReportableOrder)
     .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const totalRevenueLastMonth = ordersLastMonth
+    .filter(isReportableOrder)
     .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const deliveredOrders = orders.filter(o => o.status === "Delivered");
-  const paidOrders = orders.filter(o => o.paid_amount_pkr > 0);
+  const paidOrders = reportableOrders.filter(o => o.paid_amount_pkr > 0);
   const avgOrderValue = paidOrders.length > 0
     ? totalRevenue / paidOrders.length
     : 0;
@@ -193,7 +197,9 @@ export const useReportsData = () => {
     const dayOrders = orders.filter(o => 
       format(new Date(o.created_at), "yyyy-MM-dd") === dateStr
     );
-    const revenue = dayOrders.reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
+    const revenue = dayOrders
+      .filter(isReportableOrder)
+      .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
     return {
       date: dateStr,
       revenue,

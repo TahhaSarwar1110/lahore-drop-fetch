@@ -1,10 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { getCompletedRefundsFromEvents, getReportFinancialTotals, getReportOrderFinancials, type ReportFinancialOrder } from "../src/utils/reportFinancials";
+import { getCompletedRefundsFromEvents, getReportFinancialTotals, getReportOrderFinancials, isReportableOrder, type ReportFinancialOrder } from "../src/utils/reportFinancials";
 
 const order: ReportFinancialOrder = {
   paid_amount_pkr: 12700, shopping_expense_pkr: 10900, expense_status: "verified",
   order_total_pkr: 12699, additional_charges: 1499, delivery_charges: 0,
   customer_balance_pkr: 301, refund_status: "pending",
+  status: "Delivered",
 };
 
 describe("admin financial reports", () => {
@@ -43,5 +44,19 @@ describe("admin financial reports", () => {
     const result = getReportOrderFinancials({ ...order, expense_status: "pending_review" });
     expect(result.received).toBe(12700);
     expect(result.pendingRefund).toBe(0);
+  });
+  it("excludes pending and not-yet-confirmed orders from every financial total", () => {
+    expect(getReportFinancialTotals([{ ...order, status: "Pending" }]).received).toBe(0);
+    expect(getReportFinancialTotals([{ ...order, status: "Order Received" }]).received).toBe(0);
+    expect(getReportFinancialTotals([{ ...order, status: "Pending" }]).outstanding).toBe(0);
+    expect(getReportOrderFinancials({ ...order, status: "Order Received" }).pendingRefund).toBe(0);
+    expect(getReportFinancialTotals([{ ...order, status: "Order Confirmed" }]).received).toBe(12700);
+  });
+  it("flags only pre-confirmation statuses as unreportable", () => {
+    expect(isReportableOrder({ status: "Pending", confirmed_at: null })).toBe(false);
+    expect(isReportableOrder({ status: "Order Received", confirmed_at: null })).toBe(false);
+    expect(isReportableOrder({ status: "Order Confirmed", confirmed_at: "2026-10-21T00:00:00Z" })).toBe(true);
+    expect(isReportableOrder({ status: "Delivered", confirmed_at: null })).toBe(true);
+    expect(isReportableOrder({ status: "Cancelled", confirmed_at: null })).toBe(true);
   });
 });
