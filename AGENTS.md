@@ -1,5 +1,7 @@
 # Project architecture
 
+- Shared Table paginates rendered data rows after consumer filtering/sorting, resets on row identity changes, and keeps pagination outside horizontal scrolling; consumers must pass complete datasets (not presentation slices) so reports and exports retain all records.
+
 - Password login resolves mobile and email profile contacts only inside phone-login, including legacy phone-alias accounts; keep privileged lookup and publishable password-validation clients separate and never expose emails before authentication. New registrations prefer real Auth email when supplied and retain synthetic aliases for phone-only accounts; no-session signup requires email confirmation.
 
 - Customer home queries only the signed-in customer's orders and separates active from closed history; public and staff home experiences stay unchanged.

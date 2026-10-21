@@ -1,13 +1,43 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { TablePagination } from "@/components/ui/table-pagination";
+import { getTablePage } from "@/utils/tablePagination";
 
-const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
-  ({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
-      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
-    </div>
-  ),
+interface TableProps extends React.HTMLAttributes<HTMLTableElement> {
+  paginate?: boolean;
+}
+
+const Table = React.forwardRef<HTMLTableElement, TableProps>(
+  ({ className, children, paginate = true, ...props }, ref) => {
+    const [pageSize, setPageSize] = React.useState(10);
+    const [selection, setSelection] = React.useState({ signature: "", page: 1 });
+    const sections = React.Children.toArray(children);
+    const body = sections.find((child): child is React.ReactElement<React.HTMLAttributes<HTMLTableSectionElement>> =>
+      React.isValidElement(child) && child.type === TableBody);
+    const rows = React.Children.toArray(body?.props.children);
+    // A single spanning cell is the existing empty/loading state, not a data row.
+    const empty = rows.length === 1 && React.isValidElement<{ children?: React.ReactNode }>(rows[0]) &&
+      React.Children.toArray(rows[0].props.children).some(cell =>
+        React.isValidElement<{ colSpan?: number }>(cell) && (cell.props.colSpan ?? 1) > 1);
+    const total = empty ? 0 : rows.length;
+    const signature = rows.map(row => React.isValidElement(row) ? String(row.key) : String(row)).join("|");
+    const range = getTablePage(total, selection.signature === signature ? selection.page : 1, pageSize);
+    const enabled = paginate && !!body;
+    const visibleSections = enabled ? sections.map(section => section === body && body
+      ? React.cloneElement(body, {}, empty ? rows : rows.slice(range.start, range.end)) : section) : sections;
+
+    return (
+      <div className="relative w-full min-w-0">
+        <div className="w-full overflow-auto">
+          <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props}>{visibleSections}</table>
+        </div>
+        {enabled && <TablePagination total={total} page={range.page} pageSize={pageSize}
+          onPageChange={page => setSelection({ signature, page })}
+          onPageSizeChange={size => { setPageSize(size); setSelection({ signature, page: 1 }); }} />}
+      </div>
+    );
+  },
 );
 Table.displayName = "Table";
 

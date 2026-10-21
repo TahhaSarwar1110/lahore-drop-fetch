@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Users, Phone, Package, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { MapPin, Users, Search, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -22,6 +24,7 @@ interface RiderWithOrder {
 export const ActiveRidersGrid = () => {
   const [riders, setRiders] = useState<RiderWithOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedRider, setSelectedRider] = useState<RiderWithOrder | null>(null);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
 
@@ -95,15 +98,15 @@ export const ActiveRidersGrid = () => {
         const location = locations?.find(loc => loc.rider_id === riderId);
 
         if (riderMap.has(riderId)) {
-          const existing = riderMap.get(riderId)!;
-          existing.active_orders += 1;
+          const existing = riderMap.get(riderId);
+          if (existing) existing.active_orders += 1;
         } else {
           riderMap.set(riderId, {
             rider_id: riderId,
             rider_name: assignment.profiles?.full_name || "Unknown",
             rider_phone: assignment.profiles?.phone || "-",
-            latitude: location?.latitude || null,
-            longitude: location?.longitude || null,
+            latitude: location?.latitude ?? null,
+            longitude: location?.longitude ?? null,
             last_updated: location?.updated_at || null,
             active_orders: 1,
             current_order_status: order?.status || null,
@@ -124,17 +127,9 @@ export const ActiveRidersGrid = () => {
     setMapDialogOpen(true);
   };
 
-  const getStatusColor = (status: string | null) => {
-    const colors: Record<string, string> = {
-      "Pending": "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
-      "Order Confirmed": "bg-blue-500/10 text-blue-600 border-blue-500/20",
-      "Shopper Assigned": "bg-purple-500/10 text-purple-600 border-purple-500/20",
-      "Purchasing": "bg-orange-500/10 text-orange-600 border-orange-500/20",
-      "In Delivery": "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-      "Picked": "bg-teal-500/10 text-teal-600 border-teal-500/20",
-    };
-    return colors[status || ""] || "bg-muted text-muted-foreground";
-  };
+  const filteredRiders = riders.filter(rider =>
+    [rider.rider_name, rider.rider_phone, rider.current_order_status ?? ""].some(value =>
+      value.toLowerCase().includes(searchQuery.trim().toLowerCase())));
 
   if (loading) {
     return (
@@ -166,59 +161,44 @@ export const ActiveRidersGrid = () => {
             </Badge>
           </div>
         </CardHeader>
-        <CardContent>
-          {riders.length === 0 ? (
-            <div className="flex items-center justify-center h-32 bg-muted rounded-lg">
-              <div className="text-center text-muted-foreground">
-                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No active riders at the moment</p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {riders.map((rider) => (
-                <Card key={rider.rider_id} className="border shadow-sm">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-sm truncate">{rider.rider_name}</h3>
-                      <Badge variant="outline" className="text-xs">
-                        <Package className="h-3 w-3 mr-1" />
-                        {rider.active_orders}
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Phone className="h-3 w-3" />
-                      {rider.rider_phone}
-                    </div>
-
-                    {rider.current_order_status && (
-                      <Badge variant="outline" className={`text-xs ${getStatusColor(rider.current_order_status)}`}>
-                        {rider.current_order_status}
-                      </Badge>
-                    )}
-
-                    {rider.last_updated && (
-                      <p className="text-xs text-muted-foreground">
-                        Last seen: {new Date(rider.last_updated).toLocaleTimeString()}
-                      </p>
-                    )}
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleViewLocation(rider)}
-                      disabled={!rider.latitude || !rider.longitude}
-                    >
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {rider.latitude && rider.longitude ? "View Location" : "Location Unavailable"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+        <CardContent className="space-y-4">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input aria-label="Search active riders" placeholder="Search by name, phone or status..." value={searchQuery} onChange={event => setSearchQuery(event.target.value)} className="pl-9" />
+          </div>
+          <div className="rounded-md border border-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Rider</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead className="text-center">Active Orders</TableHead>
+                  <TableHead>Order Status</TableHead>
+                  <TableHead>Last Location Update</TableHead>
+                  <TableHead className="text-right">Location</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRiders.length === 0 ? (
+                  <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">{riders.length === 0 ? "No active riders at the moment" : "No riders match your search"}</TableCell></TableRow>
+                ) : filteredRiders.map(rider => (
+                  <TableRow key={rider.rider_id}>
+                    <TableCell className="font-medium">{rider.rider_name}</TableCell>
+                    <TableCell className="whitespace-nowrap">{rider.rider_phone}</TableCell>
+                    <TableCell className="text-center"><Badge variant="secondary">{rider.active_orders}</Badge></TableCell>
+                    <TableCell><Badge variant="outline">{rider.current_order_status ?? "—"}</Badge></TableCell>
+                    <TableCell className="whitespace-nowrap text-muted-foreground">{rider.last_updated ? new Date(rider.last_updated).toLocaleString() : "—"}</TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="outline" onClick={() => handleViewLocation(rider)} disabled={rider.latitude === null || rider.longitude === null}>
+                        <MapPin className="mr-1 h-4 w-4" />
+                        {rider.latitude !== null && rider.longitude !== null ? "View Location" : "Unavailable"}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -230,7 +210,7 @@ export const ActiveRidersGrid = () => {
               {selectedRider?.rider_name}'s Location
             </DialogTitle>
           </DialogHeader>
-          {selectedRider && selectedRider.latitude && selectedRider.longitude && (
+          {selectedRider && selectedRider.latitude !== null && selectedRider.longitude !== null && (
             <RiderLocationMap
               latitude={selectedRider.latitude}
               longitude={selectedRider.longitude}
