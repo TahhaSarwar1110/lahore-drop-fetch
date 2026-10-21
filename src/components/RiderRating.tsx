@@ -75,3 +75,8 @@ export const RiderReviewForm = ({ orderId, onSaved }: { orderId: string; onSaved
     </div>
   );
 };
+
+export const RiderRatingFor = ({ riderId, className }: { riderId: string; className?: string }) => {
+  const { summary } = useRiderRating(riderId);
+  return <RiderRatingBadge summary={summary} className={className} />;
+};
