@@ -25,6 +25,9 @@ import {
 } from "recharts";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FinancialTotals } from "@/components/admin/reports/FinancialTotals";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const COLORS = [
   "hsl(220, 70%, 17%)",
@@ -37,7 +40,7 @@ const COLORS = [
 ];
 
 const BusinessOverview = () => {
-  const { loading, kpis, statusCounts, revenueByDay } = useReportsData();
+  const { orders, loading, error, unknownRefundAmounts, kpis, statusCounts, revenueByDay } = useReportsData();
 
   const formatCurrency = (value: number) => `Rs. ${value.toLocaleString()}`;
 
@@ -60,6 +63,9 @@ const BusinessOverview = () => {
         </div>
 
         {/* KPI Cards */}
+        {error ? <p role="alert" className="text-destructive">Unable to load financial records: {error}</p> : <FinancialTotals orders={orders} loading={loading} />}
+        {unknownRefundAmounts > 0 && <p className="text-muted-foreground">{unknownRefundAmounts} historical refunds have no recorded amount and are excluded from the total.</p>}
+        <Button asChild variant="outline"><Link to="/admin/reports/settlements">View Pending Refunds & Payments</Link></Button>
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
@@ -81,8 +87,9 @@ const BusinessOverview = () => {
               icon={ShoppingCart}
             />
             <KPICard
-              title="Total Revenue"
-              value={formatCurrency(kpis.totalRevenue)}
+              title="Sales Received This Month"
+              value={formatCurrency(orders.filter(o => new Date(o.created_at).getMonth() === new Date().getMonth() && new Date(o.created_at).getFullYear() === new Date().getFullYear()).reduce((sum, o) => sum + o.paid_amount_pkr, 0))}
+              subtitle="Orders created this month"
               icon={DollarSign}
               trend={{
                 value: Math.round(kpis.revenueGrowth),
@@ -90,7 +97,7 @@ const BusinessOverview = () => {
               }}
             />
             <KPICard
-              title="Average Order Value"
+              title="Average Payment Received"
               value={formatCurrency(Math.round(kpis.avgOrderValue))}
               icon={TrendingUp}
             />
@@ -111,8 +118,8 @@ const BusinessOverview = () => {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartCard
-            title="Orders & Revenue Trend"
-            subtitle="Last 30 days"
+            title="Orders & Received Sales"
+            subtitle="Last 30 days · grouped by order creation date"
             loading={loading}
           >
             <div className="h-[300px]">

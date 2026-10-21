@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfDay, subDays, startOfWeek, startOfMonth, format } from "date-fns";
+import { getCompletedRefundsFromEvents, getReportFinancialTotals, type ReportFinancialOrder, type ReportFinancialEvent } from "@/utils/reportFinancials";
 
-export interface OrderWithDetails {
+export interface OrderWithDetails extends ReportFinancialOrder {
   id: string;
   user_id: string;
   created_at: string;
@@ -61,11 +62,16 @@ export const useReportsData = () => {
   const [orders, setOrders] = useState<OrderWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [unknownRefundAmounts, setUnknownRefundAmounts] = useState(0);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const allOrders: OrderWithDetails[] = [];
+      const pageSize = 500;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabase
         .from("orders")
         .select(`
           *,
@@ -73,10 +79,27 @@ export const useReportsData = () => {
           order_items (id, item_type, item_data, approval_status),
           order_assignments (rider_id, assigned_by, assigned_at)
         `)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(offset, offset + pageSize - 1);
 
       if (error) throw error;
-      setOrders((data as unknown as OrderWithDetails[]) || []);
+        allOrders.push(...((data as unknown as OrderWithDetails[]) || []));
+        if (!data || data.length < pageSize) break;
+      }
+      const events: ReportFinancialEvent[] = [];
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error: eventsError } = await supabase.from("order_financial_events")
+          .select("order_id,event_type,old_value,new_value")
+          .order("created_at", { ascending: true }).order("id", { ascending: true })
+          .range(offset, offset + pageSize - 1);
+        if (eventsError) throw eventsError;
+        events.push(...(data ?? []));
+        if (!data || data.length < pageSize) break;
+      }
+      const refunds = getCompletedRefundsFromEvents(events);
+      setUnknownRefundAmounts(refunds.unknownAmounts);
+      setOrders(allOrders.map(order => ({ ...order, completed_refund_pkr: refunds.totals.get(order.id) ?? 0 })));
     } catch (err) {
       console.error("Error fetching orders:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch orders");
@@ -117,20 +140,18 @@ export const useReportsData = () => {
   };
 
   const totalRevenue = orders
-    .filter(o => o.status === "Delivered")
-    .reduce((sum, o) => sum + calculateOrderValue(o), 0);
+    .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const totalRevenueThisMonth = ordersThisMonth
-    .filter(o => o.status === "Delivered")
-    .reduce((sum, o) => sum + calculateOrderValue(o), 0);
+    .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const totalRevenueLastMonth = ordersLastMonth
-    .filter(o => o.status === "Delivered")
-    .reduce((sum, o) => sum + calculateOrderValue(o), 0);
+    .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const deliveredOrders = orders.filter(o => o.status === "Delivered");
-  const avgOrderValue = deliveredOrders.length > 0
-    ? totalRevenue / deliveredOrders.length
+  const paidOrders = orders.filter(o => o.paid_amount_pkr > 0);
+  const avgOrderValue = paidOrders.length > 0
+    ? totalRevenue / paidOrders.length
     : 0;
 
   const completedOrders = orders.filter(o => o.status === "Delivered").length;
@@ -170,10 +191,9 @@ export const useReportsData = () => {
 
   const revenueByDay = last30Days.map(dateStr => {
     const dayOrders = orders.filter(o => 
-      format(new Date(o.created_at), "yyyy-MM-dd") === dateStr &&
-      o.status === "Delivered"
+      format(new Date(o.created_at), "yyyy-MM-dd") === dateStr
     );
-    const revenue = dayOrders.reduce((sum, o) => sum + calculateOrderValue(o), 0);
+    const revenue = dayOrders.reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
     return {
       date: dateStr,
       revenue,
@@ -188,6 +208,8 @@ export const useReportsData = () => {
 
   return {
     orders,
+    financialTotals: getReportFinancialTotals(orders),
+    unknownRefundAmounts,
     loading,
     error,
     refetch: fetchOrders,

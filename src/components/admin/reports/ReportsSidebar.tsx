@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   ShoppingCart,
   DollarSign,
+  Wallet,
   Bike,
   Users,
   UserCircle,
@@ -34,6 +35,12 @@ const sidebarItems = [
     label: "Sales & Revenue",
     icon: DollarSign,
     href: "/admin/reports/sales",
+  },
+  {
+    id: "settlements",
+    label: "Pending Refunds & Payments",
+    icon: Wallet,
+    href: "/admin/reports/settlements",
   },
   {
     id: "riders",
