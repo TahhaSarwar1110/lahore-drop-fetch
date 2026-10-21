@@ -242,6 +242,33 @@ export const ActiveRidersGrid = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={ordersDialogRider !== null} onOpenChange={open => { if (!open) setOrdersDialogRider(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5" />
+              {ordersDialogRider?.rider_name} — Assigned Orders
+            </DialogTitle>
+          </DialogHeader>
+          {ordersDialogRider && (
+            <div className="max-h-[60vh] space-y-2 overflow-y-auto py-2">
+              {ordersDialogRider.orders.map(order => (
+                <div key={order.id} className="flex items-center justify-between gap-3 rounded-md border border-border p-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">Order #{order.id.slice(0, 8)}</p>
+                    <Badge variant="secondary" className="mt-1">{order.status}</Badge>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => openOrder(order.id)}>
+                    Open
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
