@@ -1,8 +1,7 @@
 import { ReportsLayout } from "./ReportsLayout";
-import { KPICard } from "@/components/admin/reports/KPICard";
 import { ChartCard } from "@/components/admin/reports/ChartCard";
 import { useReportsData } from "@/hooks/useReportsData";
-import { DollarSign, TrendingUp, Receipt, AlertCircle, Award } from "lucide-react";
+import { Award } from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -17,7 +16,6 @@ import {
   Legend,
 } from "recharts";
 import { format, startOfMonth, subMonths } from "date-fns";
-import { Skeleton } from "@/components/ui/skeleton";
 import { FinancialTotals } from "@/components/admin/reports/FinancialTotals";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -70,13 +68,13 @@ const SalesReport = () => {
 
   // Top spending customers
   const customerSpending: Record<string, { name: string; total: number }> = {};
-  deliveredOrders.forEach(order => {
+  orders.forEach(order => {
     const customerId = order.user_id;
     const customerName = order.profiles?.full_name || "Unknown";
     if (!customerSpending[customerId]) {
       customerSpending[customerId] = { name: customerName, total: 0 };
     }
-    customerSpending[customerId].total += calculateOrderValue(order);
+    customerSpending[customerId].total += order.paid_amount_pkr || 0;
   });
 
   const topCustomers = Object.entries(customerSpending)
@@ -112,7 +110,7 @@ const SalesReport = () => {
         <Button asChild variant="outline"><Link to="/admin/reports/settlements">View Pending Refunds & Payments</Link></Button>
 
         {/* Revenue Trend Chart */}
-        <ChartCard title="Revenue Trend" subtitle="Last 14 days" loading={loading}>
+        <ChartCard title="Received Sales Trend" subtitle="Last 14 days · grouped by order creation date" loading={loading}>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
@@ -148,7 +146,7 @@ const SalesReport = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Revenue by Category */}
-          <ChartCard title="Revenue by Category" loading={loading}>
+          <ChartCard title="Delivered Item Value by Category" loading={loading}>
             <div className="h-[250px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topCategories}>
@@ -174,13 +172,13 @@ const SalesReport = () => {
           </ChartCard>
 
           {/* Top Spending Customers */}
-          <ChartCard title="Top Spending Customers" loading={loading}>
+          <ChartCard title="Customer Payments Received" loading={loading}>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-12">#</TableHead>
                   <TableHead>Customer</TableHead>
-                  <TableHead className="text-right">Total Spent</TableHead>
+                  <TableHead className="text-right">Verified Received</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

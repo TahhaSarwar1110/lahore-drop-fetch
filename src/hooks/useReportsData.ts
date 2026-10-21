@@ -140,20 +140,18 @@ export const useReportsData = () => {
   };
 
   const totalRevenue = orders
-    .filter(o => o.status === "Delivered")
-    .reduce((sum, o) => sum + calculateOrderValue(o), 0);
+    .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const totalRevenueThisMonth = ordersThisMonth
-    .filter(o => o.status === "Delivered")
-    .reduce((sum, o) => sum + calculateOrderValue(o), 0);
+    .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const totalRevenueLastMonth = ordersLastMonth
-    .filter(o => o.status === "Delivered")
-    .reduce((sum, o) => sum + calculateOrderValue(o), 0);
+    .reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
 
   const deliveredOrders = orders.filter(o => o.status === "Delivered");
-  const avgOrderValue = deliveredOrders.length > 0
-    ? totalRevenue / deliveredOrders.length
+  const paidOrders = orders.filter(o => o.paid_amount_pkr > 0);
+  const avgOrderValue = paidOrders.length > 0
+    ? totalRevenue / paidOrders.length
     : 0;
 
   const completedOrders = orders.filter(o => o.status === "Delivered").length;
@@ -193,10 +191,9 @@ export const useReportsData = () => {
 
   const revenueByDay = last30Days.map(dateStr => {
     const dayOrders = orders.filter(o => 
-      format(new Date(o.created_at), "yyyy-MM-dd") === dateStr &&
-      o.status === "Delivered"
+      format(new Date(o.created_at), "yyyy-MM-dd") === dateStr
     );
-    const revenue = dayOrders.reduce((sum, o) => sum + calculateOrderValue(o), 0);
+    const revenue = dayOrders.reduce((sum, o) => sum + (o.paid_amount_pkr || 0), 0);
     return {
       date: dateStr,
       revenue,

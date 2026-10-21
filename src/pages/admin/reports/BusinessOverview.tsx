@@ -87,8 +87,9 @@ const BusinessOverview = () => {
               icon={ShoppingCart}
             />
             <KPICard
-              title="Total Revenue"
-              value={formatCurrency(kpis.totalRevenue)}
+              title="Sales Received This Month"
+              value={formatCurrency(orders.filter(o => new Date(o.created_at).getMonth() === new Date().getMonth() && new Date(o.created_at).getFullYear() === new Date().getFullYear()).reduce((sum, o) => sum + o.paid_amount_pkr, 0))}
+              subtitle="Orders created this month"
               icon={DollarSign}
               trend={{
                 value: Math.round(kpis.revenueGrowth),
@@ -96,7 +97,7 @@ const BusinessOverview = () => {
               }}
             />
             <KPICard
-              title="Average Order Value"
+              title="Average Payment Received"
               value={formatCurrency(Math.round(kpis.avgOrderValue))}
               icon={TrendingUp}
             />
@@ -117,8 +118,8 @@ const BusinessOverview = () => {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartCard
-            title="Orders & Revenue Trend"
-            subtitle="Last 30 days"
+            title="Orders & Received Sales"
+            subtitle="Last 30 days · grouped by order creation date"
             loading={loading}
           >
             <div className="h-[300px]">
