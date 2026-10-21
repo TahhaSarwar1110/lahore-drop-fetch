@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MapPin, Users, Search, Loader2 } from "lucide-react";
+import { MapPin, Users, Search, Loader2, ClipboardList, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import L from "leaflet";
