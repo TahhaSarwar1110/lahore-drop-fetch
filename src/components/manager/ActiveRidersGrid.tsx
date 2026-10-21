@@ -204,14 +204,11 @@ export const ActiveRidersGrid = () => {
                     <TableCell className="font-medium">{rider.rider_name}</TableCell>
                     <TableCell className="whitespace-nowrap">{rider.rider_phone}</TableCell>
                     <TableCell className="text-center"><Badge variant="secondary">{rider.active_orders}</Badge></TableCell>
-                    <TableCell>
-                      <div className="flex max-w-[240px] flex-wrap gap-1">
-                        {rider.orders.map(order => (
-                          <Button key={order.id} size="sm" variant="outline" className="h-6 px-2 text-xs" onClick={() => navigate(`/manager/orders/${order.id}`)}>
-                            #{order.id.slice(0, 8)} · {order.status}
-                          </Button>
-                        ))}
-                      </div>
+                    <TableCell className="text-center">
+                      <Button size="sm" variant="outline" onClick={() => handleViewOrders(rider)}>
+                        <ClipboardList className="mr-1 h-4 w-4" />
+                        View Orders
+                      </Button>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-muted-foreground">{rider.last_updated ? new Date(rider.last_updated).toLocaleString() : "—"}</TableCell>
                     <TableCell className="text-right">
