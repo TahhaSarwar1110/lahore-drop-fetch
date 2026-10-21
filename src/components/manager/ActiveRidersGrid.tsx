@@ -136,6 +136,15 @@ export const ActiveRidersGrid = () => {
     setMapDialogOpen(true);
   };
 
+  const handleViewOrders = (rider: RiderWithOrder) => {
+    setOrdersDialogRider(rider);
+  };
+
+  const openOrder = (orderId: string) => {
+    setOrdersDialogRider(null);
+    navigate(`/manager/orders/${orderId}`);
+  };
+
   const filteredRiders = riders.filter(rider =>
     [rider.rider_name, rider.rider_phone, ...rider.orders.map(order => `#${order.id.slice(0, 8)} ${order.status}`)].some(value =>
       value.toLowerCase().includes(searchQuery.trim().toLowerCase())));
