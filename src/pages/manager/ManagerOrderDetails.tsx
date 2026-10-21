@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { RiderRatingFor } from "@/components/RiderRating";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -602,6 +603,7 @@ const ManagerOrderDetails = () => {
                   <div>
                     <p className="font-medium">{assignedRider.profiles.full_name}</p>
                     <p className="text-sm text-muted-foreground">{assignedRider.profiles.phone}</p>
+                    <RiderRatingFor riderId={assignedRider.rider_id} className="mt-1" />
                   </div>
                 ) : (
                   <div className="space-y-2">

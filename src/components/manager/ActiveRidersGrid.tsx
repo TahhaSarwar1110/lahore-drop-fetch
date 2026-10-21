@@ -9,6 +9,7 @@ import { MapPin, Users, Search, Loader2, ClipboardList, ArrowRight } from "lucid
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import L from "leaflet";
+import { fetchRiderRatings, RiderRatingBadge, type RiderRatingSummary } from "@/components/RiderRating";
 import "leaflet/dist/leaflet.css";
 
 interface RiderWithOrder {
@@ -20,6 +21,7 @@ interface RiderWithOrder {
   last_updated: string | null;
   active_orders: number;
   orders: { id: string; status: string }[];
+  rating?: RiderRatingSummary;
 }
 
 export const ActiveRidersGrid = () => {
@@ -121,7 +123,8 @@ export const ActiveRidersGrid = () => {
         }
       });
 
-      setRiders(Array.from(riderMap.values()));
+      const ratings = await fetchRiderRatings(Array.from(riderMap.keys()));
+      setRiders(Array.from(riderMap.values()).map(r => ({ ...r, rating: ratings.get(r.rider_id) })));
     } catch (error) {
       console.error("Error fetching active riders:", error);
     } finally {
@@ -190,6 +193,7 @@ export const ActiveRidersGrid = () => {
                 <TableRow>
                   <TableHead>Rider</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead>Rating</TableHead>
                   <TableHead className="text-center">Active Orders</TableHead>
                   <TableHead>Assigned Orders</TableHead>
                   <TableHead>Last Location Update</TableHead>
@@ -198,11 +202,12 @@ export const ActiveRidersGrid = () => {
               </TableHeader>
               <TableBody>
                 {filteredRiders.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="py-8 text-center text-muted-foreground">{riders.length === 0 ? "No active riders at the moment" : "No riders match your search"}</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7} className="py-8 text-center text-muted-foreground">{riders.length === 0 ? "No active riders at the moment" : "No riders match your search"}</TableCell></TableRow>
                 ) : filteredRiders.map(rider => (
                   <TableRow key={rider.rider_id}>
                     <TableCell className="font-medium">{rider.rider_name}</TableCell>
                     <TableCell className="whitespace-nowrap">{rider.rider_phone}</TableCell>
+                    <TableCell className="whitespace-nowrap"><RiderRatingBadge summary={rider.rating} /></TableCell>
                     <TableCell className="text-center"><Badge variant="secondary">{rider.active_orders}</Badge></TableCell>
                     <TableCell className="text-center">
                       <Button size="sm" variant="outline" onClick={() => handleViewOrders(rider)}>
