@@ -26,6 +26,7 @@ import {
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FinancialTotals } from "@/components/admin/reports/FinancialTotals";
+import { isReportableOrder } from "@/utils/reportFinancials";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -88,7 +89,7 @@ const BusinessOverview = () => {
             />
             <KPICard
               title="Sales Received This Month"
-              value={formatCurrency(orders.filter(o => new Date(o.created_at).getMonth() === new Date().getMonth() && new Date(o.created_at).getFullYear() === new Date().getFullYear()).reduce((sum, o) => sum + o.paid_amount_pkr, 0))}
+              value={formatCurrency(orders.filter(o => isReportableOrder(o) && new Date(o.created_at).getMonth() === new Date().getMonth() && new Date(o.created_at).getFullYear() === new Date().getFullYear()).reduce((sum, o) => sum + o.paid_amount_pkr, 0))}
               subtitle="Orders created this month"
               icon={DollarSign}
               trend={{
