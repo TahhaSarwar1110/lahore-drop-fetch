@@ -68,10 +68,9 @@ export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
 
     try {
       setDeleting(true);
-      const { error } = await supabase
-        .from("orders")
-        .delete()
-        .eq("id", orderToDelete);
+      const { error } = await supabase.rpc("admin_delete_order", {
+        p_order_id: orderToDelete,
+      });
 
       if (error) throw error;
 
@@ -146,6 +145,7 @@ export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
                     <Button
                       size="sm"
                       variant="destructive"
+                      aria-label={`Delete order ${order.id.slice(0, 8)}`}
                       onClick={() => handleDeleteClick(order.id)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -166,7 +166,9 @@ export const OrdersTable = ({ orders, onOrderUpdated }: OrdersTableProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Order</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this order? This action cannot be undone.
+               Permanently delete this order, even if it is in progress? Its items, rider assignments,
+               payment proofs, expense records and financial history will also be removed from reports.
+               This does not refund payments or stop purchases already underway. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
