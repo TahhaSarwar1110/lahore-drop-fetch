@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfDay, subDays, startOfWeek, startOfMonth, format } from "date-fns";
+import { getReportFinancialTotals, type ReportFinancialOrder } from "@/utils/reportFinancials";
 
-export interface OrderWithDetails {
+export interface OrderWithDetails extends ReportFinancialOrder {
   id: string;
   user_id: string;
   created_at: string;
@@ -65,7 +66,11 @@ export const useReportsData = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const allOrders: OrderWithDetails[] = [];
+      const pageSize = 500;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabase
         .from("orders")
         .select(`
           *,
@@ -73,10 +78,15 @@ export const useReportsData = () => {
           order_items (id, item_type, item_data, approval_status),
           order_assignments (rider_id, assigned_by, assigned_at)
         `)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(offset, offset + pageSize - 1);
 
       if (error) throw error;
-      setOrders((data as unknown as OrderWithDetails[]) || []);
+        allOrders.push(...((data as unknown as OrderWithDetails[]) || []));
+        if (!data || data.length < pageSize) break;
+      }
+      setOrders(allOrders);
     } catch (err) {
       console.error("Error fetching orders:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch orders");
@@ -188,6 +198,7 @@ export const useReportsData = () => {
 
   return {
     orders,
+    financialTotals: getReportFinancialTotals(orders),
     loading,
     error,
     refetch: fetchOrders,
