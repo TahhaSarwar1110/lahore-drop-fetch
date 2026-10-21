@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { startOfDay, subDays, startOfWeek, startOfMonth, format } from "date-fns";
-import { getReportFinancialTotals, type ReportFinancialOrder } from "@/utils/reportFinancials";
+import { getCompletedRefundsFromEvents, getReportFinancialTotals, type ReportFinancialOrder, type ReportFinancialEvent } from "@/utils/reportFinancials";
 
 export interface OrderWithDetails extends ReportFinancialOrder {
   id: string;
@@ -62,6 +62,7 @@ export const useReportsData = () => {
   const [orders, setOrders] = useState<OrderWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [unknownRefundAmounts, setUnknownRefundAmounts] = useState(0);
 
   const fetchOrders = async () => {
     try {
@@ -86,7 +87,19 @@ export const useReportsData = () => {
         allOrders.push(...((data as unknown as OrderWithDetails[]) || []));
         if (!data || data.length < pageSize) break;
       }
-      setOrders(allOrders);
+      const events: ReportFinancialEvent[] = [];
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error: eventsError } = await supabase.from("order_financial_events")
+          .select("order_id,event_type,old_value,new_value")
+          .order("created_at", { ascending: true }).order("id", { ascending: true })
+          .range(offset, offset + pageSize - 1);
+        if (eventsError) throw eventsError;
+        events.push(...(data ?? []));
+        if (!data || data.length < pageSize) break;
+      }
+      const refunds = getCompletedRefundsFromEvents(events);
+      setUnknownRefundAmounts(refunds.unknownAmounts);
+      setOrders(allOrders.map(order => ({ ...order, completed_refund_pkr: refunds.totals.get(order.id) ?? 0 })));
     } catch (err) {
       console.error("Error fetching orders:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch orders");
@@ -199,6 +212,7 @@ export const useReportsData = () => {
   return {
     orders,
     financialTotals: getReportFinancialTotals(orders),
+    unknownRefundAmounts,
     loading,
     error,
     refetch: fetchOrders,

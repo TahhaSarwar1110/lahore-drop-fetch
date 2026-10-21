@@ -22,6 +22,7 @@ import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 import BusinessOverview from "./pages/admin/reports/BusinessOverview";
 import OrdersReport from "./pages/admin/reports/OrdersReport";
 import SalesReport from "./pages/admin/reports/SalesReport";
+import PendingSettlements from "./pages/admin/reports/PendingSettlements";
 import RiderPerformance from "./pages/admin/reports/RiderPerformance";
 import ManagerPerformance from "./pages/admin/reports/ManagerPerformance";
 import CustomerInsights from "./pages/admin/reports/CustomerInsights";
@@ -73,6 +74,7 @@ const App = () => (
           <Route path="/admin/reports" element={<BusinessOverview />} />
           <Route path="/admin/reports/orders" element={<OrdersReport />} />
           <Route path="/admin/reports/sales" element={<SalesReport />} />
+          <Route path="/admin/reports/settlements" element={<PendingSettlements />} />
           <Route path="/admin/reports/riders" element={<RiderPerformance />} />
           <Route path="/admin/reports/managers" element={<ManagerPerformance />} />
           <Route path="/admin/reports/customers" element={<CustomerInsights />} />

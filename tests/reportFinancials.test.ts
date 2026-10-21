@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { getReportFinancialTotals, getReportOrderFinancials, type ReportFinancialOrder } from "../src/utils/reportFinancials";
+import { getCompletedRefundsFromEvents, getReportFinancialTotals, getReportOrderFinancials, type ReportFinancialOrder } from "../src/utils/reportFinancials";
 
 const order: ReportFinancialOrder = {
   paid_amount_pkr: 12700, shopping_expense_pkr: 10900, expense_status: "verified",
@@ -15,7 +15,17 @@ describe("admin financial reports", () => {
     expect(getReportFinancialTotals([order]).shopping).toBe(10900);
   });
   it("counts completed refunds only, not cancelled or pending values", () => {
-    expect(getReportFinancialTotals([order, { ...order, refund_status: "completed" }]).completedRefund).toBe(301);
+    expect(getReportFinancialTotals([order, { ...order, refund_status: "completed", completed_refund_pkr: 301 }]).completedRefund).toBe(301);
+  });
+  it("refund totals retain the amount at completion even if the balance later changes", () => {
+    const result = getCompletedRefundsFromEvents([
+      { order_id: "one", event_type: "expense_verified", old_value: {}, new_value: { customer_balance_pkr: 4000 } },
+      { order_id: "one", event_type: "refund_completed", old_value: { refund_status: "pending" }, new_value: {} },
+      { order_id: "one", event_type: "refund_completed", old_value: { refund_status: "completed" }, new_value: {} },
+      { order_id: "one", event_type: "expense_verified", old_value: {}, new_value: { customer_balance_pkr: 301 } },
+    ]);
+    expect(result.totals.get("one")).toBe(4000);
+    expect(result.unknownAmounts).toBe(0);
   });
   it("counts bundle service and separate delivery exactly once", () => {
     expect(getReportFinancialTotals([{ ...order, delivery_charges: 500 }]).charges).toBe(1999);

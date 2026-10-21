@@ -9,7 +9,32 @@ export interface ReportFinancialOrder {
   delivery_charges: number;
   customer_balance_pkr: number | null;
   refund_status: string;
+  completed_refund_pkr?: number;
 }
+
+export interface ReportFinancialEvent {
+  order_id: string;
+  event_type: string;
+  old_value: unknown;
+  new_value: unknown;
+}
+
+/** Recover completed amounts from the recorded balance at completion, never today's mutable balance. */
+export const getCompletedRefundsFromEvents = (events: ReportFinancialEvent[]) => {
+  const balances = new Map<string, number>();
+  const totals = new Map<string, number>();
+  let unknownAmounts = 0;
+  for (const event of events) {
+    const next = event.new_value && typeof event.new_value === "object" ? event.new_value as Record<string, unknown> : {};
+    const previous = event.old_value && typeof event.old_value === "object" ? event.old_value as Record<string, unknown> : {};
+    if (typeof next.customer_balance_pkr === "number") balances.set(event.order_id, next.customer_balance_pkr);
+    if (event.event_type !== "refund_completed" || previous.refund_status === "completed") continue;
+    const amount = typeof next.refund_amount_pkr === "number" ? next.refund_amount_pkr : balances.get(event.order_id);
+    if (amount === undefined) { unknownAmounts++; continue; }
+    totals.set(event.order_id, (totals.get(event.order_id) ?? 0) + Math.max(0, amount));
+  }
+  return { totals, unknownAmounts };
+};
 
 export const getReportOrderFinancials = (order: ReportFinancialOrder) => {
   const received = Math.max(0, order.paid_amount_pkr || 0);
@@ -27,7 +52,7 @@ export const getReportOrderFinancials = (order: ReportFinancialOrder) => {
     service,
     delivery,
     charges: service + delivery,
-    completedRefund: order.refund_status === "completed" ? refund : 0,
+    completedRefund: order.completed_refund_pkr ?? 0,
     pendingRefund: order.expense_status === "verified" && order.refund_status !== "completed" ? refund : 0,
     outstanding: target === null ? 0 : Math.max(0, target - received),
     target,
