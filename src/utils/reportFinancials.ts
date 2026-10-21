@@ -10,7 +10,15 @@ export interface ReportFinancialOrder {
   customer_balance_pkr: number | null;
   refund_status: string;
   completed_refund_pkr?: number;
+  status: string;
+  confirmed_at?: string | null;
 }
+
+/** Pre-confirmation statuses carry no settled money, so reports ignore them entirely. */
+export const UNCONFIRMED_ORDER_STATUSES = ["Pending", "Order Received"];
+
+export const isReportableOrder = (order: Pick<ReportFinancialOrder, "status" | "confirmed_at">) =>
+  !UNCONFIRMED_ORDER_STATUSES.includes(order.status);
 
 export interface ReportFinancialEvent {
   order_id: string;
