@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MapPin, Users, Search, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -18,7 +19,7 @@ interface RiderWithOrder {
   longitude: number | null;
   last_updated: string | null;
   active_orders: number;
-  current_order_status: string | null;
+  orders: { id: string; status: string }[];
 }
 
 export const ActiveRidersGrid = () => {
@@ -97,9 +98,14 @@ export const ActiveRidersGrid = () => {
 
         const location = locations?.find(loc => loc.rider_id === riderId);
 
+        const orderEntry = { id: order?.id ?? "", status: order?.status ?? "" };
+
         if (riderMap.has(riderId)) {
           const existing = riderMap.get(riderId);
-          if (existing) existing.active_orders += 1;
+          if (existing) {
+            existing.active_orders += 1;
+            existing.orders.push(orderEntry);
+          }
         } else {
           riderMap.set(riderId, {
             rider_id: riderId,
@@ -109,7 +115,7 @@ export const ActiveRidersGrid = () => {
             longitude: location?.longitude ?? null,
             last_updated: location?.updated_at || null,
             active_orders: 1,
-            current_order_status: order?.status || null,
+            orders: [orderEntry],
           });
         }
       });
@@ -122,13 +128,15 @@ export const ActiveRidersGrid = () => {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleViewLocation = (rider: RiderWithOrder) => {
     setSelectedRider(rider);
     setMapDialogOpen(true);
   };
 
   const filteredRiders = riders.filter(rider =>
-    [rider.rider_name, rider.rider_phone, rider.current_order_status ?? ""].some(value =>
+    [rider.rider_name, rider.rider_phone, ...rider.orders.map(order => `#${order.id.slice(0, 8)} ${order.status}`)].some(value =>
       value.toLowerCase().includes(searchQuery.trim().toLowerCase())));
 
   if (loading) {
@@ -173,7 +181,7 @@ export const ActiveRidersGrid = () => {
                   <TableHead>Rider</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead className="text-center">Active Orders</TableHead>
-                  <TableHead>Order Status</TableHead>
+                  <TableHead>Assigned Orders</TableHead>
                   <TableHead>Last Location Update</TableHead>
                   <TableHead className="text-right">Location</TableHead>
                 </TableRow>
@@ -186,7 +194,15 @@ export const ActiveRidersGrid = () => {
                     <TableCell className="font-medium">{rider.rider_name}</TableCell>
                     <TableCell className="whitespace-nowrap">{rider.rider_phone}</TableCell>
                     <TableCell className="text-center"><Badge variant="secondary">{rider.active_orders}</Badge></TableCell>
-                    <TableCell><Badge variant="outline">{rider.current_order_status ?? "—"}</Badge></TableCell>
+                    <TableCell>
+                      <div className="flex max-w-[240px] flex-wrap gap-1">
+                        {rider.orders.map(order => (
+                          <Button key={order.id} size="sm" variant="outline" className="h-6 px-2 text-xs" onClick={() => navigate(`/manager/orders/${order.id}`)}>
+                            #{order.id.slice(0, 8)} · {order.status}
+                          </Button>
+                        ))}
+                      </div>
+                    </TableCell>
                     <TableCell className="whitespace-nowrap text-muted-foreground">{rider.last_updated ? new Date(rider.last_updated).toLocaleString() : "—"}</TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="outline" onClick={() => handleViewLocation(rider)} disabled={rider.latitude === null || rider.longitude === null}>
