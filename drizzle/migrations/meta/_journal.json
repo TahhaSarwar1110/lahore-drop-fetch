@@ -141,6 +141,13 @@
       "when": 1792524064236,
       "tag": "0019_multi_proof_unavailable_items_refund_delivery",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792613011651,
+      "tag": "0020_admin_delete_orders_any_status",
+      "breakpoints": true
     }
   ]
 }

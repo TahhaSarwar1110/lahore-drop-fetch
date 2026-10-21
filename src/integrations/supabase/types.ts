@@ -1092,6 +1092,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_order: { Args: { p_order_id: string }; Returns: undefined }
       admin_save_user_details: {
         Args: {
           p_address: string
