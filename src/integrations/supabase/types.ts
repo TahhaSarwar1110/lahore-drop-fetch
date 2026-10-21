@@ -864,6 +864,47 @@ export type Database = {
         }
         Relationships: []
       }
+      rider_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          customer_id: string
+          id: string
+          order_id: string
+          rating: number
+          rider_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          customer_id: string
+          id?: string
+          order_id: string
+          rating: number
+          rider_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          customer_id?: string
+          id?: string
+          order_id?: string
+          rating?: number
+          rider_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           created_at: string | null
@@ -1132,6 +1173,14 @@ export type Database = {
         Args: { _user_id: string }
         Returns: string[]
       }
+      get_rider_ratings: {
+        Args: { p_rider_ids: string[] }
+        Returns: {
+          avg_rating: number
+          review_count: number
+          rider_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1203,6 +1252,10 @@ export type Database = {
           p_receipt_path: string
         }
         Returns: boolean
+      }
+      submit_rider_review: {
+        Args: { p_comment: string; p_order_id: string; p_rating: number }
+        Returns: undefined
       }
       submit_shopping_expense: {
         Args: { p_amount: number; p_notes?: string; p_order_id: string }

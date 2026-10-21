@@ -148,6 +148,13 @@
       "when": 1792613011651,
       "tag": "0020_admin_delete_orders_any_status",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792614275511,
+      "tag": "0021_rider_reviews",
+      "breakpoints": true
     }
   ]
 }
