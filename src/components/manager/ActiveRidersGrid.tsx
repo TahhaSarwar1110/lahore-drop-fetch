@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MapPin, Users, Search, Loader2 } from "lucide-react";
+import { MapPin, Users, Search, Loader2, ClipboardList, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import L from "leaflet";
@@ -28,6 +28,7 @@ export const ActiveRidersGrid = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRider, setSelectedRider] = useState<RiderWithOrder | null>(null);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
+  const [ordersDialogRider, setOrdersDialogRider] = useState<RiderWithOrder | null>(null);
 
   useEffect(() => {
     fetchActiveRiders();
@@ -135,6 +136,15 @@ export const ActiveRidersGrid = () => {
     setMapDialogOpen(true);
   };
 
+  const handleViewOrders = (rider: RiderWithOrder) => {
+    setOrdersDialogRider(rider);
+  };
+
+  const openOrder = (orderId: string) => {
+    setOrdersDialogRider(null);
+    navigate(`/manager/orders/${orderId}`);
+  };
+
   const filteredRiders = riders.filter(rider =>
     [rider.rider_name, rider.rider_phone, ...rider.orders.map(order => `#${order.id.slice(0, 8)} ${order.status}`)].some(value =>
       value.toLowerCase().includes(searchQuery.trim().toLowerCase())));
@@ -194,14 +204,11 @@ export const ActiveRidersGrid = () => {
                     <TableCell className="font-medium">{rider.rider_name}</TableCell>
                     <TableCell className="whitespace-nowrap">{rider.rider_phone}</TableCell>
                     <TableCell className="text-center"><Badge variant="secondary">{rider.active_orders}</Badge></TableCell>
-                    <TableCell>
-                      <div className="flex max-w-[240px] flex-wrap gap-1">
-                        {rider.orders.map(order => (
-                          <Button key={order.id} size="sm" variant="outline" className="h-6 px-2 text-xs" onClick={() => navigate(`/manager/orders/${order.id}`)}>
-                            #{order.id.slice(0, 8)} · {order.status}
-                          </Button>
-                        ))}
-                      </div>
+                    <TableCell className="text-center">
+                      <Button size="sm" variant="outline" onClick={() => handleViewOrders(rider)}>
+                        <ClipboardList className="mr-1 h-4 w-4" />
+                        View Orders
+                      </Button>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-muted-foreground">{rider.last_updated ? new Date(rider.last_updated).toLocaleString() : "—"}</TableCell>
                     <TableCell className="text-right">
@@ -232,6 +239,33 @@ export const ActiveRidersGrid = () => {
               longitude={selectedRider.longitude}
               riderName={selectedRider.rider_name}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={ordersDialogRider !== null} onOpenChange={open => { if (!open) setOrdersDialogRider(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5" />
+              {ordersDialogRider?.rider_name} — Assigned Orders
+            </DialogTitle>
+          </DialogHeader>
+          {ordersDialogRider && (
+            <div className="max-h-[60vh] space-y-2 overflow-y-auto py-2">
+              {ordersDialogRider.orders.map(order => (
+                <div key={order.id} className="flex items-center justify-between gap-3 rounded-md border border-border p-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">Order #{order.id.slice(0, 8)}</p>
+                    <Badge variant="secondary" className="mt-1">{order.status}</Badge>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => openOrder(order.id)}>
+                    Open
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
           )}
         </DialogContent>
       </Dialog>
