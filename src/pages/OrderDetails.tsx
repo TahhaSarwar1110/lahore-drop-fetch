@@ -103,6 +103,7 @@ const OrderDetails = () => {
   const orderId = searchParams.get("orderId");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
+  const riderRating = useRiderRating(order?.order_assignments?.rider_id);
   const [loading, setLoading] = useState(true);
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItems, setNewItems] = useState<FormOrderItem[]>([]);
