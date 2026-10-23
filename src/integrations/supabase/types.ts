@@ -1188,6 +1188,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      manager_cancel_order: { Args: { p_order_id: string }; Returns: undefined }
       mark_ready_for_delivery: {
         Args: { p_order_id: string }
         Returns: undefined
