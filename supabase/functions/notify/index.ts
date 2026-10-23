@@ -7,6 +7,7 @@ import webpush from "npm:web-push@3.6.7";
 import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 import { sendOrderWhatsApp } from "./whatsapp.ts";
 import { dispatchSettlementWhatsApp } from "./settlement.ts";
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -17,11 +18,7 @@ const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "mailto:support@tabedaar.
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 const FIREBASE_MESSAGING_API_KEY = Deno.env.get("FIREBASE_MESSAGING_API_KEY") ?? "";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void };
 
 type Audience = "customer" | "manager" | "admin" | "rider";
 
@@ -296,6 +293,18 @@ serve(async (req) => {
     if (order) {
       try { await dispatchSettlementWhatsApp(admin, order.id); }
       catch (e) { log("settlement_dispatch_failed", { message: String((e as Error)?.message ?? e) }); }
+      // Retry only explicit transient Meta rejections; no permanent polling job.
+      // Each request keeps a bounded processor alive while its retry rows exist.
+      const retryOrder = order.id;
+      EdgeRuntime.waitUntil((async () => {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          const { count } = await admin.from("whatsapp_events").select("event_id", { count: "exact", head: true }).eq("order_id", retryOrder).eq("send_status", "retry");
+          if (!count) return;
+          await new Promise(resolve => setTimeout(resolve, 65000));
+          try { await dispatchSettlementWhatsApp(admin, retryOrder); }
+          catch (e) { log("settlement_retry_failed", { message: String((e as Error)?.message ?? e) }); }
+        }
+      })());
     }
     if (body.event_type === "settlement_dispatch") {
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
