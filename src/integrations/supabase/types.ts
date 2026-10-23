@@ -460,8 +460,12 @@ export type Database = {
           file_url: string
           id: string
           order_id: string
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           submitted_amount_pkr: number | null
           uploaded_by: string
+          verified_amount_pkr: number | null
         }
         Insert: {
           created_at?: string
@@ -469,8 +473,12 @@ export type Database = {
           file_url: string
           id?: string
           order_id: string
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           submitted_amount_pkr?: number | null
           uploaded_by: string
+          verified_amount_pkr?: number | null
         }
         Update: {
           created_at?: string
@@ -478,8 +486,12 @@ export type Database = {
           file_url?: string
           id?: string
           order_id?: string
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           submitted_amount_pkr?: number | null
           uploaded_by?: string
+          verified_amount_pkr?: number | null
         }
         Relationships: [
           {
