@@ -22,8 +22,6 @@ import { hasVerifiedOrderPayment, isFinanciallySettled, canMarkReadyForDelivery,
 import { StorageImage } from "@/components/StorageImage";
 import { sendNotificationEmail } from "@/utils/notificationHelper";
 import { triggerNotification } from "@/utils/notify";
-import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
-import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 
 interface OrderItem {
   id: string;
@@ -290,13 +288,6 @@ const ManagerOrderDetails = () => {
           orderLink: `${window.location.origin}/order-details?orderId=${orderId}`,
         });
 
-        await sendWhatsAppNotification({
-          userId: order.user_id,
-          templateName: WHATSAPP_TEMPLATES.orderConfirmed.name,
-          templateLanguage: WHATSAPP_TEMPLATES.orderConfirmed.language,
-          templateParams: [orderId.slice(0, 8)],
-          message: `Tabedaar.com: Your order #${orderId.slice(0, 8)} has been confirmed by our manager. You can track its progress in the app.`,
-        });
       }
 
       toast.success("Order confirmed successfully!");

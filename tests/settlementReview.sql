@@ -1,0 +1,33 @@
+BEGIN;
+DO $$
+DECLARE m uuid; c uuid; o uuid; p jsonb; n integer; i uuid;
+BEGIN
+ SELECT user_id INTO m FROM public.user_roles WHERE role='manager' LIMIT 1;
+ SELECT user_id INTO c FROM public.user_roles WHERE role='customer' LIMIT 1;
+ PERFORM set_config('request.jwt.claims',jsonb_build_object('sub',m,'role','authenticated')::text,true);
+ INSERT INTO public.orders(user_id,delivery_address,status,confirmed_at,additional_charges) VALUES(c,'Review test','Order Confirmed',now(),500) RETURNING id INTO o;
+ INSERT INTO public.order_items(order_id,item_type,item_data,approval_status,manager_price_pkr) VALUES(o,'Cloth','{"Item Name":"Shirt","Quantity":2}'::jsonb,'approved',2000);
+ PERFORM public.queue_review_whatsapp(o);
+ PERFORM public.queue_review_whatsapp(o);
+ SELECT count(*),max(template_params::text)::jsonb INTO n,p FROM public.whatsapp_events WHERE order_id=o;
+ IF n<>1 OR jsonb_array_length(p)<>6 OR p->>5<>'2,500' THEN RAISE EXCEPTION 'All-approved merged review failed'; END IF;
+ INSERT INTO public.order_items(order_id,item_type,item_data,approval_status,manager_price_pkr,manager_feedback) VALUES(o,'Cloth','{"Item Name":"Jacket"}'::jsonb,'rejected',9000,'Unavailable') RETURNING id INTO i;
+ PERFORM public.queue_review_whatsapp(o);
+ SELECT template_params INTO p FROM public.whatsapp_events WHERE order_id=o ORDER BY created_at DESC,event_id DESC LIMIT 1;
+ IF p->>5<>'2,500' THEN RAISE EXCEPTION 'Rejected price included in payable'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.whatsapp_events WHERE order_id=o AND template_params->>3='Jacket' AND template_params->>4='Jacket: Unavailable') THEN RAISE EXCEPTION 'Rejected details missing'; END IF;
+ INSERT INTO public.orders(user_id,delivery_address,status) VALUES(c,'All rejected test','Pending') RETURNING id INTO o;
+ INSERT INTO public.order_items(order_id,item_type,item_data,approval_status,manager_feedback) VALUES(o,'Cloth','{"Item Name":"Jacket"}'::jsonb,'rejected','Unavailable');
+ PERFORM public.queue_review_whatsapp(o);
+ SELECT count(*) INTO n FROM public.whatsapp_events WHERE order_id=o AND template_name='tabedaar_items_reviewed';
+ IF n<>1 THEN RAISE EXCEPTION 'All rejected must send review only'; END IF;
+ IF EXISTS(SELECT 1 FROM public.whatsapp_events WHERE order_id=o AND template_name='tabedaar_order_review_payment') THEN RAISE EXCEPTION 'All rejected requested payment'; END IF;
+ INSERT INTO public.orders(user_id,delivery_address,status,additional_charges) VALUES(c,'Review-before-payment test','Pending',500) RETURNING id INTO o;
+ INSERT INTO public.order_items(order_id,item_type,item_data,approval_status,manager_price_pkr) VALUES(o,'Cloth','{"Item Name":"Shirt"}'::jsonb,'approved',2000);
+ PERFORM public.queue_review_whatsapp(o);
+ UPDATE public.whatsapp_events SET send_status='sent' WHERE order_id=o;
+ UPDATE public.orders SET confirmed_at=now(),status='Order Confirmed' WHERE id=o;
+ IF NOT EXISTS(SELECT 1 FROM public.whatsapp_events WHERE order_id=o AND template_name='tabedaar_payment_required_after_review') THEN RAISE EXCEPTION 'Later payment request missing'; END IF;
+ IF EXISTS(SELECT 1 FROM public.whatsapp_events WHERE order_id=o AND template_name='tabedaar_order_review_payment') THEN RAISE EXCEPTION 'Already sent review duplicated'; END IF;
+END $$;
+ROLLBACK;

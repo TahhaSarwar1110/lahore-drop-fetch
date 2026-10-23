@@ -143,6 +143,12 @@ const storeInbound = async (
 const applyStatus = async (supabase: ReturnType<typeof admin>, status: any) => {
   const state: string = status?.status ?? "";
   if (!["sent", "delivered", "read", "failed"].includes(state)) return;
+  // Track settlement callbacks even if the inbox row was not yet persisted.
+  const { data: event } = await supabase.from("whatsapp_events").select("event_id, send_status")
+    .eq("message_id", status.id).maybeSingle();
+  if (event && (state === "failed" || (RANK[state] ?? 0) > (RANK[event.send_status] ?? 0))) {
+    await supabase.from("whatsapp_events").update({ send_status: state, last_error: state === "failed" ? String(status?.errors?.[0]?.title ?? "Delivery failed").slice(0, 300) : null, updated_at: new Date().toISOString() }).eq("event_id", event.event_id);
+  }
   const { data: row } = await supabase
     .from("whatsapp_messages").select("id, status").eq("wa_message_id", status.id).eq("direction", "outbound").maybeSingle();
   if (!row) return;

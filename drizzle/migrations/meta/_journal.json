@@ -162,6 +162,41 @@
       "when": 1792738339113,
       "tag": "0022_manager_cancel_order",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792785820149,
+      "tag": "0023_settlement_whatsapp_obligations",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792785854004,
+      "tag": "0024_settlement_review_refund_security",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792786033409,
+      "tag": "0025_payment_declaration_exact_once",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792786148930,
+      "tag": "0026_settlement_obligation_compatibility",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792786372871,
+      "tag": "0027_settlement_obligation_send_validity",
+      "breakpoints": true
     }
   ]
 }

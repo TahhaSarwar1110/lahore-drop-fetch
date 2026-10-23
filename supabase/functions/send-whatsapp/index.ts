@@ -308,6 +308,11 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     const body: WhatsAppRequest = rawBody;
+    // Settlement templates may only use database-built obligations/audit records
+    // through notify. Do not accept caller-supplied financial confirmations.
+    if (["tabedaar_order_review_payment", "tabedaar_items_reviewed", "tabedaar_payment_required_after_review", "tabedaar_refund_due", "tabedaar_outstanding_balance", "tabedaar_payment_confirmed", "tabedaar_refund_completed"].includes(body.templateName ?? "")) {
+      return json({ success: false, error: "Use the verified order notification workflow for settlement templates" }, 400);
+    }
     if (!body.message || typeof body.message !== "string") {
       return new Response(JSON.stringify({ error: "message is required" }), {
         status: 400,

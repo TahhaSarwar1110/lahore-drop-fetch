@@ -171,9 +171,7 @@ export const OrderItemApproval = ({ items, orderId, onUpdate, isLocked = false }
       const finalized = (allItems ?? []).length > 0 &&
         (allItems ?? []).every((i) => i.approval_status && i.approval_status !== "pending");
       if (finalized) {
-        const reviewBatch = `r${Date.now()}`;
-        await triggerNotification({ event_type: "items_reviewed", order_id: orderId, event_version: reviewBatch });
-        await triggerNotification({ event_type: "payment_required_after_review", order_id: orderId, event_version: reviewBatch });
+        await triggerNotification({ event_type: "items_reviewed", order_id: orderId });
       }
 
       toast.success("All changes saved successfully");

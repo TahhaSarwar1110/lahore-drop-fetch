@@ -82,51 +82,18 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
   };
 
   switch (event) {
-    case "items_reviewed": {
-      const r = await reviewedItems();
-      if (!r) return null;
-      return {
-        template: "tabedaar_items_reviewed",
-        key: `${orderId}:items_reviewed:${version || "v1"}`,
-        params: [
-          name, no,
-          clean(r.approved.length ? summarize(r.approved) : "None", 400),
-          clean(r.rejected.length ? summarize(r.rejected) : "None", 400),
-          clean(r.rejected.length ? r.reasons || "See order details" : "Not applicable", 400),
-        ],
-      };
-    }
-    case "payment_required_after_review": {
-      const r = await reviewedItems();
-      if (!r || !r.approved.length) return null; // nothing payable -> review message only
-      const payable = r.approved.reduce(
-        (s: number, i: { item_data: Record<string, unknown>; manager_price_pkr: number | null }) => s + (i.manager_price_pkr ?? priceOf(i.item_data) * qtyOf(i.item_data)),
-        0,
-      ) + num(o.additional_charges) + num(o.delivery_charges);
-      if (payable <= 0) return null;
-      return {
-        template: "tabedaar_payment_required_after_review",
-        key: `${orderId}:payment_required_after_review:${version || "v1"}`,
-        params: [
-          name, no,
-          clean(summarize(r.approved), 400),
-          clean(r.rejected.length ? summarize(r.rejected) : "None", 400),
-          rs(payable),
-        ],
-      };
-    }
+    // Durable database settlement events are dispatched by settlement.ts.
+    case "items_reviewed":
+    case "payment_required_after_review":
     case "order_confirmed":
-      if (!o.confirmed_at) return null;
-      return { template: "tabedaar_payment_pending", key: `${orderId}:payment_pending:order`, params: [name, no, rs((await goods()) + num(o.delivery_charges)), "Order payment"] };
+    case "payment_confirmed":
+    case "outstanding_payment_due":
+    case "refund_due":
+    case "refund_completed":
+      return null;
     case "delivery_payment_requested":
       if (o.delivery_payment_status !== "pending" || num(o.delivery_charges) <= 0) return null;
       return { template: "tabedaar_payment_pending", key: `${orderId}:payment_pending:delivery`, params: [name, no, rs(num(o.delivery_charges)), "Delivery charges"] };
-    case "payment_confirmed": {
-      // Authoritative amount: the manager-verified paid total on the order.
-      const paid = num(o.paid_amount_pkr);
-      if (o.payment_verification !== "verified" || paid <= 0) return null;
-      return { template: "tabedaar_payment_confirmed", key: `${orderId}:payment_confirmed:${version || paid}`, params: [name, no, rs(paid)] };
-    }
     case "delivery_payment_confirmed":
       if (o.delivery_payment_status !== "confirmed") return null;
       return { template: "tabedaar_payment_confirmed", key: `${orderId}:payment_confirmed:delivery`, params: [name, no, rs(num(o.delivery_charges))] };
@@ -146,17 +113,6 @@ async function plan(db: Db, event: string, orderId: string, version: string | un
       const { count } = await db.from("item_pickups").select("id", { count: "exact", head: true }).in("order_item_id", ids);
       if (!count) return null;
       return { template: "tabedaar_items_picked_up", key: `${orderId}:items_picked_up`, params: [name, no] };
-    }
-    case "outstanding_payment_due": {
-      const owed = Math.max(0, -Number(o.customer_balance_pkr ?? 0));
-      if (owed <= 0) return null;
-      return { template: "tabedaar_payment_pending", key: `${orderId}:outstanding:${owed}`, params: [name, no, rs(owed), "Shopping and delivery/service balance"] };
-    }
-    case "refund_due": {
-      const due = num(o.customer_balance_pkr);
-      if (due <= 0) return null;
-      // Requires the "tabedaar_refund_due" template (name, order, amount) approved in WhatsApp Manager.
-      return { template: "tabedaar_refund_due", key: `${orderId}:refund_due:${due}`, params: [name, no, rs(due)] };
     }
     case "order_delivered":
       if (o.status !== "delivered" && !o.delivered_at) return null;
