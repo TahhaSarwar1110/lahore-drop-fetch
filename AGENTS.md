@@ -1,4 +1,5 @@
 # Project architecture
+- Manager cancellation uses a dedicated manager-only RPC with a locked order row and status-history entry; retain financial records and disable fulfilment controls on cancelled orders to avoid unintended delivery or refunds.
 - Admin financial totals use verified payment fields, rider goods expenses and separate charges; completed refund amounts are reconstructed from chronological financial audit balances at completion, never the mutable current balance, and unknown historical amounts are disclosed rather than guessed.
 
 - Shared Table paginates rendered data rows after consumer filtering/sorting, resets on row identity changes, and keeps pagination outside horizontal scrolling; consumers must pass complete datasets (not presentation slices) so reports and exports retain all records.
