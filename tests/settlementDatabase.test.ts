@@ -3,7 +3,7 @@ import postgres from "postgres";
 
 // Exercises the deployed RPCs/triggers, but always rolls back test records.
 // No request Authorization header is set, so test fixtures cannot send messages.
-const run = process.env.SUPABASE_DB_URL ? it : it.skip;
+const run = process.env.RUN_PRIVILEGED_SETTLEMENT_TESTS === "1" ? it : it.skip;
 describe("atomic live settlement rules (rolled back)", () => {
   run("creates/revises obligations, dedupes approved records and protects delivery/refunds", async () => {
     const url = process.env.SUPABASE_DB_URL;
