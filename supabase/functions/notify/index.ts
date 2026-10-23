@@ -235,6 +235,11 @@ serve(async (req) => {
     }
 
     const body = (await req.json()) as NotifyRequest;
+    if (!body || typeof body.event_type !== "string" ||
+      (body.order_id !== undefined && (typeof body.order_id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.order_id))) ||
+      (body.event_version !== undefined && (typeof body.event_version !== "string" || body.event_version.length > 200))) {
+      return new Response(JSON.stringify({ error: "Invalid notification input" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const recipe = RECIPES[body.event_type];
     if (!recipe) {
       return new Response(JSON.stringify({ error: "Unknown event_type" }), {
