@@ -169,6 +169,13 @@
       "when": 1792785820149,
       "tag": "0023_settlement_whatsapp_obligations",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792785854004,
+      "tag": "0024_settlement_review_refund_security",
+      "breakpoints": true
     }
   ]
 }

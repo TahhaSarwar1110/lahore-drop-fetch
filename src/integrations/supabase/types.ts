@@ -1320,6 +1320,10 @@ export type Database = {
         Args: { p_bundle: number; p_delivery: number; p_goods: number }
         Returns: number
       }
+      queue_review_whatsapp: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
       queue_settlement_whatsapp: {
         Args: {
           p_key: string
