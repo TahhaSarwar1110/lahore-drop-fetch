@@ -183,6 +183,13 @@
       "when": 1792786033409,
       "tag": "0025_payment_declaration_exact_once",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792786148930,
+      "tag": "0026_settlement_obligation_compatibility",
+      "breakpoints": true
     }
   ]
 }

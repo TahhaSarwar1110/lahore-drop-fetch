@@ -1,0 +1,7 @@
+INSERT INTO public.order_settlement_obligations(order_id,kind,amount_pkr,status,reason,components) SELECT id,CASE WHEN customer_balance_pkr>0 THEN 'refund' ELSE 'outstanding' END,abs(customer_balance_pkr),CASE WHEN customer_balance_pkr>0 AND refund_status IN('initiated','failed') THEN refund_status ELSE 'pending' END,'Existing verified settlement',jsonb_build_object('shopping_expense_pkr',shopping_expense_pkr,'paid_amount_pkr',paid_amount_pkr,'bundle_pkr',additional_charges,'delivery_pkr',delivery_charges) FROM public.orders o WHERE expense_status='verified' AND customer_balance_pkr<>0 AND NOT(customer_balance_pkr>0 AND refund_status='completed') AND NOT EXISTS(SELECT 1 FROM public.order_settlement_obligations s WHERE s.order_id=o.id AND s.status IN('pending','initiated','failed'));
+CREATE OR REPLACE FUNCTION public.review_confirmation_whatsapp() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ BEGIN
+ IF NEW.confirmed_at IS NOT NULL AND OLD.confirmed_at IS NULL THEN PERFORM public.queue_review_whatsapp(NEW.id); END IF;
+ RETURN NEW;
+END $$;
+CREATE TRIGGER review_confirmation_whatsapp AFTER UPDATE ON public.orders FOR EACH ROW EXECUTE FUNCTION public.review_confirmation_whatsapp();
+REVOKE ALL ON FUNCTION public.review_confirmation_whatsapp() FROM PUBLIC,anon,authenticated;
