@@ -64,8 +64,14 @@ export async function dispatchSettlementWhatsApp(db: Db, orderId: string) {
       if (updateError) throw new Error(updateError.message);
       await db.from("notification_deliveries").insert({ user_id: event.customer_id, channel: "whatsapp", status, event_type: event.event_type, dedupe_key: `${event.event_id}:attempt:${event.attempts}`, error: safeError });
       if (id) {
-        const { data: conversation, error: convError } = await db.from("whatsapp_conversations").upsert({ phone: to, display_name: profile?.full_name ?? "Customer", customer_user_id: event.customer_id }, { onConflict: "phone" }).select("id").single();
+        const { data: existingConversation } = await db.from("whatsapp_conversations").select("id").eq("phone", to).maybeSingle();
+        const conversationResult = existingConversation
+          ? { data: existingConversation, error: null }
+          : await db.from("whatsapp_conversations").upsert({ phone: to, display_name: profile?.full_name ?? "Customer", customer_user_id: event.customer_id }, { onConflict: "phone", ignoreDuplicates: true }).select("id").maybeSingle();
+        const conversation = conversationResult.data;
+        const convError = conversationResult.error;
         if (convError) throw new Error(convError.message);
+        if (!conversation) throw new Error("Conversation write requires reconciliation");
         const { error: messageError } = await db.from("whatsapp_messages").upsert({ conversation_id: conversation.id, wa_message_id: id, direction: "outbound", msg_type: "template", body: `[Template: ${event.template_name}] ${params.join(" | ")}`, status: "sent", status_updated_at: new Date().toISOString() }, { onConflict: "wa_message_id", ignoreDuplicates: true });
         if (messageError) throw new Error(messageError.message);
       }
