@@ -6,6 +6,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
 import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 import { sendOrderWhatsApp } from "./whatsapp.ts";
+import { dispatchSettlementWhatsApp } from "./settlement.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -43,6 +44,7 @@ interface Recipe {
 }
 
 const RECIPES: Record<string, Recipe> = {
+  settlement_dispatch: { audiences: [], title: "Settlement processing", message: "" },
   order_placed: {
     audiences: ["customer", "manager", "admin"],
     title: "Order placed",
@@ -286,6 +288,19 @@ serve(async (req) => {
       });
     }
 
+    // Old paired review calls resolve to one database-derived obligation.
+    if (order && ["items_reviewed", "payment_required_after_review", "order_confirmed"].includes(body.event_type)) {
+      const { error: reviewError } = await asUser.rpc("queue_review_whatsapp", { p_order_id: order.id });
+      if (reviewError) throw reviewError;
+    }
+    if (order) {
+      try { await dispatchSettlementWhatsApp(admin, order.id); }
+      catch (e) { log("settlement_dispatch_failed", { message: String((e as Error)?.message ?? e) }); }
+    }
+    if (body.event_type === "settlement_dispatch") {
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // ---- resolve recipients server-side
     const shortId = order ? order.id.slice(0, 8) : "";
     let customerName = "a customer";
@@ -346,7 +361,7 @@ serve(async (req) => {
     });
 
     // Money events use authoritative amounts from the order, never the caller's.
-    const serverAmount = (() => {
+    let serverAmount = (() => {
       if (!order) return null;
       const bal = order.customer_balance_pkr ?? 0;
       switch (body.event_type) {
@@ -357,6 +372,25 @@ serve(async (req) => {
         default: return undefined;
       }
     })();
+    if (order && ["refund_due", "outstanding_payment_due", "refund_completed"].includes(body.event_type)) {
+      const query = admin.from("order_settlement_obligations").select("id, amount_pkr")
+        .eq("order_id", order.id).eq("kind", body.event_type === "outstanding_payment_due" ? "outstanding" : "refund");
+      const { data: obligation } = body.event_type === "refund_completed"
+        ? await query.eq("status", "completed").order("completed_at", { ascending: false }).limit(1).maybeSingle()
+        : await query.in("status", ["pending", "initiated", "failed"]).limit(1).maybeSingle();
+      serverAmount = obligation ? obligation.amount_pkr.toLocaleString("en-PK") : null;
+      if (obligation) body.event_version = obligation.id;
+    }
+    if (order && body.event_type === "payment_confirmed") {
+      const { data: payment } = await admin.from("order_financial_events").select("id, old_value, new_value")
+        .eq("order_id", order.id).eq("event_type", "payment_verified").order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (!payment) serverAmount = null;
+      else {
+        const delta = Number(payment.new_value?.paid_amount_pkr ?? 0) - Number(payment.old_value?.paid_amount_pkr ?? 0);
+        serverAmount = delta > 0 ? delta.toLocaleString("en-PK") : null;
+        body.event_version = payment.id;
+      }
+    }
     if (serverAmount === null) {
       return new Response(JSON.stringify({ success: true, skipped: "state_not_met" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
