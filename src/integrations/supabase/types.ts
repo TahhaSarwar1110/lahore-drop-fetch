@@ -491,6 +491,59 @@ export type Database = {
           },
         ]
       }
+      order_settlement_obligations: {
+        Row: {
+          amount_pkr: number
+          completed_at: string | null
+          components: Json
+          created_at: string
+          id: string
+          kind: string
+          method: string | null
+          order_id: string
+          proof_path: string | null
+          reason: string | null
+          reference: string | null
+          status: string
+        }
+        Insert: {
+          amount_pkr: number
+          completed_at?: string | null
+          components?: Json
+          created_at?: string
+          id?: string
+          kind: string
+          method?: string | null
+          order_id: string
+          proof_path?: string | null
+          reason?: string | null
+          reference?: string | null
+          status?: string
+        }
+        Update: {
+          amount_pkr?: number
+          completed_at?: string | null
+          components?: Json
+          created_at?: string
+          id?: string
+          kind?: string
+          method?: string | null
+          order_id?: string
+          proof_path?: string | null
+          reason?: string | null
+          reference?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_settlement_obligations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_status_history: {
         Row: {
           id: string
@@ -1053,21 +1106,66 @@ export type Database = {
       }
       whatsapp_events: {
         Row: {
+          attempts: number
           created_at: string
+          customer_id: string | null
           event_id: string
           event_type: string
+          last_error: string | null
+          message_id: string | null
+          next_attempt_at: string | null
+          order_id: string | null
+          send_status: string
+          template_name: string | null
+          template_params: Json | null
+          updated_at: string
         }
         Insert: {
+          attempts?: number
           created_at?: string
+          customer_id?: string | null
           event_id: string
           event_type: string
+          last_error?: string | null
+          message_id?: string | null
+          next_attempt_at?: string | null
+          order_id?: string | null
+          send_status?: string
+          template_name?: string | null
+          template_params?: Json | null
+          updated_at?: string
         }
         Update: {
+          attempts?: number
           created_at?: string
+          customer_id?: string | null
           event_id?: string
           event_type?: string
+          last_error?: string | null
+          message_id?: string | null
+          next_attempt_at?: string | null
+          order_id?: string | null
+          send_status?: string
+          template_name?: string | null
+          template_params?: Json | null
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_events_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       whatsapp_messages: {
         Row: {
@@ -1165,6 +1263,30 @@ export type Database = {
         Args: { p_email: string; p_phone: string }
         Returns: Json
       }
+      claim_settlement_whatsapp: {
+        Args: { p_order: string }
+        Returns: {
+          attempts: number
+          created_at: string
+          customer_id: string | null
+          event_id: string
+          event_type: string
+          last_error: string | null
+          message_id: string | null
+          next_attempt_at: string | null
+          order_id: string | null
+          send_status: string
+          template_name: string | null
+          template_params: Json | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "whatsapp_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_customer_ids_for_rider_orders: {
         Args: { _rider_id: string }
         Returns: string[]
@@ -1197,6 +1319,15 @@ export type Database = {
       order_settlement_total: {
         Args: { p_bundle: number; p_delivery: number; p_goods: number }
         Returns: number
+      }
+      queue_settlement_whatsapp: {
+        Args: {
+          p_key: string
+          p_order: string
+          p_params: Json
+          p_template: string
+        }
+        Returns: undefined
       }
       reopen_shopping_expense: {
         Args: { p_order_id: string; p_reason?: string }

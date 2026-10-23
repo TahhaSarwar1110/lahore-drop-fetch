@@ -162,6 +162,13 @@
       "when": 1792738339113,
       "tag": "0022_manager_cancel_order",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792785820149,
+      "tag": "0023_settlement_whatsapp_obligations",
+      "breakpoints": true
     }
   ]
 }
