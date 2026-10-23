@@ -22,9 +22,10 @@
 - [x] Prepare Play Store screenshots, icon, feature graphic, listing text and publication checklist
 - [x] Update feature graphic with transparent uploaded logo and match web/Android/iOS icons
 - [x] Item-level manager pricing, rider per-item amount + photo + receipt, bill verification, outstanding/refund notices, refund account + screenshot, Ready for Delivery gate, delivery proof for customer and manager
-- [ ] WhatsApp refund notice — waits on the "tabedaar_refund_due" template being approved in WhatsApp Manager
-- [ ] Integrate four approved settlement WhatsApp templates, durable obligations and per-record notification deduplication (Meta verified: en; body counts 6/4/4/5, Payment Confirmed 3).
-- [ ] Verify settlement notifications, delivery gates, top-ups, refunds and actual Meta callbacks after integration.
+- [x] WhatsApp refund notice — approved template verified and integrated with four variables.
+- [x] Integrate four approved settlement WhatsApp templates, durable obligations and per-record notification deduplication (Meta verified: en; body counts 6/4/4/5, Payment Confirmed 3).
+- [x] Verify transaction-level reviews/refunds/top-ups/delivery gates, real manager top-up flow, five template smoke-test delivery callbacks and application payment/outstanding delivery callbacks; remove temporary test order.
+- [ ] Complete customer declaration/photo and refund-completion evidence flows end-to-end on devices; interrupted at user credit check-in. Bounded retry is deployed, but termination recovery and uncertain-send reconciliation remain operational limitations.
 - [x] Separate goods totals and bundle/delivery charges; reconcile payments and refunds against goods expense plus charges.
 - [x] Repair mobile login for existing email-created accounts without exposing registered email addresses; verified reported account reaches Rider Dashboard.
 - [x] Allow mobile-only, email-only, or both at registration and either saved contact at login for old and new accounts; verified all new registration/login combinations.
