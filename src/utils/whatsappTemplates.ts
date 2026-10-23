@@ -19,6 +19,10 @@
  * If a template name changes in WhatsApp Manager, change it here only.
  */
 export const WHATSAPP_TEMPLATES = {
+  orderReviewPayment: { name: "tabedaar_order_review_payment", language: "en" },
+  refundDue: { name: "tabedaar_refund_due", language: "en" },
+  outstandingBalance: { name: "tabedaar_outstanding_balance", language: "en" },
+  refundCompleted: { name: "tabedaar_refund_completed", language: "en" },
   orderReceived: { name: "tabedaar_order_received", language: "en" },
   itemsReviewed: { name: "tabedaar_items_reviewed", language: "en" },
   paymentRequiredAfterReview: { name: "tabedaar_payment_required_after_review", language: "en" },

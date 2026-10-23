@@ -113,7 +113,6 @@ export function PaymentVerification(props: PaymentVerificationProps) {
         void triggerNotification({
           event_type: "payment_confirmed",
           order_id: orderId,
-          event_version: `paid_${parsedAmount}`,
         });
       }
       toast.success(approved ? "Payment verified — settlement updated" : "Payment rejected");
@@ -170,7 +169,7 @@ export function PaymentVerification(props: PaymentVerificationProps) {
               </div>
             ) : (
               <p className="text-xs text-green-700 dark:text-green-300">
-                Payment covers shopping and delivery/service charges. Any excess must be refunded before delivery.
+                Payment covers shopping and delivery/service charges. Any refund is processed separately from delivery.
               </p>
             )
           ) : (
