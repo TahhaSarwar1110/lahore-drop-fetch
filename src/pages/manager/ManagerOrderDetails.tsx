@@ -7,7 +7,9 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ArrowLeft, User, UserPlus } from "lucide-react";
+import { Loader2, ArrowLeft, User, UserPlus, Ban } from "lucide-react";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter } from "@/components/ui/alert-dialog";
+import { canCancelManagerOrder } from "@/utils/orderCancellation";
 import { toast } from "sonner";
 import { OrderItemApproval } from "@/components/manager/OrderItemApproval";
 import { AdditionalCharges } from "@/components/manager/AdditionalCharges";
@@ -100,6 +102,9 @@ const ManagerOrderDetails = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isManager, setIsManager] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     checkAuthAndFetchOrder();
@@ -129,6 +134,7 @@ const ManagerOrderDetails = () => {
         return;
       }
 
+      setIsManager(roles.some(role => role.role === "manager"));
       await fetchOrderDetails();
     } catch (error) {
       console.error("Auth check error:", error);
@@ -223,7 +229,7 @@ const ManagerOrderDetails = () => {
   };
 
   const canAssignRider = () => {
-    return allItemsApproved() && order?.confirmed_at && isPaymentConfirmed();
+    return order?.status !== "Cancelled" && allItemsApproved() && order?.confirmed_at && isPaymentConfirmed();
   };
 
   // Order flow: items reviewed -> order confirmed -> payment verified
@@ -301,6 +307,23 @@ const ManagerOrderDetails = () => {
     }
   };
 
+  const handleCancelOrder = async () => {
+    if (!order || !canCancelManagerOrder(order.status, isManager) || cancelling) return;
+    setCancelling(true);
+    try {
+      const { error } = await supabase.rpc("manager_cancel_order", { p_order_id: order.id });
+      if (error) throw error;
+      setCancelOpen(false);
+      await triggerNotification({ event_type: "order_cancelled", order_id: order.id });
+      toast.success("Order cancelled successfully");
+      await fetchOrderDetails();
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to cancel order");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -343,15 +366,21 @@ const ManagerOrderDetails = () => {
               Back to Dashboard
             </Button>
             
-            <div className="flex justify-between items-start">
+            <div className="flex flex-wrap gap-4 justify-between items-start">
               <div>
                 <h1 className="text-3xl font-bold">Order Details</h1>
                 <p className="text-muted-foreground mt-1">Order #{order.id.slice(0, 8)}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Badge className={getStatusColor(order.status)}>
                   {order.status}
                 </Badge>
+                {canCancelManagerOrder(order.status, isManager) && (
+                  <Button variant="destructive" onClick={() => setCancelOpen(true)}>
+                    <Ban className="h-4 w-4 mr-2" />
+                    Cancel Order
+                  </Button>
+                )}
                 {!order.confirmed_at && order.status === "Pending" && (
                   <Button 
                     onClick={handleConfirmOrder}
@@ -394,7 +423,7 @@ const ManagerOrderDetails = () => {
             </Card>
           )}
 
-          {order.confirmed_at && !isPaymentConfirmed() && !order.order_assignments?.rider_id && (
+          {order.status !== "Cancelled" && order.confirmed_at && !isPaymentConfirmed() && !order.order_assignments?.rider_id && (
             <Card className="mb-6 border-yellow-500 bg-yellow-500/5">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
@@ -410,7 +439,7 @@ const ManagerOrderDetails = () => {
             </Card>
           )}
 
-          {order.confirmed_at && isPaymentConfirmed() && !order.order_assignments?.rider_id && (
+          {order.status !== "Cancelled" && order.confirmed_at && isPaymentConfirmed() && !order.order_assignments?.rider_id && (
             <Card className="mb-6 border-green-500 bg-green-500/5">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
@@ -512,7 +541,7 @@ const ManagerOrderDetails = () => {
             )}
 
             {/* Financial settlement indicator — rider delivery is blocked until settled */}
-            {order.expense_status && (
+            {order.status !== "Cancelled" && order.expense_status && (
               <Card className={isFinanciallySettled(order.expense_status, order.customer_balance_pkr, order.refund_status) ? "border-green-500 bg-green-500/5" : "border-yellow-500 bg-yellow-500/5"}>
                 <CardContent className="p-4 space-y-1">
                   <p className="text-sm font-medium break-words">
@@ -559,7 +588,7 @@ const ManagerOrderDetails = () => {
             )}
 
             {/* Delivery Charges (out-of-city / out-of-country only) */}
-            {order.confirmed_at && order.delivery_type !== "within_city" && isPaymentConfirmed() && (
+            {order.status !== "Cancelled" && order.confirmed_at && order.delivery_type !== "within_city" && isPaymentConfirmed() && (
               <DeliveryChargesInput
                 orderId={order.id}
                 userId={order.user_id}
@@ -605,6 +634,8 @@ const ManagerOrderDetails = () => {
                     <p className="text-sm text-muted-foreground">{assignedRider.profiles.phone}</p>
                     <RiderRatingFor riderId={assignedRider.rider_id} className="mt-1" />
                   </div>
+                ) : order.status === "Cancelled" ? (
+                  <p className="text-sm text-muted-foreground">No rider assigned — order cancelled</p>
                 ) : (
                   <div className="space-y-2">
                     {!canAssignRider() ? (
@@ -638,24 +669,38 @@ const ManagerOrderDetails = () => {
             </Card>
 
             {/* Additional Charges Card */}
-            <AdditionalCharges
+            {order.status !== "Cancelled" && <AdditionalCharges
               orderId={order.id}
               currentCharges={order.additional_charges}
               currentDescription={order.charges_description}
               onUpdate={fetchOrderDetails}
-            />
+            />}
 
             {/* Order Items Approval - Only editable before order is confirmed */}
             <OrderItemApproval
               items={orderItems}
               orderId={order.id}
               onUpdate={fetchOrderDetails}
-              isLocked={!!order.confirmed_at}
+              isLocked={!!order.confirmed_at || order.status === "Cancelled"}
             />
           </div>
         </div>
       </main>
 
+      <AlertDialog open={cancelOpen} onOpenChange={open => { if (!cancelling) setCancelOpen(open); }}>
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel order #{order.id.slice(0, 8)}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This stops the order, including any assigned rider’s delivery. Existing payments, purchase proofs and refund records will be kept. Cancelling does not automatically refund the customer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <Button variant="outline" disabled={cancelling} onClick={() => setCancelOpen(false)}>Keep Order</Button>
+            <Button variant="destructive" loading={cancelling} disabled={cancelling} onClick={handleCancelOrder}>Confirm Cancellation</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Footer />
     </div>
   );
