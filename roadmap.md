@@ -23,7 +23,7 @@
 - [x] Update feature graphic with transparent uploaded logo and match web/Android/iOS icons
 - [x] Item-level manager pricing, rider per-item amount + photo + receipt, bill verification, outstanding/refund notices, refund account + screenshot, Ready for Delivery gate, delivery proof for customer and manager
 - [ ] WhatsApp refund notice — waits on the "tabedaar_refund_due" template being approved in WhatsApp Manager
-- [ ] Integrate four approved settlement WhatsApp templates, durable obligations and per-record notification deduplication — blocked on reading Meta definitions: existing credentials cannot discover the template-owning account; need WhatsApp Business Account ID or four template IDs.
+- [ ] Integrate four approved settlement WhatsApp templates, durable obligations and per-record notification deduplication (Meta verified: en; body counts 6/4/4/5, Payment Confirmed 3).
 - [ ] Verify settlement notifications, delivery gates, top-ups, refunds and actual Meta callbacks after integration.
 - [x] Separate goods totals and bundle/delivery charges; reconcile payments and refunds against goods expense plus charges.
 - [x] Repair mobile login for existing email-created accounts without exposing registered email addresses; verified reported account reaches Rider Dashboard.
