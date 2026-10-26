@@ -1,6 +1,6 @@
 
 - [ ] Restore Android push delivery by configuring valid Firebase server credentials and validating delivery
-- [ ] Add admin Operational Settings for operating cities and persist the selected Deliver From City on orders; verify permissions and the signed-in flow.
+- [x] Add admin Operational Settings and Deliver From City saved on orders; verified admin create/edit/deactivate/delete, dropdown selection and manager write denial. Initialized Lahore from the existing operating city.
 - [x] Order payment reconciliation: paid amount verification, rider expense + receipts, auto balance, refund workflow, role-based financial summaries
 - [x] Replace the plain mobile navigation with the approved branded side menu
 - [x] Make admin order details view-only and remove admin status-update permission
