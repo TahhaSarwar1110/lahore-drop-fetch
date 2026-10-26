@@ -233,6 +233,27 @@ export type Database = {
           },
         ]
       }
+      operating_cities: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
       order_assignments: {
         Row: {
           assigned_at: string | null
@@ -599,6 +620,7 @@ export type Database = {
           delivery_charges: number
           delivery_charges_set_at: string | null
           delivery_charges_set_by: string | null
+          delivery_from_city: string | null
           delivery_latitude: number | null
           delivery_longitude: number | null
           delivery_payment_confirmed_at: string | null
@@ -662,6 +684,7 @@ export type Database = {
           delivery_charges?: number
           delivery_charges_set_at?: string | null
           delivery_charges_set_by?: string | null
+          delivery_from_city?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
           delivery_payment_confirmed_at?: string | null
@@ -725,6 +748,7 @@ export type Database = {
           delivery_charges?: number
           delivery_charges_set_at?: string | null
           delivery_charges_set_by?: string | null
+          delivery_from_city?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
           delivery_payment_confirmed_at?: string | null
