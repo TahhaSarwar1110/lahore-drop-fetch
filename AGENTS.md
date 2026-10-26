@@ -1,4 +1,5 @@
 # Project architecture
+- Operational Settings stores admin-managed operating cities behind role-checked RLS; orders retain a city-name snapshot validated against active cities at placement so later edits or deletion never rewrite historical origins.
 - Settlement WhatsApp uses transactional obligations and audit-event IDs in whatsapp_events; notify dispatches stored template parameters and the existing signed webhook updates delivery status, so repeated clicks and ambiguous timeouts cannot duplicate financial notices.
 - Manager cancellation uses a dedicated manager-only RPC with a locked order row and status-history entry; retain financial records and disable fulfilment controls on cancelled orders to avoid unintended delivery or refunds.
 - Admin financial totals use verified payment fields, rider goods expenses and separate charges; completed refund amounts are reconstructed from chronological financial audit balances at completion, never the mutable current balance, and unknown historical amounts are disclosed rather than guessed.

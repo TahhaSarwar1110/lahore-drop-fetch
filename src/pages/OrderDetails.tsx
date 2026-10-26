@@ -57,6 +57,7 @@ interface ItemPickup {
 interface Order {
   id: string;
   delivery_address: string;
+  delivery_from_city: string | null;
   delivery_type: string;
   status: string;
   created_at: string;
@@ -133,6 +134,7 @@ const OrderDetails = () => {
       .select(`
         id,
         delivery_address,
+        delivery_from_city,
         delivery_type,
         status,
         created_at,
@@ -389,6 +391,7 @@ const OrderDetails = () => {
               </Badge>
             </div>
             <div className="mt-2 space-y-1">
+              {order.delivery_from_city && <p className="text-sm text-muted-foreground break-words">Deliver From City: {order.delivery_from_city}</p>}
               <p className="text-sm text-muted-foreground">
                 Delivery Address: {order.delivery_address}
               </p>

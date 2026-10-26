@@ -32,6 +32,7 @@ interface OrderDetails {
   id: string;
   created_at: string;
   delivery_address: string;
+  delivery_from_city: string | null;
   status: string;
   profiles: {
     full_name: string;
@@ -157,6 +158,7 @@ const AdminOrderDetails = () => {
                 </p>
                 <p>{order.delivery_address}</p>
               </div>
+              {order.delivery_from_city && <div><p className="text-sm text-muted-foreground">Deliver From City</p><p className="break-words">{order.delivery_from_city}</p></div>}
             </CardContent>
           </Card>
 

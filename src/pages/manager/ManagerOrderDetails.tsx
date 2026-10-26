@@ -38,6 +38,7 @@ interface OrderItem {
 interface Order {
   id: string;
   delivery_address: string;
+  delivery_from_city: string | null;
   delivery_type: string;
   status: string;
   created_at: string;
@@ -464,6 +465,7 @@ const ManagerOrderDetails = () => {
                   <p className="text-sm font-medium">Delivery Address</p>
                   <p className="text-sm text-muted-foreground">{order.delivery_address}</p>
                 </div>
+                {order.delivery_from_city && <div><p className="text-sm font-medium">Deliver From City</p><p className="text-sm text-muted-foreground break-words">{order.delivery_from_city}</p></div>}
 
                 <div>
                   <p className="text-sm font-medium">Order Date</p>

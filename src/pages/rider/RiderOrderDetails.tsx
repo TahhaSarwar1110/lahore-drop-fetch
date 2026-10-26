@@ -42,6 +42,7 @@ interface OrderItem {
 interface OrderDetails {
   id: string;
   delivery_address: string;
+  delivery_from_city: string | null;
   delivery_latitude: number | null;
   delivery_longitude: number | null;
   status: string;
@@ -95,6 +96,7 @@ const RiderOrderDetails = () => {
         .select(`
           id,
           delivery_address,
+          delivery_from_city,
           delivery_latitude,
           delivery_longitude,
           status,
@@ -352,6 +354,7 @@ const RiderOrderDetails = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-3">{order.delivery_address}</p>
+                  {order.delivery_from_city && <p className="text-sm text-muted-foreground mb-3 break-words">Deliver From City: {order.delivery_from_city}</p>}
                   {order.delivery_latitude && order.delivery_longitude && (
                     <Button
                       size="sm"
