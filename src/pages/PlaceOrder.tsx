@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/dialog";
 import { z } from "zod";
 import { useBundlePricing } from "@/hooks/useBundlePricing";
+import { useOperatingCities } from "@/hooks/useOperatingCities";
+import { isAvailableOriginCity } from "@/utils/operatingCities";
 import { LocationPickerMap } from "@/components/map/LocationPickerMap";
 import { useAuth } from "@/hooks/useAuth";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
@@ -120,6 +122,7 @@ const PlaceOrder = () => {
   const [phone, setPhone] = useState("");
   const [deliveryType, setDeliveryType] = useState<DeliveryType>("within_city");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryFromCity, setDeliveryFromCity] = useState("");
   const [deliveryLocation, setDeliveryLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
@@ -130,6 +133,11 @@ const PlaceOrder = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { calculateBundlePrice } = useBundlePricing();
+  const { data: operatingCities = [], isLoading: citiesLoading, isError: citiesError, refetch: reloadCities } = useOperatingCities(false, isAuthenticated);
+
+  useEffect(() => {
+    if (deliveryFromCity && !isAvailableOriginCity(deliveryFromCity, operatingCities)) setDeliveryFromCity("");
+  }, [deliveryFromCity, operatingCities]);
 
   useEffect(() => {
     const checkAuthAndRole = async () => {
@@ -245,6 +253,11 @@ const PlaceOrder = () => {
     let saved = false;
     try {
       buildOrderSchema(countryCode).parse({ fullName, phone, deliveryAddress });
+      const latestCities = await reloadCities();
+      if (latestCities.isError || !isAvailableOriginCity(deliveryFromCity, latestCities.data ?? [])) {
+        toast({ title: "Select an operating city", description: "Please select an available Deliver From City before placing your order.", variant: "destructive" });
+        return;
+      }
       submittingRef.current = true;
       setLoading(true);
 
@@ -261,6 +274,7 @@ const PlaceOrder = () => {
           user_id: userId,
           delivery_address: `[${deliveryType.replace(/_/g, " ").toUpperCase()}] ${deliveryAddress}`,
           delivery_type: deliveryType,
+          delivery_from_city: deliveryFromCity,
           delivery_latitude: deliveryLocation?.lat,
           delivery_longitude: deliveryLocation?.lng,
           status: "Pending",
@@ -430,6 +444,15 @@ const PlaceOrder = () => {
                   </h2>
 
                   <div className="space-y-1.5">
+                    <Label htmlFor="delivery-from-city" className="mobile-label">Deliver From City <span className="text-destructive">*</span></Label>
+                    <Select value={deliveryFromCity} onValueChange={setDeliveryFromCity} disabled={citiesLoading || citiesError || operatingCities.length === 0}>
+                      <SelectTrigger id="delivery-from-city" className="mobile-input w-full"><SelectValue placeholder={citiesLoading ? "Loading cities…" : "Select city"} /></SelectTrigger>
+                      <SelectContent>{operatingCities.map(city => <SelectItem key={city.id} value={city.name}>{city.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                    {citiesError ? <div role="alert" className="text-sm text-destructive">Could not load operating cities. <Button variant="outline" size="sm" onClick={() => reloadCities()}>Retry</Button></div> : !citiesLoading && operatingCities.length === 0 ? <p className="text-sm text-muted-foreground">No operating cities are currently available.</p> : null}
+                  </div>
+
+                  <div className="space-y-1.5">
                     <label className="mobile-label">
                       Delivery Type <span className="text-destructive">*</span>
                     </label>
@@ -570,6 +593,10 @@ const PlaceOrder = () => {
                     
                     {/* Summary rows */}
                     <div className="space-y-2 pt-2">
+                      <div className="flex justify-between gap-3 py-2 border-b border-border/50">
+                        <span className="text-sm text-muted-foreground">Deliver From City</span>
+                        <span className="text-sm font-medium break-words text-right">{deliveryFromCity || "—"}</span>
+                      </div>
                       <div className="flex justify-between items-center py-2 border-b border-border/50">
                         <span className="text-sm text-muted-foreground">Delivery Type</span>
                         <span className="text-sm font-medium">{getDeliveryTypeLabel(deliveryType)}</span>
@@ -630,10 +657,10 @@ const PlaceOrder = () => {
                     </div>
                   )}
                   {orderItems.length === 0 && <BillingDisclaimer />}
-                  {(!fullName || !phone || !deliveryAddress) && (
+                  {(!fullName || !phone || !deliveryAddress || !deliveryFromCity) && (
                     <div className="p-3 bg-muted border border-border rounded-xl">
                       <p className="text-xs text-foreground">
-                        ⚠️ Complete all required fields (Name, Phone, Address)
+                        ⚠️ Complete all required fields (Name, Phone, City, Address)
                       </p>
                     </div>
                   )}
@@ -647,7 +674,7 @@ const PlaceOrder = () => {
                     onClick={handleSubmitOrder}
                     className="w-full mobile-button h-14 text-base bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-glow-accent"
                     size="lg"
-                    disabled={loading || orderPlaced}
+                    disabled={loading || orderPlaced || citiesLoading || citiesError || !deliveryFromCity}
                     loading={loading}
                   >
                     {loading ? "Placing Order..." : "Submit Order"}
