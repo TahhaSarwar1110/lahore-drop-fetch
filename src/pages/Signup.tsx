@@ -205,7 +205,7 @@ const Signup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="mobile-label">Mobile Number <span className="text-muted-foreground font-normal">(optional with email)</span></Label>
+                <Label htmlFor="phone" className="mobile-label">Mobile Number</Label>
                 <div className="flex gap-2">
                   <CountryCodeSelect
                     value={countryCode}
