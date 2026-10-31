@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 import { triggerNotification } from "@/utils/notify";
 import { getItemTotalPrice } from "@/utils/orderPricing";
+import { trackPlacedOrder } from "@/lib/metaPixel";
 import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 import {
   Select,
@@ -250,6 +251,8 @@ const PlaceOrder = () => {
       return;
     }
 
+    submittingRef.current = true;
+    setLoading(true);
     let saved = false;
     try {
       buildOrderSchema(countryCode).parse({ fullName, phone, deliveryAddress });
@@ -258,9 +261,6 @@ const PlaceOrder = () => {
         toast({ title: "Select an operating city", description: "Please select an available Deliver From City before placing your order.", variant: "destructive" });
         return;
       }
-      submittingRef.current = true;
-      setLoading(true);
-
       // Calculate bundle pricing based on item count
       const { bundle, price: bundlePrice } = calculateBundlePrice(orderItems.length);
 
@@ -306,6 +306,7 @@ const PlaceOrder = () => {
 
       if (itemsError) throw itemsError;
       saved = true;
+      void trackPlacedOrder(orderData.id).catch(() => console.warn("Order advertising measurement unavailable"));
 
       const shortId = orderData.id.slice(0, 8);
       // Notifications must never turn a saved order into an error.

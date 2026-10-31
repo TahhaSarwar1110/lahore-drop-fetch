@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ScreenLoader } from "@/components/ui/screen-loader";
 import { RecoveryRedirect } from "@/components/RecoveryRedirect";
+import { AdvertisingPrivacy } from "@/components/AdvertisingPrivacy";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
@@ -88,6 +89,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
         <PushOptInBanner />
+        <AdvertisingPrivacy />
       </TooltipProvider>
     </BrowserRouter>
   </QueryClientProvider>
