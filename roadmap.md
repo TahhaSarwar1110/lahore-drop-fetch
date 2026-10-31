@@ -1,5 +1,6 @@
 
-- [ ] Install website Meta Pixel for successful order placement, advertising consent and privacy disclosure — awaiting Meta account/pixel selection and consent route.
+- [x] Add selected Meta Pixel, Lead after order/item persistence, regional consent banner, withdrawal/history records and privacy disclosure; browser PageView/Lead test transmissions returned 200, duplicates and withdrawal blocked; consent tests pass.
+- [ ] Publish and verify Meta tracking on tabedaar.com — requires publishing approval; provider stats still empty and full customer order submission unverified (current account is a manager).
 - [ ] Restore Android push delivery by configuring valid Firebase server credentials and validating delivery
 - [x] Add admin Operational Settings and Deliver From City saved on orders; verified admin create/edit/deactivate/delete, dropdown selection and manager write denial. Initialized Lahore from the existing operating city.
 - [x] Order payment reconciliation: paid amount verification, rider expense + receipts, auto balance, refund workflow, role-based financial summaries
