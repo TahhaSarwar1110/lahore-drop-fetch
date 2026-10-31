@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin, MessageCircle, Facebook, Instagram, Twitter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { openCookieSettings } from "@/components/AdvertisingPrivacy";
 import { BUSINESS_WHATSAPP_NUMBER, BUSINESS_PHONE_DISPLAY, buildWhatsAppUrl } from "@/utils/whatsapp";
 import logo from "@/assets/tabedaar-logo.png";
 
@@ -142,6 +143,7 @@ export const Footer = () => {
                 </li>
               ))}
             </ul>
+            <Button variant="link" className="mt-2 px-0" onClick={openCookieSettings}>Cookie settings</Button>
           </div>
         </div>
       </div>

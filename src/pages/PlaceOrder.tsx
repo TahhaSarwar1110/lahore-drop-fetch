@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { sendWhatsAppNotification } from "@/utils/whatsappNotification";
 import { triggerNotification } from "@/utils/notify";
 import { getItemTotalPrice } from "@/utils/orderPricing";
+import { trackPlacedOrder } from "@/lib/metaPixel";
 import { WHATSAPP_TEMPLATES } from "@/utils/whatsappTemplates";
 import {
   Select,
@@ -306,6 +307,7 @@ const PlaceOrder = () => {
 
       if (itemsError) throw itemsError;
       saved = true;
+      void trackPlacedOrder(orderData.id).catch(() => console.warn("Order advertising measurement unavailable"));
 
       const shortId = orderData.id.slice(0, 8);
       // Notifications must never turn a saved order into an error.

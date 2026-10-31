@@ -4,6 +4,16 @@ import { AIBotButton } from "@/components/AIBotButton";
 
 const sections = [
   {
+    title: "Website Advertising Measurement",
+    body: [
+      "We use the Meta Pixel on our website to report page visits and successful order submissions (as Lead events) to Meta Platforms for measuring Facebook and Instagram advertising and supporting ad optimization. An order submission is not a paid purchase; we do not report payment amounts or purchase events through this installation.",
+      "Meta receives browser/device information, IP address, eligible page URL, advertising click identifiers and advertising cookie identifiers (such as _fbp and _fbc). We do not deliberately share names, email addresses, phone numbers, delivery addresses, item details, uploaded photos or bank/payment information through the Pixel. Automatic form-data collection and automatic website events are disabled in this installation. Order event identifiers prevent duplicate reporting; we do not enable customer matching or server-side uploads.",
+      "In regions requiring advertising consent, we block the Pixel until you accept advertising tracking. If your region cannot be established, the same consent requirement applies. Elsewhere, ordinary advertising measurement is enabled unless you reject it or your browser communicates an applicable privacy opt-out. Meta separately records ad clicks and impressions whether or not you accept website tracking.",
+      "You can accept, reject or withdraw advertising permission through Cookie settings in the footer. Rejection is as easy as acceptance and withdrawal stops future website advertising events; earlier blocked events are not replayed. Your browser stores your visitor identifier, choice, region, date/time, notice version and notice text, retaining earlier acceptance evidence if you later withdraw. Clearing browser storage clears this local record and may prompt you again. Essential account/order services do not depend on advertising acceptance.",
+      "Meta handles the information it receives under its privacy policies, including possible international processing. Learn more at https://www.facebook.com/privacy/policy/ and manage advertising preferences in your Meta account. Contact contact@tabedaar.com with privacy questions. This installation measures website activity only, not activity in our native mobile apps.",
+    ],
+  },
+  {
     title: "1. Introduction",
     body: [
       "Tabedaar.com (\"we\", \"our\", \"us\") is a personal shopping service based in Lahore, Pakistan. We shop on your behalf and deliver your purchases anywhere in the world.",
@@ -98,7 +108,7 @@ const PrivacyPolicy = () => {
       <main className="flex-1 py-12">
         <div className="container mx-auto px-4 max-w-3xl">
           <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
-          <p className="text-muted-foreground text-sm mb-8">Last updated: 11 October 2026</p>
+          <p className="text-muted-foreground text-sm mb-8">Last updated: 31 October 2026</p>
 
           <div className="space-y-8">
             {sections.map((section) => (

@@ -1,4 +1,5 @@
 # Project architecture
+- Website Meta measurement uses one ID-only Pixel with automatic configuration disabled, Lead only after successful order/item persistence, per-order event IDs, and a shared regional advertising-consent gate; keep private/detail/auth routes and native apps untracked so order content and account identifiers are not shared.
 - Operational Settings stores admin-managed operating cities behind role-checked RLS; orders retain a city-name snapshot validated against active cities at placement so later edits or deletion never rewrite historical origins.
 - Settlement WhatsApp uses transactional obligations and audit-event IDs in whatsapp_events; notify dispatches stored template parameters and the existing signed webhook updates delivery status, so repeated clicks and ambiguous timeouts cannot duplicate financial notices.
 - Manager cancellation uses a dedicated manager-only RPC with a locked order row and status-history entry; retain financial records and disable fulfilment controls on cancelled orders to avoid unintended delivery or refunds.
