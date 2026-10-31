@@ -29,19 +29,28 @@ export function readConsent(): ConsentRecord | null {
     return record?.notice?.version === NOTICE.version && typeof record.advertising === "boolean" && typeof record.visitor === "string" && typeof record.timestamp === "string" ? record : null;
   } catch { return null; }
 }
+let sessionRefusal = false;
+export function currentAdvertisingChoice() { return sessionRefusal ? false : readConsent()?.advertising; }
 export function saveConsent(advertising: boolean, region: string | null) {
+  // A withdrawal must remain effective even if browser storage is unavailable.
+  sessionRefusal = !advertising;
   const previous = readConsent();
   const record: ConsentRecord = { visitor: previous?.visitor ?? crypto.randomUUID(), advertising, region, timestamp: new Date().toISOString(), notice: NOTICE };
   // Preserve acceptance evidence when a later decision withdraws permission.
-  const history = JSON.parse(localStorage.getItem(`${CONSENT_KEY}-history`) ?? "[]") as ConsentRecord[];
-  localStorage.setItem(`${CONSENT_KEY}-history`, JSON.stringify([...history, record]));
   localStorage.setItem(CONSENT_KEY, JSON.stringify(record));
+  try {
+    const history = JSON.parse(localStorage.getItem(`${CONSENT_KEY}-history`) ?? "[]") as ConsentRecord[];
+    localStorage.setItem(`${CONSENT_KEY}-history`, JSON.stringify([...history, record]));
+  } catch { /* The current choice is enforced independently of historical logging. */ }
   window.dispatchEvent(new Event(CONSENT_EVENT));
 }
 let regionPromise: Promise<string | null> | undefined;
+let cachedRegion: string | null = null;
+export function getResolvedRegion() { return cachedRegion; }
 export function resolveRegion() {
   regionPromise ??= fetch("/cdn-cgi/trace", { signal: AbortSignal.timeout(2000), cache: "no-store" })
-    .then(async response => response.ok ? parseTrace(await response.text(), location.host) : null).catch(() => null);
+    .then(async response => response.ok ? parseTrace(await response.text(), location.host) : null).catch(() => null)
+    .then(region => { cachedRegion = region; return region; });
   return regionPromise;
 }
 export function hasAdvertisingOptOut() {

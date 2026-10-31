@@ -251,6 +251,8 @@ const PlaceOrder = () => {
       return;
     }
 
+    submittingRef.current = true;
+    setLoading(true);
     let saved = false;
     try {
       buildOrderSchema(countryCode).parse({ fullName, phone, deliveryAddress });
@@ -259,9 +261,6 @@ const PlaceOrder = () => {
         toast({ title: "Select an operating city", description: "Please select an available Deliver From City before placing your order.", variant: "destructive" });
         return;
       }
-      submittingRef.current = true;
-      setLoading(true);
-
       // Calculate bundle pricing based on item count
       const { bundle, price: bundlePrice } = calculateBundlePrice(orderItems.length);
 
