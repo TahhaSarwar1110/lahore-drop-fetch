@@ -1,6 +1,6 @@
-
+- [x] Repair existing PageView/Lead reliability: SDK-ready dispatch, disable Meta automatic history reporting, deduplicate SPA visits/orders, allow clean auth referrers; browser confirms PageView and synthetic Lead requests, no Purchase/personal fields and withdrawal blocks events.
 - [x] Add selected Meta Pixel, Lead after order/item persistence, regional consent banner, withdrawal/history records and privacy disclosure; browser PageView/Lead test transmissions returned 200, duplicates and withdrawal blocked; consent tests pass.
-- [ ] Publish and verify Meta tracking on tabedaar.com — requires publishing approval; provider stats still empty and full customer order submission unverified (current account is a manager).
+- [ ] Publish updated tracking and verify a customer order on tabedaar.com — requires publishing approval and a customer session; current session is a manager and cannot place orders. Provider has historical PageView/Lead receipt, not proof of this updated installation.
 - [ ] Restore Android push delivery by configuring valid Firebase server credentials and validating delivery
 - [x] Add admin Operational Settings and Deliver From City saved on orders; verified admin create/edit/deactivate/delete, dropdown selection and manager write denial. Initialized Lahore from the existing operating city.
 - [x] Order payment reconciliation: paid amount verification, rider expense + receipts, auto balance, refund workflow, role-based financial summaries
