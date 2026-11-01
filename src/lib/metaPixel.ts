@@ -10,6 +10,7 @@ type Pixel = {
   push: Pixel;
   loaded: boolean;
   version: string;
+  disablePushState?: boolean;
 };
 declare global { interface Window { fbq?: Pixel; _fbq?: Pixel; } }
 let initialized = false;
@@ -62,6 +63,8 @@ export async function syncMetaPermission() {
       pixel.queue = []; pixel.push = pixel; pixel.loaded = true; pixel.version = "2.0";
       window.fbq = pixel; window._fbq = pixel;
     }
+    // Own SPA reporting: the SDK otherwise sends before private-route gates run.
+    window.fbq.disablePushState = true;
     window.fbq("consent", "grant");
     window.fbq("set", "autoConfig", false, META_PIXEL_ID);
     window.fbq("init", META_PIXEL_ID, {}, { agent: "lovable" });
