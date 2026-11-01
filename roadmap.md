@@ -1,4 +1,4 @@
-
+- [ ] Repair existing PageView/Lead reliability, preserve consent and private-route exclusions, leave Purchase disabled, and verify transmissions.
 - [x] Add selected Meta Pixel, Lead after order/item persistence, regional consent banner, withdrawal/history records and privacy disclosure; browser PageView/Lead test transmissions returned 200, duplicates and withdrawal blocked; consent tests pass.
 - [ ] Publish and verify Meta tracking on tabedaar.com — requires publishing approval; provider stats still empty and full customer order submission unverified (current account is a manager).
 - [ ] Restore Android push delivery by configuring valid Firebase server credentials and validating delivery
