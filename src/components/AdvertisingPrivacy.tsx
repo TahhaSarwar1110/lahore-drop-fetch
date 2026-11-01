@@ -34,7 +34,7 @@ export function AdvertisingPrivacy() {
       window.removeEventListener("tabedaar-cookie-settings", settings);
     };
   }, []);
-  useEffect(() => { void trackPageView(); }, [location.pathname, location.search]);
+  useEffect(() => { void trackPageView(location.key); }, [location.key, location.pathname, location.search, location.hash]);
   const choose = (accepted: boolean) => {
     try { saveConsent(accepted, region); setOpen(false); setError(""); }
     catch { setError("Your choice could not be saved. Advertising tracking remains off; please enable website storage and try again."); window.fbq?.("consent", "revoke"); }
