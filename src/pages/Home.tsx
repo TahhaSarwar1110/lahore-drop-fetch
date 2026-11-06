@@ -22,8 +22,7 @@ import {
   Apple,
   Package,
   ShieldCheck,
-  Globe,
-  MapPin,
+  Heart,
   Headphones,
 } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -34,11 +33,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { TestimonialSlider } from "@/components/TestimonialSlider";
 import { AnimatedText, AnimatedFadeIn } from "@/components/AnimatedText";
 import { ShoppingCoverageSection } from "@/components/ShoppingCoverage";
-import fashionImg from "@/assets/category-fashion.jpg";
-import foodImg from "@/assets/category-food.jpg";
-import groceriesImg from "@/assets/category-grocery.jpg";
-import giftsImg from "@/assets/category-gift.jpg";
-import othersImg from "@/assets/category-others.jpg";
+import fashionImg from "@/assets/reference-fashion.jpg";
+import foodImg from "@/assets/reference-food.jpg";
+import groceriesImg from "@/assets/reference-grocery.jpg";
+import giftsImg from "@/assets/reference-gift.jpg";
+import othersImg from "@/assets/reference-others.jpg";
 import heroBg from "@/assets/tabedar-hero-bg.jpg";
 import { CustomerHome } from "@/components/customer/CustomerHome";
 
@@ -80,7 +79,7 @@ const Home = () => {
     {
       title: "Groceries",
       subtitle: "Daily essentials and fresh items",
-      icon: Apple,
+      icon: ShoppingCart,
       image: groceriesImg,
     },
     {
@@ -261,66 +260,64 @@ const Home = () => {
         <ShoppingCoverageSection />
 
         {/* What We Shop Section */}
-        <section className="py-12 lg:py-20 bg-background">
-          <div className="container mx-auto px-4">
-            <AnimatedFadeIn className="text-center mb-12 lg:mb-16">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+        <section id="what-we-shop" className="shopping-section py-12 lg:py-16 bg-card">
+          <div className="mx-auto max-w-[1800px] px-4 lg:px-5">
+            <AnimatedFadeIn className="text-center mb-7">
+              <div className="flex items-center justify-center gap-8 mb-3" aria-hidden="true">
+                <span className="h-[3px] w-20 sm:w-36 bg-secondary" />
+                <div className="relative text-primary">
+                  <ShoppingBagIcon className="h-12 w-12" strokeWidth={2.5} />
+                  <span className="absolute inset-x-0 bottom-1 text-secondary font-bold text-xl">T</span>
+                </div>
+                <span className="h-[3px] w-20 sm:w-36 bg-secondary" />
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-2">
                 What We Shop
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                From everyday essentials to special gifts — shopped and delivered for you
+              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mx-auto">
+                From everyday essentials to special gifts — we shop and deliver it all
               </p>
             </AnimatedFadeIn>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 max-w-md sm:max-w-3xl lg:max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5 max-w-md sm:max-w-none mx-auto">
               {serviceItems.map((item, index) => (
-                <Card
-                  key={index}
-                  className={`group service-card cursor-pointer opacity-0 animate-fade-in-up lg:col-span-2 ${
-                    index === 3 ? "lg:col-start-2" : ""
-                  }`}
-                  style={{ animationDelay: `${0.1 + index * 0.1}s` }}
-                  onClick={handleCategoryClick}
-                >
-                  <div className="aspect-[4/3] overflow-hidden">
+                <article key={item.title} className="group shopping-photo-card">
                     <img
                       src={item.image}
                       alt={item.title}
                       loading="lazy"
-                      width={1200}
-                      height={900}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      width={400}
+                      height={1024}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-105"
                     />
-                  </div>
-                  <CardContent className="p-5 sm:p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-                        <item.icon className="h-5 w-5 text-secondary" />
+                  <div className="shopping-photo-shade absolute inset-0" />
+                  <div className="relative z-10 flex flex-col justify-end h-full p-5 text-primary-foreground">
+                    <item.icon className="h-9 w-9 mb-2 shrink-0" strokeWidth={1.8} />
+                    <h3 className="font-bold text-xl leading-tight mb-2 text-primary-foreground">{item.title}</h3>
+                    <p className="text-base leading-snug min-h-[66px] text-primary-foreground/90">{item.subtitle}</p>
+                    <Button variant="ghost" onClick={handleCategoryClick} aria-label={`Shop ${item.title}`} className="shopping-photo-link mt-3 w-full h-11 p-0 justify-between text-primary-foreground hover:text-primary-foreground hover:bg-transparent">
+                      <span className="flex items-center gap-3 text-sm font-semibold">Shop Now <ArrowRight className="h-5 w-5" /></span>
+                      <div className="h-11 w-11 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
+                        <ArrowRight className="h-6 w-6" />
                       </div>
-                      <h3 className="font-bold text-lg text-foreground">{item.title}</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-4">{item.subtitle}</p>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-secondary">
-                      Shop Now
-                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                    </span>
-                  </CardContent>
-                </Card>
+                    </Button>
+                  </div>
+                </article>
               ))}
             </div>
 
             {/* Trust strip */}
             <AnimatedFadeIn delay={0.3}>
-              <div className="mt-12 lg:mt-16 pt-8 border-t border-border/60 max-w-5xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="shopping-trust-strip mt-7 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-y-6 py-6 px-5">
                 {[
-                  { icon: ShieldCheck, label: "Trusted Personal Shopping" },
-                  { icon: Globe, label: "Delivery Worldwide" },
-                  { icon: MapPin, label: "Shop from Lahore" },
-                  { icon: Headphones, label: "Dedicated Customer Support" },
+                  { icon: ShieldCheck, label: "Trusted Service", description: "Shop with confidence" },
+                  { icon: Truck, label: "Worldwide Delivery", description: "From Lahore to anywhere" },
+                  { icon: Heart, label: "Be There for Your Loved Ones", description: "Even from miles away" },
+                  { icon: Headphones, label: "Dedicated Support", description: "We are here to help" },
                 ].map((benefit) => (
-                  <div key={benefit.label} className="flex items-center gap-3 justify-center">
-                    <benefit.icon className="h-5 w-5 text-secondary shrink-0" />
-                    <span className="text-sm font-medium text-foreground">{benefit.label}</span>
+                  <div key={benefit.label} className="shopping-trust-item flex items-center gap-4 xl:justify-center px-3">
+                    <benefit.icon className="h-10 w-10 text-secondary shrink-0" strokeWidth={1.8} />
+                    <div><p className="text-sm font-bold text-foreground">{benefit.label}</p><p className="text-sm text-muted-foreground">{benefit.description}</p></div>
                   </div>
                 ))}
               </div>
