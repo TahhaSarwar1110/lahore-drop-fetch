@@ -1,13 +1,31 @@
+import { useLocation } from "react-router-dom";
 import { BUSINESS_WHATSAPP_NUMBER, buildWhatsAppUrl } from "@/utils/whatsapp";
 
 /**
- * Floating WhatsApp support shortcut shown on the home page.
+ * Floating WhatsApp support shortcut shown across customer-facing screens.
  *
  * Rendered as a real anchor with target="_blank" (never window.open) so the
  * browser performs a top-level navigation — WhatsApp blocks framed loads.
  * Sits directly above the AI assistant button so the two never overlap.
  */
 const SUPPORT_MESSAGE = "Hi Tabedaar! I need help with my order.";
+
+/** Staff-only areas that must never show the customer support shortcut. */
+const STAFF_PREFIXES = ["/admin", "/manager", "/rider"];
+
+/** Staff-only routes matched exactly so /order-details and /order-history stay visible. */
+const STAFF_EXACT_PATHS = ["/orders"];
+
+/**
+ * True when a path belongs to a public or customer screen (home, place order,
+ * my orders, order history, order details, track order, profile, contact,
+ * legal pages). False for rider, manager and admin workspaces.
+ */
+export const isCustomerFacingPath = (pathname: string): boolean => {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  if (STAFF_EXACT_PATHS.includes(path)) return false;
+  return !STAFF_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+};
 
 export const WhatsAppSupportButton = () => {
   return (
@@ -24,4 +42,15 @@ export const WhatsAppSupportButton = () => {
       </svg>
     </a>
   );
+};
+
+/**
+ * Renders the support shortcut once for every public/customer screen and never
+ * inside the rider, manager or admin workspaces. Mounted globally in App so
+ * individual pages do not have to remember it.
+ */
+export const WhatsAppSupportShortcut = () => {
+  const { pathname } = useLocation();
+  if (!isCustomerFacingPath(pathname)) return null;
+  return <WhatsAppSupportButton />;
 };
