@@ -261,51 +261,70 @@ const Home = () => {
         <ShoppingCoverageSection />
 
         {/* What We Shop Section */}
-        <section className="py-20 lg:py-28 bg-background">
+        <section className="py-12 lg:py-20 bg-background">
           <div className="container mx-auto px-4">
-            <AnimatedFadeIn className="text-center mb-16">
+            <AnimatedFadeIn className="text-center mb-12 lg:mb-16">
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 What We Shop
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                From everyday essentials to special gifts — we shop and deliver it all
+                From everyday essentials to special gifts — shopped and delivered for you
               </p>
             </AnimatedFadeIn>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 max-w-md sm:max-w-none mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 max-w-md sm:max-w-3xl lg:max-w-6xl mx-auto">
               {serviceItems.map((item, index) => (
                 <Card
                   key={index}
-                  className="group service-card cursor-pointer opacity-0 animate-fade-in-up border-0"
+                  className={`group service-card cursor-pointer opacity-0 animate-fade-in-up lg:col-span-2 ${
+                    index === 3 ? "lg:col-start-2" : ""
+                  }`}
                   style={{ animationDelay: `${0.1 + index * 0.1}s` }}
                   onClick={handleCategoryClick}
                 >
-                  {item.image ? (
-                    <div className="relative h-56 sm:h-60 lg:h-64 overflow-hidden">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent transition-opacity duration-500 group-hover:from-foreground/90" />
-                      <div className="absolute bottom-0 left-0 right-0 p-5 transform transition-transform duration-500 group-hover:translate-y-[-4px]">
-                        <h3 className="font-bold text-lg text-white mb-1">{item.title}</h3>
-                        <p className="text-white/80 text-sm transform transition-all duration-500 opacity-90 group-hover:opacity-100">{item.subtitle}</p>
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      loading="lazy"
+                      width={1200}
+                      height={900}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <CardContent className="p-5 sm:p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+                        <item.icon className="h-5 w-5 text-secondary" />
                       </div>
+                      <h3 className="font-bold text-lg text-foreground">{item.title}</h3>
                     </div>
-                  ) : (
-                    <div className="h-48 bg-primary/5 flex flex-col items-center justify-center p-5 text-center">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                        <item.icon className="h-7 w-7 text-primary" />
-                      </div>
-                      <h3 className="font-bold text-lg mb-1">{item.title}</h3>
-                      <p className="text-muted-foreground text-sm">{item.subtitle}</p>
-                    </div>
-                  )}
+                    <p className="text-sm text-muted-foreground mb-4">{item.subtitle}</p>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-secondary">
+                      Shop Now
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    </span>
+                  </CardContent>
                 </Card>
               ))}
             </div>
+
+            {/* Trust strip */}
+            <AnimatedFadeIn delay={0.3}>
+              <div className="mt-12 lg:mt-16 pt-8 border-t border-border/60 max-w-5xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { icon: ShieldCheck, label: "Trusted Personal Shopping" },
+                  { icon: Globe, label: "Delivery Worldwide" },
+                  { icon: MapPin, label: "Shop from Lahore" },
+                  { icon: Headphones, label: "Dedicated Customer Support" },
+                ].map((benefit) => (
+                  <div key={benefit.label} className="flex items-center gap-3 justify-center">
+                    <benefit.icon className="h-5 w-5 text-secondary shrink-0" />
+                    <span className="text-sm font-medium text-foreground">{benefit.label}</span>
+                  </div>
+                ))}
+              </div>
+            </AnimatedFadeIn>
           </div>
         </section>
 
