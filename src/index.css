@@ -265,14 +265,14 @@ All colors MUST be HSL.
   
   /* Service card with image */
   .service-card {
-    @apply relative rounded-3xl overflow-hidden bg-card;
-    box-shadow: var(--shadow-md);
+    @apply relative rounded-2xl overflow-hidden bg-card border border-border/60;
+    box-shadow: var(--shadow-sm);
     transition: var(--transition-smooth);
   }
-  
+
   .service-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
   }
   
   /* Step icon for timeline */
