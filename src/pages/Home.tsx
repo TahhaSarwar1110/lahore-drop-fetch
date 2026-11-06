@@ -21,6 +21,10 @@ import {
   UtensilsCrossed,
   Apple,
   Package,
+  ShieldCheck,
+  Globe,
+  MapPin,
+  Headphones,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
