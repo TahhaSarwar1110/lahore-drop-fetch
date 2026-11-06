@@ -38,6 +38,7 @@ import AssignRider from "./pages/manager/AssignRider";
 import Notifications from "./pages/Notifications";
 import NotificationSettings from "./pages/NotificationSettings";
 import { PushOptInBanner } from "./components/notifications/PushOptInBanner";
+import { WhatsAppSupportShortcut } from "./components/WhatsAppSupportButton";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -88,6 +89,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <WhatsAppSupportShortcut />
         <PushOptInBanner />
         <AdvertisingPrivacy />
       </TooltipProvider>

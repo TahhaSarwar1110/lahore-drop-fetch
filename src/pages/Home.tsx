@@ -445,7 +445,6 @@ const Home = () => {
       </main>
 
       <Footer />
-      <WhatsAppSupportButton />
       <AIBotButton />
     </div>
   );
