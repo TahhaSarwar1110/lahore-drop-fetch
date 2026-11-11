@@ -9,7 +9,7 @@ import { Capacitor } from "@capacitor/core";
  *   iframe — otherwise the browser reports `ERR_BLOCKED_BY_RESPONSE`.
  * - Native (Capacitor iOS/Android): the `whatsapp://` deep link opens the installed app directly.
  *
- * @param phone E.164 phone number (e.g., "+923044693863" or "923044693863")
+ * @param phone E.164 phone number (e.g., "+923013267622" or "923013267622")
  * @param message Optional pre-filled message (URL-encoded automatically)
  */
 export const buildWhatsAppUrl = (phone: string, message?: string): string => {
